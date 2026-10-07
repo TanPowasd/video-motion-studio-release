@@ -14,6 +14,8 @@ import { AnimationInspector } from '../AnimationInspector.js';
 import { AssetItem } from '../AssetItem.js';
 import { CanvasInteraction } from '../CanvasInteraction.js';
 import { CanvasViewport } from '../CanvasViewport.js';
+import { CodeCheck } from '../CodeCheck.js';
+import { CodeEditor } from '../CodeEditor.js';
 import { DesignInspector } from '../DesignInspector.js';
 import { EffectInspector } from '../EffectInspector.js';
 import { FilmToolbar } from '../FilmToolbar.js';
@@ -361,6 +363,26 @@ export const AssetPanel = React.memo(function AssetPanel({
                 </div>
               ))}
           </div>
+          <div className="section-title">组件</div>
+          {Object.keys(snapshot!.files)
+            .filter((f) => f.endsWith('.ts'))
+            .map((file) => (
+              <button
+                className="component-row"
+                disabled={codeBusy}
+                key={file}
+                onClick={() => {
+                  setCodePath(file);
+                  setCodeDirty(false);
+                  setWorkspace('code');
+                  setPlaying(false);
+                }}
+              >
+                <Icon name="code" size={15} />
+                {file.split('/').at(-1)}
+                <span>TS</span>
+              </button>
+            ))}
         </>
       )}
       <div className="sidebar-footer">

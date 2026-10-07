@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import './desktop-api.js';
 import { Icon } from './Icons.js';
+import { McpConnectionButton } from './McpConnection.js';
 import { projectCreationSchema, type ProjectHome as HomeData } from '../core/project-creation.js';
 import './project-home.css';
 
@@ -353,6 +354,7 @@ export function ProjectHome() {
           </span>
         </div>
         <span>本地创作工作站</span>
+        <McpConnectionButton />
       </header>
       <div className="project-home-content">
         <section className="project-home-intro">
@@ -418,11 +420,7 @@ export function ProjectHome() {
             {error}
           </p>
         )}
-        {!window.vmotionDesktop && (
-          <p className="project-form-hint">
-            请在桌面版新建或打开项目。
-          </p>
-        )}
+        {!window.vmotionDesktop && <p className="project-form-hint">请在桌面版新建或打开项目。</p>}
       </div>
       <footer>所有项目保存在本机 · 无需账号</footer>
       {creating && (

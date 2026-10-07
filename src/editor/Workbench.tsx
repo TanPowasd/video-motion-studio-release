@@ -16,6 +16,8 @@ import { AnimationInspector } from './AnimationInspector.js';
 import { AssetItem } from './AssetItem.js';
 import { CanvasInteraction } from './CanvasInteraction.js';
 import { CanvasViewport } from './CanvasViewport.js';
+import { CodeCheck } from './CodeCheck.js';
+import { CodeEditor } from './CodeEditor.js';
 import { DesignInspector } from './DesignInspector.js';
 import { EffectInspector } from './EffectInspector.js';
 import { FilmToolbar } from './FilmToolbar.js';
@@ -31,6 +33,7 @@ import { TrackingInspector } from './TrackingInspector.js';
 import { VectorInspector } from './VectorInspector.js';
 import { VisualAuditPanel } from './VisualAuditPanel.js';
 import { WorkbenchHeader } from './WorkbenchHeader.js';
+import { openMcpConnection } from './McpConnection.js';
 import { Splitter } from './panelLayout.js';
 import { rpc } from './state/rpc-client.js';
 import { useWorkbenchController } from './state/workbench-controller.js';
@@ -255,7 +258,7 @@ export function Workbench() {
           setPlaying(false);
           setStudioTab('graph');
         }}
-        onModal={setModal}
+        onModal={(value) => (value === 'connect' ? openMcpConnection() : setModal(value))}
         onUndo={() => void run('undo')}
         onRedo={() => void run('redo')}
         onPlugin={() => setPluginManaging(true)}
@@ -409,6 +412,12 @@ export function Workbench() {
                   洋葱皮
                 </button>
               </>
+            ) : workspace === 'code' ? (
+              <>
+                <Icon name="code" />
+                <span>{codePath}</span>
+                <span className="tag">TYPESCRIPT</span>
+              </>
             ) : (
               <>
                 {[
@@ -512,7 +521,25 @@ export function Workbench() {
             )}
           </div>
           <div className="top-spacer" />
-          {
+          {workspace === 'code' ? (
+            <>
+              <button
+                className="compact"
+                disabled={codeBusy || !codeBase}
+                onClick={() => checkCode()}
+              >
+                {' '}
+                {codeBusy ? '检查中…' : '预检代码'}{' '}
+              </button>
+              <button
+                className="primary compact"
+                disabled={!codeDirty || codeBusy || !codeBase}
+                onClick={() => checkCode(true)}
+              >
+                保存组件
+              </button>
+            </>
+          ) : (
             <span className="preview-quality">
               <select
                 aria-label="素材预览方式"
@@ -535,14 +562,44 @@ export function Workbench() {
                 ))}
               </select>
             </span>
-          }
+          )}
           {workspace === 'animation' && (
             <button className="compact" disabled={visualCheckBusy || playing} onClick={checkVisual}>
               {visualCheckBusy ? '画面检查中…' : '检查画面'}
             </button>
           )}
         </div>
-        {
+        {workspace === 'code' ? (
+          <>
+            <CodeEditor
+              key={codePath}
+              value={code}
+              readOnly={codeBusy}
+              jumpTo={codeJump}
+              onChange={(value) => {
+                setCode(value);
+                setCodeDirty(true);
+                const draft = { content: value, base: codeBase };
+                codeDrafts.current.set(codePath, draft);
+                try {
+                  sessionStorage.setItem(draftKey(codePath), JSON.stringify(draft));
+                } catch {}
+                setCodeCheck(undefined);
+              }}
+            />
+            {codeCheck && (
+              <CodeCheck
+                report={codeCheck}
+                onClose={() => setCodeCheck(undefined)}
+                onJump={(d) => {
+                  if (d.line && d.file?.replace(/\\/g, '/').endsWith(codePath))
+                    setCodeJump({ line: d.line, column: d.column });
+                  else setError(`${d.file ?? '工程'} ${d.path ?? ''}: ${d.message}`);
+                }}
+              />
+            )}
+          </>
+        ) : (
           <>
             <CanvasViewport
               width={viewWidth}
@@ -676,7 +733,7 @@ export function Workbench() {
                 />
               )}
           </>
-        }
+        )}
         {studioTab && (
           <Suspense fallback={<div className="studio-loading">正在打开创作工具…</div>}>
             <StudioWorkspace
@@ -973,6 +1030,31 @@ export function Workbench() {
                 >
                   <Icon name="export" />
                   开始本地渲染
+                </button>
+              </>
+            ) : modal === 'connect' ? (
+              <>
+                <span className="eyebrow">外部工具</span>
+                <h2>连接你的 agent</h2>
+                <p>
+                  外部 agent 可以直接修改工程文件，也可通过本地 MCP 检查工程、执行编辑并获取画面。
+                </p>
+                <pre>
+                  {JSON.stringify(
+                    {
+                      mcpServers: {
+                        vmotion: state.connection,
+                      },
+                    },
+                    null,
+                    2,
+                  )}
+                </pre>
+                <button
+                  className="secondary"
+                  onClick={() => navigator.clipboard.writeText(state.root)}
+                >
+                  复制工程路径
                 </button>
               </>
             ) : (

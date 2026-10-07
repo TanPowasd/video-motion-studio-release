@@ -7,9 +7,10 @@ import { Application } from '../src/service/application.js';
 import { initProject } from '../src/service/template.js';
 import { serveHttp } from '../src/service/http.js';
 import { publishableSource } from '../scripts/export-public-release.js';
-it('separates client boundaries without duplicating the shared edit service', () => {
-  expect(surfaceManifest.studio.workspaces).not.toContain('code');
+it('shares one project between direct UI edits and external Agent interfaces', () => {
+  expect(surfaceManifest.studio.workspaces).toContain('code');
   expect(surfaceManifest.agent.path).toBe('/agent/');
+  expect(surfaceManifest.agent.interfacesOnly).toBe(true);
   expect(() => assertSurfaceMethod('studio', 'agentToolInvoke')).toThrow('automation');
   expect(() => assertSurfaceMethod('studio', 'projectFileRead')).toThrow('automation');
   expect(() => assertSurfaceMethod('studio', 'projectApply')).not.toThrow();

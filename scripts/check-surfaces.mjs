@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 const packaged = process.argv.includes('--packaged'),
   pkg = path.resolve('release/Vmotion');
 await mkdir('artifacts', { recursive: true });
-const root = await mkdtemp(path.resolve('artifacts/surfaces-'));
+const root = await mkdtemp(path.resolve('artifacts/shared-ui-'));
 const runtime = packaged ? path.join(pkg, 'Vmotion.exe') : process.execPath,
   cli = packaged
     ? path.join(pkg, 'resources/app/dist/cli/index.mjs')
@@ -22,7 +22,7 @@ const runtime = packaged ? path.join(pkg, 'Vmotion.exe') : process.execPath,
   };
 execFileSync(
   runtime,
-  [cli, 'init', '--project', root, '--template', 'science', '--duration', '2'],
+  [cli, 'init', '--project', root, '--template', 'science', '--duration', '4'],
   { env, windowsHide: true },
 );
 const allocator = net.createServer();
@@ -38,167 +38,171 @@ let logs = '';
 service.stdout.on('data', (d) => (logs += d));
 service.stderr.on('data', (d) => (logs += d));
 const url = 'http://127.0.0.1:' + port;
-async function inspectWindows(BrowserWindow, root, url) {
+async function verify(BrowserWindow, root, url, options) {
   const fs = require('node:fs'),
     path = require('node:path'),
     assert = require('node:assert/strict');
-  const report = { root, checks: [] },
-    check = (name, value) => {
-      assert.ok(value, name);
-      report.checks.push(name);
-    };
-  const human = new BrowserWindow({
+  const { Client } = require(
+    path.resolve('node_modules/@modelcontextprotocol/sdk/dist/cjs/client/index.js'),
+  );
+  const { StdioClientTransport } = require(
+    path.resolve('node_modules/@modelcontextprotocol/sdk/dist/cjs/client/stdio.js'),
+  );
+  const w = new BrowserWindow({
       show: false,
       width: 1560,
       height: 1040,
       webPreferences: { sandbox: true, contextIsolation: true },
     }),
-    agent = new BrowserWindow({
-      show: false,
-      width: 1360,
-      height: 940,
-      webPreferences: { sandbox: true, contextIsolation: true },
+    client = new Client({ name: 'shared-editor-check', version: '1.0.0' }),
+    transport = new StdioClientTransport({
+      command: options.runtime,
+      args: [options.cli, 'mcp', '--project', root],
+      env: options.env,
+      stderr: 'pipe',
     });
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms)),
-    ev = (w, code) => w.webContents.executeJavaScript(code, true),
-    until = async (w, code, name) => {
-      const started = Date.now();
-      while (Date.now() - started < 30000) {
-        if (await ev(w, code)) return;
+  const report = { root, checks: [] },
+    check = (name, value) => {
+      assert.ok(value, name);
+      report.checks.push(name);
+    };
+  const ev = (code) => w.webContents.executeJavaScript(code, true),
+    sleep = (ms) => new Promise((r) => setTimeout(r, ms)),
+    until = async (code, name) => {
+      let start = Date.now();
+      while (Date.now() - start < 30000) {
+        if (await ev(code)) return;
         await sleep(100);
       }
       throw Error(name);
     };
-  const click = async (w, label) => {
+  const call = async (name, argumentsValue = {}) => {
+    const r = await client.callTool({
+      name: 'tool_call',
+      arguments: { name, arguments: argumentsValue, response: 'full' },
+    });
+    const result = JSON.parse(r.content.find((c) => c.type === 'text').text);
+    if (r.isError) throw Error(JSON.stringify(result));
+    return result;
+  };
+  const click = async (label) => {
     await ev(
-      w,
       `Array.from(document.querySelectorAll('button')).find(b=>b.textContent.trim().startsWith(${JSON.stringify(label)})).click()`,
     );
     await sleep(150);
   };
-  const rpc = (method, params = {}, endpoint = '/api/agent/rpc') =>
-    ev(
-      agent,
-      `fetch(${JSON.stringify(endpoint)},{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(${JSON.stringify({ method, params })})}).then(r=>r.json()).then(r=>{if(r.error)throw Error(r.error.message);return r.result;})`,
+  try {
+    await client.connect(transport);
+    await w.loadURL(url + '/#/project');
+    await until('!!document.querySelector(".topbar")', 'Studio missing');
+    check(
+      'normal editor contains visual and code workspaces',
+      await ev(
+        `document.querySelector('.workspaces').textContent.includes('代码')&&document.querySelector('.workspaces').textContent.includes('音乐')`,
+      ),
     );
-  await human.loadURL(url + '/#/project');
-  await until(human, `!!document.querySelector('.topbar')`, 'Studio did not mount');
-  check(
-    'Studio has human workspaces and no code/MCP connection UI',
-    await ev(
-      human,
-      `document.querySelector('.workspaces').textContent.includes('音乐')&&!document.querySelector('.workspaces').textContent.includes('代码')&&!document.querySelector('.topbar').textContent.includes('agent')&&!document.querySelector('.topbar').textContent.includes('MCP')`,
-    ),
-  );
-  await agent.loadURL(url + '/agent/');
-  await until(
-    agent,
-    `!!document.querySelector('[aria-label="MCP 配置"]')`,
-    'Agent workbench did not mount',
-  );
-  check(
-    'Agent has separate document/build and MCP config',
-    await ev(
-      agent,
-      `document.title==='Vmotion Agent Workbench'&&!document.querySelector('.topbar')`,
-    ),
-  );
-  const before = await rpc('state');
-  await ev(agent, `location.hash='#/source?path=scenes/intro.json'`);
-  await until(
-    agent,
-    `document.querySelector('[aria-label="TypeScript 组件源码"]')?.value.includes('nodes')`,
-    'Agent source did not load',
-  );
-  const change = async (name) =>
-    ev(
-      agent,
-      `(()=>{const el=document.querySelector('[aria-label="TypeScript 组件源码"]'),doc=JSON.parse(el.value);doc.name=${JSON.stringify(name)};Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(el,JSON.stringify(doc,null,2));el.dispatchEvent(new Event('input',{bubbles:true}));})()`,
+    await ev(`document.querySelector('[aria-label="连接 MCP"]').click()`);
+    await until(`!!document.querySelector('[aria-label="MCP 配置"]')`, 'MCP configuration missing');
+    check(
+      'MCP dialog explains external file/tool editing without an Agent workbench',
+      await ev(
+        `document.querySelector('.mcp-connection').textContent.includes('AI 在外部')&&!document.querySelector('iframe')`,
+      ),
     );
-  await change('Agent reviewed scene');
-  await click(agent, '预检源码');
-  await until(
-    agent,
-    `document.querySelector('.agent-review')?.textContent.includes('预检通过')`,
-    'Source preflight failed',
-  );
-  check(
-    'preflight returns picture without changing active project',
-    (await rpc('state')).snapshot.revision === before.snapshot.revision &&
-      (await ev(agent, `!!document.querySelector('.agent-review img')`)),
-  );
-  await click(agent, '提交候选');
-  await until(
-    agent,
-    `document.querySelector('.agent-meta').textContent.includes('已原子提交')`,
-    'Exact candidate apply failed',
-  );
-  check(
-    'source commit reaches shared Studio',
-    (await rpc('state', {}, '/api/studio/rpc')).snapshot.scenes[0].name === 'Agent reviewed scene',
-  );
-  await until(
-    human,
-    `document.body.textContent.includes('Agent reviewed scene')`,
-    'Studio did not hot-sync Agent edit',
-  );
-  await change('Second reviewed scene');
-  await click(agent, '预检源码');
-  await until(
-    agent,
-    `document.querySelector('.agent-review')?.textContent.includes('预检通过')`,
-    'Accepted source hash was not refreshed',
-  );
-  check('successive source edits advance accepted hash', true);
-  await rpc('undo', {}, '/api/studio/rpc');
-  check(
-    'Studio undo restores Agent edit atomically',
-    (await rpc('state')).snapshot.revision === before.snapshot.revision,
-  );
-  await click(agent, '工具目录');
-  await ev(
-    agent,
-    `(()=>{const el=document.querySelector('[aria-label="Agent 工具搜索"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,'audio');el.dispatchEvent(new Event('input',{bubbles:true}));})()`,
-  );
-  await click(agent, '搜索');
-  await until(
-    agent,
-    `document.querySelectorAll('.agent-tool-list button').length>0`,
-    'Tool discovery failed',
-  );
-  await ev(agent, `document.querySelector('.agent-tool-list button').click()`);
-  await until(
-    agent,
-    `!!document.querySelector('[aria-label="工具 Schema"]')`,
-    'Schema discovery failed',
-  );
-  check('Agent discovers bounded tools and schemas', true);
-  await human.loadURL(url + '/#/music');
-  await until(human, `!!document.querySelector('.music-app')`, 'Music workspace missing');
-  check(
-    'human music excludes raw JSON tab',
-    await ev(
-      human,
-      `!Array.from(document.querySelectorAll('.music-main-tabs button')).some(b=>b.textContent==='JSON')`,
-    ),
-  );
-  fs.writeFileSync(
-    path.join(root, 'studio.png'),
-    (await human.webContents.capturePage(undefined, { stayHidden: true, stayAwake: true })).toPNG(),
-  );
-  fs.writeFileSync(
-    path.join(root, 'agent.png'),
-    (await agent.webContents.capturePage(undefined, { stayHidden: true, stayAwake: true })).toPNG(),
-  );
-  human.destroy();
-  agent.destroy();
-  fs.writeFileSync(path.join(root, 'report.json'), JSON.stringify(report, null, 2));
-  return report;
+    await ev(`document.querySelector('[aria-label="关闭 MCP 连接"]').click()`);
+    await click('动画');
+    const before = await call('project_inspect');
+    const original = before.snapshot.scenes[0].nodes.map((n) => n.id);
+    await ev(`document.querySelector('[aria-label="Shape"]').click()`);
+    await until(`document.querySelector('.layer-row.selected')!==null`, 'UI shape did not select');
+    const after = await call('project_inspect'),
+      added = after.snapshot.scenes[0].nodes.find((n) => !original.includes(n.id));
+    check(
+      'direct UI edit is immediately visible to real external stdio MCP',
+      !!added && added.type === 'rect',
+    );
+    const plan = await call('project_preflight', {
+      revision: after.snapshot.revision,
+      operations: [
+        {
+          type: 'updateNode',
+          sceneId: 'intro',
+          nodeId: added.id,
+          patch: { name: 'MCP reviewed layer', x: 155 },
+        },
+      ],
+    });
+    check(
+      'MCP preflight preserves the UI project revision',
+      (await call('project_context')).revision === after.snapshot.revision && plan.valid,
+    );
+    await call('project_apply', {
+      revision: after.snapshot.revision,
+      operations: [
+        {
+          type: 'updateNode',
+          sceneId: 'intro',
+          nodeId: added.id,
+          patch: { name: 'MCP reviewed layer', x: 155 },
+        },
+      ],
+      expectedCandidateRevision: plan.candidateRevision,
+    });
+    await until(
+      `document.querySelector('.layer-list').textContent.includes('MCP reviewed layer')`,
+      'MCP edit did not synchronize',
+    );
+    check('external MCP edits hot-sync into ordinary UI', true);
+    await ev(`document.querySelector('[aria-label="Undo"]').click()`);
+    await sleep(300);
+    check(
+      'UI undo restores the same MCP transaction',
+      (await call('project_context')).revision === after.snapshot.revision,
+    );
+    const sceneFile = path.join(root, 'scenes/intro.json'),
+      scene = JSON.parse(fs.readFileSync(sceneFile, 'utf8'));
+    scene.nodes.find((n) => n.id === added.id).name = 'External file layer';
+    fs.writeFileSync(sceneFile + '.tmp', JSON.stringify(scene, null, 2) + '\n');
+    fs.renameSync(sceneFile + '.tmp', sceneFile);
+    await until(
+      `document.querySelector('.layer-list').textContent.includes('External file layer')`,
+      'External file edit did not synchronize',
+    );
+    check(
+      'direct external JSON edits enter the same preview and history',
+      (await call('project_inspect')).snapshot.scenes[0].nodes.find((n) => n.id === added.id)
+        .name === 'External file layer',
+    );
+    await ev(`document.querySelector('[aria-label="Undo"]').click()`);
+    await sleep(300);
+    check(
+      'UI can undo a valid external file edit',
+      (await call('project_context')).revision === after.snapshot.revision,
+    );
+    await click('代码');
+    await until(`!!document.querySelector('.code-area textarea')`, 'Code workspace missing');
+    check('human code workspace is available directly in the editor', true);
+    await w.loadURL(url + '/#/music');
+    await until(
+      `!!document.querySelector('.music-header [aria-label="连接 MCP"]')`,
+      'Music MCP entry missing',
+    );
+    check('music uses direct UI plus simple MCP configuration', true);
+    fs.writeFileSync(
+      path.join(root, 'ui.png'),
+      (await w.webContents.capturePage(undefined, { stayHidden: true, stayAwake: true })).toPNG(),
+    );
+    fs.writeFileSync(path.join(root, 'report.json'), JSON.stringify(report, null, 2));
+    return report;
+  } finally {
+    await client.close();
+    w.destroy();
+  }
 }
 const main = path.join(root, 'check.cjs');
 await writeFile(
   main,
-  `const {app,BrowserWindow}=require('electron');app.disableHardwareAcceleration();app.whenReady().then(async()=>{try{const inspect=${inspectWindows.toString()};console.log(JSON.stringify(await inspect(BrowserWindow,${JSON.stringify(root)},${JSON.stringify(url)})));app.exit(0);}catch(e){console.error(e);app.exit(1);}});`,
+  `const {app,BrowserWindow}=require('electron');app.disableHardwareAcceleration();app.whenReady().then(async()=>{try{const verify=${verify.toString()};console.log(JSON.stringify(await verify(BrowserWindow,${JSON.stringify(root)},${JSON.stringify(url)},${JSON.stringify({ runtime, cli, env })})));app.exit(0);}catch(e){console.error(e);app.exit(1);}});`,
 );
 let child;
 try {
@@ -217,8 +221,8 @@ try {
   child.stderr.pipe(process.stderr);
   const timer = setTimeout(() => child.kill(), 150000);
   const code = await new Promise((r) => {
-    child.on('error', () => r(1));
-    child.on('exit', r);
+    child.once('exit', r);
+    child.once('error', () => r(1));
   });
   clearTimeout(timer);
   assert.equal(code, 0);

@@ -7,9 +7,9 @@ declare global {
       projectHome: () => Promise<ProjectHome>;
       openProject: (root?: string) => Promise<void>;
       createProject: (options: ProjectCreationInput & { directory: string }) => Promise<void>;
-      openStudioWorkbench: () => Promise<void>;
       showHome: () => Promise<void>;
       openAgentWorkbench: (route?: string) => Promise<void>;
+      openStudioWorkbench: () => Promise<void>;
       showFile: (file: string) => Promise<void>;
     };
   }

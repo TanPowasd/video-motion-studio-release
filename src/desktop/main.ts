@@ -13,9 +13,6 @@ import type http from 'node:http';
 import type net from 'node:net';
 
 let window: BrowserWindow;
-let agentWindow: BrowserWindow | undefined;
-let studioWindow: BrowserWindow | undefined;
-const agentLaunch = process.argv.includes('--agent-workbench');
 let studio: Application | undefined;
 let httpServer: http.Server | undefined;
 let pipeServer: net.Server | undefined;
@@ -36,20 +33,21 @@ function serverUrl(server: http.Server) {
   if (!address || typeof address === 'string') throw new Error('无法启动本地编辑器服务');
   return `http://127.0.0.1:${address.port}`;
 }
+async function showMcpConnection() {
+  await window.webContents.executeJavaScript(
+    `new Promise((resolve,reject)=>{const start=Date.now();const check=()=>{if(document.documentElement.dataset.mcpConnectionReady==='true'){window.dispatchEvent(new Event('vmotion:connect-mcp'));resolve(true);}else if(Date.now()-start>10000)reject(new Error('MCP 连接入口未初始化'));else setTimeout(check,50);};check();})`,
+  );
+}
 async function showHome() {
   if (!httpServer) httpServer = await serveHttp(undefined, 0, clientDirectory());
-  await window.loadURL(`${serverUrl(httpServer)}/${agentLaunch ? 'agent/' : '#/welcome'}`);
-  if (agentWindow && !agentWindow.isDestroyed())
-    await agentWindow.loadURL(`${serverUrl(httpServer)}/agent/`);
-  if (studioWindow && !studioWindow.isDestroyed())
-    await studioWindow.loadURL(`${serverUrl(httpServer)}/#/welcome`);
+  await window.loadURL(`${serverUrl(httpServer)}/#/welcome`);
   window.setTitle('Vmotion · 项目');
 }
 async function openProject(input: string) {
   const root = projectRoot(input);
   if (switching) throw new Error('正在切换项目，请稍候');
   if (studio?.root === root) {
-    await window.loadURL(`${serverUrl(httpServer!)}/${agentLaunch ? 'agent/' : '#/project'}`);
+    await window.loadURL(`${serverUrl(httpServer!)}/#/project`);
     return;
   }
   switching = true;
@@ -63,7 +61,7 @@ async function openProject(input: string) {
     nextPipe = await servePipe(candidate);
     nextHttp = await serveHttp(candidate, 0, clientDirectory());
     navigating = true;
-    await window.loadURL(`${serverUrl(nextHttp)}/${agentLaunch ? 'agent/' : '#/project'}`);
+    await window.loadURL(`${serverUrl(nextHttp)}/#/project`);
   } catch (error) {
     nextHttp?.closeAllConnections();
     nextHttp?.close();
@@ -82,10 +80,6 @@ async function openProject(input: string) {
   studio = candidate;
   httpServer = nextHttp;
   pipeServer = nextPipe;
-  if (agentWindow && !agentWindow.isDestroyed())
-    await agentWindow.loadURL(`${serverUrl(nextHttp!)}/agent/`);
-  if (studioWindow && !studioWindow.isDestroyed())
-    await studioWindow.loadURL(`${serverUrl(nextHttp!)}/#/project`);
   await previous?.close();
   window.setTitle(`${studio.service.snapshot.project.name} · Vmotion`);
   await rememberProject(recentFile(), root, studio.service.snapshot.project.name).catch((error) =>
@@ -105,7 +99,7 @@ app
     session.defaultSession.setPermissionCheckHandler((_contents, permission, _origin, details) => {
       if (permission === 'midi' || permission === 'midiSysex')
         return (
-          (_contents === window?.webContents || _contents === studioWindow?.webContents) &&
+          _contents === window?.webContents &&
           /^http:\/\/127\.0\.0\.1:\d+(?:\/|$)/.test(details.requestingUrl ?? _origin)
         );
       return false;
@@ -113,7 +107,7 @@ app
     session.defaultSession.setPermissionRequestHandler((contents, permission, callback) => {
       callback(
         (permission === 'midi' || permission === 'midiSysex') &&
-          (contents === window?.webContents || contents === studioWindow?.webContents) &&
+          contents === window?.webContents &&
           /^http:\/\/127\.0\.0\.1:\d+\//.test(contents.getURL()),
       );
     });
@@ -194,41 +188,8 @@ app
       return result.canceled ? undefined : result.filePaths[0];
     });
     ipcMain.handle('project:home', showHome);
-    ipcMain.handle('agent:open', async (_event, route?: string) => {
-      if (
-        route !== undefined &&
-        (typeof route !== 'string' ||
-          !/^#\/(source|connect|tools|review|tasks)(?:\?.*)?$/.test(route))
-      )
-        throw new Error('Agent 工作台路由无效');
-      if (!httpServer) throw new Error('请先打开应用');
-      if (!agentWindow || agentWindow.isDestroyed()) {
-        agentWindow = new BrowserWindow({
-          width: 1360,
-          height: 940,
-          minWidth: 900,
-          minHeight: 650,
-          title: 'Vmotion Agent Workbench',
-          backgroundColor: '#111721',
-          show: !process.env.VMOTION_UI_TEST,
-          webPreferences: {
-            preload: path.join(base, 'dist/desktop/preload.cjs'),
-            contextIsolation: true,
-            nodeIntegration: false,
-            sandbox: true,
-          },
-        });
-        agentWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-        agentWindow.webContents.on('will-navigate', (event, url) => {
-          if (!url.startsWith('http://127.0.0.1:')) event.preventDefault();
-        });
-        agentWindow.on('closed', () => {
-          agentWindow = undefined;
-        });
-      }
-      await agentWindow.loadURL(`${serverUrl(httpServer)}/agent/${route ?? ''}`);
-      if (!process.env.VMOTION_UI_TEST) agentWindow.show();
-    });
+    ipcMain.handle('agent:open', showMcpConnection);
+    ipcMain.handle('studio:open', () => window.focus());
     ipcMain.handle('project:open', async (_event, root?: string) => {
       if (root !== undefined && typeof root !== 'string') throw new Error('项目路径格式无效');
       if (!root) {
@@ -241,40 +202,6 @@ app
         root = result.filePaths[0];
       }
       await openProject(root);
-    });
-    ipcMain.handle('studio:open', async () => {
-      if (!agentLaunch) {
-        window.show();
-        window.focus();
-        return;
-      }
-      if (!httpServer) throw new Error('请先打开应用');
-      if (!studioWindow || studioWindow.isDestroyed()) {
-        studioWindow = new BrowserWindow({
-          width: 1560,
-          height: 1040,
-          minWidth: 1100,
-          minHeight: 720,
-          title: 'Vmotion Studio',
-          backgroundColor: '#111217',
-          show: !process.env.VMOTION_UI_TEST,
-          webPreferences: {
-            preload: path.join(base, 'dist/desktop/preload.cjs'),
-            contextIsolation: true,
-            nodeIntegration: false,
-            sandbox: true,
-          },
-        });
-        studioWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-        studioWindow.webContents.on('will-navigate', (event, url) => {
-          if (!url.startsWith('http://127.0.0.1:')) event.preventDefault();
-        });
-        studioWindow.on('closed', () => {
-          studioWindow = undefined;
-        });
-      }
-      await studioWindow.loadURL(serverUrl(httpServer) + '/#/' + (studio ? 'project' : 'welcome'));
-      if (!process.env.VMOTION_UI_TEST) studioWindow.show();
     });
     ipcMain.handle('project:create', async (_event, options: unknown) => {
       if (!options || typeof options !== 'object') throw new Error('请先填写新建项目设置');
@@ -307,6 +234,7 @@ app
     } else {
       await showHome();
     }
+    if (process.argv.includes('--agent-workbench')) await showMcpConnection();
     if (process.env.VMOTION_SMOKE) {
       const validation = studio ? await studio.dispatch('validate') : undefined,
         capture = studio

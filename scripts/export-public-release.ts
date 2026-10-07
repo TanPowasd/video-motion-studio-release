@@ -80,8 +80,14 @@ export async function exportPublicRelease(root = process.cwd()) {
     const source = path.resolve(root, file),
       target = path.join(output, file);
     await mkdir(path.dirname(target), { recursive: true });
-    await copyFile(source, target);
-    const bytes = await readFile(target);
+    const canonical = spawnSync('git', ['show', `HEAD:${file}`], {
+      cwd: root,
+      windowsHide: true,
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    if (canonical.status !== 0) throw Error(`Cannot read committed source: ${file}`);
+    const bytes = canonical.stdout;
+    await writeFile(target, bytes);
     entries.push({
       path: file,
       bytes: bytes.length,

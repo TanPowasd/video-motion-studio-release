@@ -31,7 +31,7 @@ export function WorkbenchHeader({
   showRight: boolean;
   onWorkspace: (v: string) => void;
   onTools: () => void;
-  onModal: (v: 'settings' | 'export') => void;
+  onModal: (v: 'settings' | 'connect' | 'export') => void;
   onUndo: () => void;
   onRedo: () => void;
   onPlugin: () => void;
@@ -66,6 +66,10 @@ export function WorkbenchHeader({
             <Icon name="redo" />
           </button>
         </div>
+        <button className="subtle" aria-label="连接 MCP" onClick={() => onModal('connect')}>
+          <Icon name="link" />
+          连接 MCP
+        </button>
         <button className="primary" onClick={() => onModal('export')}>
           <Icon name="export" />
           导出
@@ -78,6 +82,7 @@ export function WorkbenchHeader({
             ['editing', 'film', '剪辑'],
             ['music', 'music', '音乐'],
             ['drawing', 'brush', '绘画'],
+            ['code', 'code', '代码'],
           ].map(([id, icon, name]) => (
             <button
               key={id}

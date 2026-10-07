@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ProjectHome } from './ProjectHome.js';
+import { McpConnection } from './McpConnection.js';
 import { Workbench } from './Workbench.js';
 import { loadRuntimeFonts } from './runtime-fonts.js';
 // Font requests must not extend Electron's initial loadURL/switch transaction.
@@ -15,7 +16,7 @@ function Root() {
     window.addEventListener('hashchange', changed);
     return () => window.removeEventListener('hashchange', changed);
   }, []);
-  return route.startsWith('#/welcome') ? (
+  const workspace = route.startsWith('#/welcome') ? (
     <ProjectHome />
   ) : route.startsWith('#/music') ? (
     <MusicWorkspace />
@@ -23,6 +24,12 @@ function Root() {
     <WorkbenchProvider>
       <Workbench />
     </WorkbenchProvider>
+  );
+  return (
+    <>
+      {workspace}
+      <McpConnection />
+    </>
   );
 }
 createRoot(document.getElementById('root')!).render(

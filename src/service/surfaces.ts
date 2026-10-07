@@ -24,9 +24,10 @@ export const surfaceManifest = {
   studio: {
     path: '/',
     rpc: '/api/studio/rpc',
-    workspaces: ['animation', 'editing', 'music', 'drawing'],
+    workspaces: ['animation', 'editing', 'music', 'drawing', 'code'],
   },
   agent: {
+    interfacesOnly: true,
     path: '/agent/',
     rpc: '/api/agent/rpc',
     discovery: '/api/agent/discovery',

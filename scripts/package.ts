@@ -167,7 +167,7 @@ try {
   );
   await writeFile(
     path.join(stage, 'READ-ME.txt'),
-    'Vmotion Studio · Windows 10/11 x64\r\n复制完整 Vmotion 文件夹，双击 Vmotion.exe 或“启动 Vmotion.cmd”。无需安装 Node、Rust、FFmpeg 或额外编译器，基本功能可离线使用。\r\n主页新建/打开工程，Ctrl+N / Ctrl+O。动画、剪辑、音乐和绘画使用创作界面。\r\n设置与最近项目保存在 profile 中；请放在可写目录。工程和素材保存在你选择的位置。\r\n源文件、自动化接口和工具检查使用独立“启动 Agent 工作台.cmd”，详细工具链说明在 Agent 文件夹。\r\n创作说明：resources\\app\\docs\\STUDIO-GUIDE.md。第三方许可、媒体来源与对应源码见 resources\\runtime\\licenses 和 sources；内容清单见 portable-manifest.json。\r\n',
+    'Vmotion · Windows 10/11 x64\r\n复制完整 Vmotion 文件夹，双击 Vmotion.exe 或“启动 Vmotion.cmd”。无需安装 Node、Rust、FFmpeg 或额外编译器，基本功能可离线使用。\r\n主页新建/打开工程，Ctrl+N / Ctrl+O。人用动画、剪辑、音乐、绘画和代码界面直接编辑；AI 在外部修改文件或连接 MCP。\r\n顶部“连接 MCP”复制接入配置，双方共享同一工程、预览和撤销。CLI/MCP 兼容启动器和详细指南在 Agent 文件夹。\r\n设置与最近项目保存在 profile 中；工程和素材保存在你选择的位置。\r\n创作说明：resources\\app\\docs\\STUDIO-GUIDE.md。第三方许可、媒体来源与对应源码见 resources\\runtime\\licenses 和 sources；内容清单见 portable-manifest.json。\r\n',
   );
   await writeFile(path.join(stage, 'portable.flag'), 'Vmotion portable settings\r\n');
   await writeFile(
@@ -212,6 +212,7 @@ try {
         surfaces: {
           studio: { entry: 'Vmotion.exe', path: '/' },
           agent: {
+            interfacesOnly: true,
             entry: '启动 Agent 工作台.cmd',
             path: '/agent/',
             cli: 'Agent/vmotion-agent.cmd',

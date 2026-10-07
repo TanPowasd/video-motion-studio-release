@@ -1,3 +1,4 @@
+import { McpConnectionButton } from './McpConnection.js';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Snapshot } from '../core/model.js';
 import type {
@@ -56,8 +57,12 @@ export function DrawingWorkspace({
     gesture = useRef<Gesture | undefined>(undefined);
   const document = useMemo(() => {
     const entry = snapshot.project.drawings.find((d) => d.id === id);
-    if(!entry)return;
-    try{return JSON.parse(snapshot.files[entry.path]) as DrawingDocument;}catch{return;}
+    if (!entry) return;
+    try {
+      return JSON.parse(snapshot.files[entry.path]) as DrawingDocument;
+    } catch {
+      return;
+    }
   }, [id, snapshot.revision]);
   const layer = document?.layers.find((l) => l.id === selected.at(-1)),
     flight = useRef(false),
@@ -269,6 +274,7 @@ export function DrawingWorkspace({
   return (
     <div className="drawing-workspace">
       <header className="drawing-topbar">
+        <McpConnectionButton />
         <button onClick={onExit}>
           <Icon name="arrow" /> 返回创作工作站
         </button>

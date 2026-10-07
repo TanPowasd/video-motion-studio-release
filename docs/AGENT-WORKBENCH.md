@@ -1,13 +1,9 @@
-# Agent 工作台与工具链
+# 外部 AI 与界面共同编辑
 
-双击 `启动 Agent 工作台.cmd`；命令行可用 `Vmotion.exe --agent-workbench --project "D:\视频工程"`。Web 服务的创作页是 `/`，独立工作台是 `/agent/`，两个页面使用不同 HTML、入口和构建产物。
+人直接通过 Vmotion Studio 的动画、剪辑、音乐、绘画和代码工作区编辑。AI 在外部通过项目文件或 CLI/MCP 操作同一个工程，程序不调用 AI 模型。
 
-工作台提供 MCP/CLI 配置、分页源码、TypeScript/JSON/Python/WGSL 编辑、类型/画面预检、准确候选提交、按需工具目录/Schema、原生画面/声音、planId、诊断与渲染任务。这里也不内置 AI 模型；外部 agent 使用项目文件、CLI 和 MCP。
+顶部“连接 MCP”复制当前工程的本地接入配置。关闭配置框继续用 UI 编辑，不需要额外 Agent 面板或第二窗口。旧“启动 Agent 工作台.cmd”/--agent-workbench 作为兼容入口，启动普通创作界面并显示配置框。
 
-源码草稿保留在当前标签页 sessionStorage。预检不保存；提交使用被检查的原始请求、文件 hash、工程 revision 和 expectedCandidateRevision。改变草稿或源文件后须重新检查，不能把旧候选提交到新版本上。创作端与工作台共享一次撤销、外部文件冲突和导出队列。
+JSON 为可视化数据来源，TypeScript/Python/WGSL 为程序逻辑来源。文件同步先验证再切换活动版本；错误保留最后可用预览，冲突保留双方内容。AI 通过 project_preflight 检查准确候选，再 project_apply 原样提交；人通过 UI 修改参数和图层，双方共享原子事务、revision、撤销和渲染。
 
-便携包中 `Agent/vmotion-agent.cmd` 是专用 CLI/MCP 启动器，`Agent/README.md` 提供流程。根目录 `vmotion.cmd` 仍作为兼容入口保留。
-
-HTTP 入口：`/api/studio/rpc` 为创作端，`/api/agent/rpc` 为工作台，`/api/agent/discovery` 提供 search/schema。`/api/surfaces` 明确页面和接口。旧 `/api/rpc` 继续兼容已存在的客户端；外部 MCP 的 10 个默认入口、140 项按需能力、字段投影和媒体规则保持不变。
-
-预览/应用等共享编辑命令复用同一 Application/ProjectService；源码读取、Agent 指南、工具调用和自动化分页诊断由 Agent 入口提供。分别阅读 [创作指南](STUDIO-GUIDE.md)、[MCP 发现](AGENT-DISCOVERY.md)、[Agent 创作流程](AGENT-WORKFLOW.md)。
+旧 /agent/ Web 页和 /api/agent/* 保留给已有工具使用，日常不用打开。MCP 默认仍10入口，140项能力按需发现；完整信息、Schema 和源文件按需读取。参考 [外部 Agent 创作流程](AGENT-WORKFLOW.md)。

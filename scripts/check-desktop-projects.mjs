@@ -994,17 +994,29 @@ try {
   }
   if (process.argv.includes('--surfaces')) {
     check(
-      'studio navigation has no code or MCP connection controls',
-      await desktop.evaluate(
-        `!document.querySelector('.topbar').textContent.includes('agent')&&!document.querySelector('.workspaces').textContent.includes('代码')`,
-      ),
+      'ordinary UI offers external MCP configuration',
+      await desktop.evaluate(`!!document.querySelector('[aria-label="连接 MCP"]')`),
     );
-    await desktop.evaluate(`window.vmotionDesktop.openAgentWorkbench('#/connect')`);
-    const agentPage = await until(async () => {
-      const all = await (await fetch(`http://127.0.0.1:${desktop.debugPort}/json/list`)).json();
-      return all.find((t) => t.url.includes('/agent/'));
-    }, 'Native Agent window missing');
-    check('native Agent window is a separate document', agentPage.url.includes('/agent/'));
+    const route = await desktop.evaluate('location.hash');
+    await desktop.evaluate('window.vmotionDesktop.openAgentWorkbench()');
+    await until(
+      () => desktop.evaluate(`!!document.querySelector('[aria-label="MCP 配置"]')`),
+      'MCP dialog missing',
+    );
+    check(
+      'MCP connection preserves current UI page without extra workbench',
+      (await desktop.evaluate('location.hash')) === route &&
+        (await desktop.evaluate('!document.querySelector("iframe")')),
+    );
+    const targets = await (
+      await fetch('http://127.0.0.1:' + desktop.debugPort + '/json/list')
+    ).json();
+    check(
+      'external AI requires no second application window',
+      targets.filter((t) => t.type === 'page' && t.url.startsWith('http://127.0.0.1:')).length ===
+        1,
+    );
+    await desktop.evaluate(`document.querySelector('[aria-label="关闭 MCP 连接"]').click()`);
   }
   if (process.argv.includes('--sound')) {
     const manifest = path.join(projects, '空白动画/project.vmotion.json'),

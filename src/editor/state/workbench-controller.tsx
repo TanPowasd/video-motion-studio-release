@@ -229,6 +229,7 @@ export function useWorkbenchController() {
   }, [sceneId, workspace, focusPath.join('/'), focusContextFrames.join(','), drawingId]);
   useEffect(() => {
     const back = () => {
+      if (location.hash.startsWith('#/music') || location.hash.startsWith('#/welcome')) return;
       const route = readCompositionRoute();
       setPlaying(false);
       setWorkspace(route.workspace);

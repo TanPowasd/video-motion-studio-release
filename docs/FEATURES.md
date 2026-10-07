@@ -3,7 +3,7 @@
 本地可编程视频创作工作站。**软件不接入 AI 模型**；外部 agent 通过文件、CLI 或 MCP 操作工程。
 
 
-创作工作站和 Agent 工作台独立提供：动画、剪辑、音乐与绘画使用可视化创作界面；文件、CLI、MCP、源码和候选检查使用 /agent/ 或“启动 Agent 工作台.cmd”。底层工程服务、渲染与撤销共用。
+人直接用 Studio 界面编辑；外部 AI 通过项目文件、CLI 或 MCP 操作同一工程。顶部“连接 MCP”只提供配置，程序不内置 AI 工作台或模型。底层工程服务、渲染与撤销共用。
 
 [创作指南](STUDIO-GUIDE.md) · [Agent 工作台](AGENT-WORKBENCH.md) · [公开 Release 仓库](https://github.com/TanPowasd/video-motion-studio-release)
 

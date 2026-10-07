@@ -498,7 +498,7 @@ export class Application extends EventEmitter {
           scope: 'point-effects',
           fullSceneGpu: false,
         },
-        workspaces: ['animation', 'editing', 'music', 'drawing'],
+        workspaces: ['animation', 'editing', 'music', 'drawing','code'],
         agentWorkbench: '/agent/',
         aiIntegration: false,
         animationTools: [

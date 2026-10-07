@@ -11,6 +11,25 @@ const source = path.resolve(process.argv[2] ?? ''),
 if (!process.argv[2] || !source.startsWith(path.resolve('artifacts') + path.sep))
   throw Error('Pass an exported product snapshot under artifacts');
 const manifest = JSON.parse(await readFile(path.join(source, 'SOURCE-MANIFEST.json'), 'utf8'));
+const version = JSON.parse(await readFile(path.join(source, 'package.json'), 'utf8')).version;
+const tag = 'v' + version;
+if (!/^v\d+\.\d+\.\d+$/.test(tag)) throw Error('Release version must use semver');
+const packageManifest = JSON.parse(
+  await readFile('release/Vmotion/portable-manifest.json', 'utf8'),
+);
+if (
+  packageManifest.gitCommit !== manifest.sourceCommit ||
+  packageManifest.applicationVersion !== version
+)
+  throw Error('Portable package and public source version/commit differ');
+for (const entry of manifest.entries) {
+  const bytes = await readFile(path.join(source, entry.path));
+  if (
+    bytes.length !== entry.bytes ||
+    createHash('sha256').update(bytes).digest('hex') !== entry.sha256
+  )
+    throw Error('Source snapshot content differs from its manifest');
+}
 const credential = spawnSync('git', ['credential', 'fill'], {
   input: 'protocol=https\nhost=github.com\n\n',
   encoding: 'utf8',
@@ -70,12 +89,23 @@ if (info.status === 404)
       name,
       private: false,
       description:
-        'Open-source Vmotion release snapshots and Windows portable builds. Separate Studio and Agent workspaces.',
+        'Open-source Vmotion releases. Visual creation and external Agent tools in one local workstation.',
       auto_init: false,
       has_wiki: false,
     }),
   });
 if (info.data.private !== false) throw Error('Release repository must be public');
+await api('/repos/' + repo, {
+  method: 'PATCH',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    description:
+      'Open-source Vmotion. People edit directly in the UI; external AI uses files, CLI or MCP on the same local project.',
+  }),
+});
+const existingTag = await api('/repos/' + repo + '/git/ref/tags/' + tag);
+if (existingTag.status !== 404)
+  throw Error('Release tag already exists; do not overwrite a published version');
 const archiveHash = createHash('sha256');
 for await (const chunk of createReadStream(zip)) archiveHash.update(chunk);
 const sha = archiveHash.digest('hex');
@@ -86,8 +116,6 @@ if (!sourceLicense.includes('Apache License')) throw Error('Snapshot license is 
 git(['init', '-b', 'main']);
 git(['config', 'user.name', 'TanPowasd']);
 git(['config', 'user.email', 'TanPowasd@users.noreply.github.com']);
-git(['add', '.']);
-git(['commit', '-m', 'Publish verified Vmotion source with separate Studio and Agent interfaces']);
 git(['remote', 'add', 'origin', `https://github.com/${repo}.git`]);
 if (info.status !== 201) {
   const remote = spawnSync(
@@ -99,16 +127,18 @@ if (info.status !== 201) {
       windowsHide: true,
     },
   );
-  if (remote.stdout.trim())
-    throw Error(
-      'Existing release source requires a reviewed fast-forward update; this snapshot publishes only to an empty repository',
-    );
+  if (remote.status !== 0) throw Error('Cannot inspect public repository history');
+  if (remote.stdout.trim()) {
+    git(['fetch', 'origin', 'main']);
+    git(['reset', '--mixed', 'origin/main']);
+  }
 }
+git(['add', '.']);
+git(['commit', '-m', `Publish Vmotion ${version}: integrated visual and Agent workflows`]);
 git(['push', '-u', 'origin', 'main']);
-const tag = 'v0.1.0';
 git(['tag', tag]);
 git(['push', 'origin', tag]);
-const body = `Vmotion 0.1.0 开源预览版。\n\n- 创作工作站：动画、剪辑、音乐、绘画与可视化工具。\n- Agent 工作台：独立页面/窗口、文件/CLI/MCP、源码与准确候选检查。程序不调用 AI 模型。\n- Windows 10/11 x64 便携包，自带运行时、VST3 宿主和实时 MIDI 接口。\n- Apache-2.0 第一方源码；第三方许可与 FFmpeg 对应源码随包保留。\n\n源码快照基准：${manifest.sourceCommit}。\n\n解压后：Vmotion.exe / 启动 Vmotion.cmd；Agent 用户使用“启动 Agent 工作台.cmd”或 Agent/vmotion-agent.cmd。\n\n已运行类型、全量回归、构建、真实 MCP、窗口分区与便携验收。AU/macOS 尚未实机验收；专业长片、全场景 GPU、VST2/ASIO 和非零插件延迟补偿不属于此预览版已验收范围。\n\nSHA256: ${sha}\n`;
+const body = `Vmotion ${version} 开源预览版。\n\n- 人通过动画、剪辑、音乐、绘画和代码界面直接编辑。\n- AI 在外部通过文件或 MCP 修改同一工程，顶部“连接 MCP”复制配置。\n- Windows 10/11 x64 便携包内置运行时、VST3 宿主和 MIDI 接口。\n- 外部 AI 通过文件/CLI/MCP 操作；程序不调用模型。\n- Apache-2.0，第三方许可与 FFmpeg 对应源码保留。\n\n源码与便携包基准：${manifest.sourceCommit}。\n\n双击 Vmotion.exe 使用普通创作界面；无需 Agent 工作台或第二窗口。\n\n已通过全量回归、构建、真实 MCP、文件热更新与直接 UI 编辑及便携验收。AU/macOS 尚未实机验收。\n\nSHA256: ${sha}\n`;
 let release = await api('/repos/' + repo + '/releases/tags/' + tag);
 if (release.status === 404)
   release = await api('/repos/' + repo + '/releases', {
@@ -116,7 +146,7 @@ if (release.status === 404)
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       tag_name: tag,
-      name: 'Vmotion 0.1.0 · Studio + Agent',
+      name: `Vmotion ${version} · 统一创作与 Agent`,
       body,
       draft: false,
       prerelease: true,
