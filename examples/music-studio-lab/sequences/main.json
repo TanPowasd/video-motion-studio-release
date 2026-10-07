@@ -1,0 +1,54 @@
+{
+  "id": "main",
+  "name": "主序列",
+  "duration": 1020,
+  "tracks": [
+    {
+      "id": "visual",
+      "name": "画面",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        {
+          "id": "intro-clip",
+          "sceneId": "intro",
+          "start": 0,
+          "duration": 1020,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0
+        }
+      ]
+    },
+    {
+      "id": "voice",
+      "name": "声音",
+      "type": "audio",
+      "muted": false,
+      "clips": []
+    },
+    {
+      "id": "music",
+      "name": "配乐",
+      "type": "audio",
+      "muted": false,
+      "clips": [
+        {
+          "id": "623356b7-8cc7-479a-8489-4e5dc07ecce1",
+          "assetId": "studio-score",
+          "start": 0,
+          "duration": 1005,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "暖色循环 · Pattern 编曲"
+        }
+      ]
+    }
+  ],
+  "markers": []
+}

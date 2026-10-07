@@ -1,0 +1,63 @@
+{
+  "$ref": "#/definitions/motionPath",
+  "definitions": {
+    "motionPath": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "maxLength": 1000000
+        },
+        "nodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "useRendered": {
+          "type": "boolean",
+          "default": false
+        },
+        "progress": {
+          "type": "number",
+          "default": 0
+        },
+        "repeat": {
+          "type": "string",
+          "enum": [
+            "clamp",
+            "loop",
+            "pingpong"
+          ],
+          "default": "clamp"
+        },
+        "autoRotate": {
+          "type": "boolean",
+          "default": false
+        },
+        "rotationOffset": {
+          "$ref": "#/definitions/motionPath/properties/progress",
+          "default": 0
+        },
+        "anchor": {
+          "type": "string",
+          "enum": [
+            "origin",
+            "center",
+            "topLeft"
+          ],
+          "default": "origin"
+        },
+        "offsetX": {
+          "$ref": "#/definitions/motionPath/properties/progress",
+          "default": 0
+        },
+        "offsetY": {
+          "$ref": "#/definitions/motionPath/properties/progress",
+          "default": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

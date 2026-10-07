@@ -1,0 +1,38 @@
+{
+  "formatVersion": 1,
+  "id": "8128a1f5-524a-483f-9f9c-50742f552738",
+  "name": "音乐工作室 · Pattern 编排",
+  "width": 640,
+  "height": 360,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [
+    {
+      "id": "studio-score",
+      "name": "暖色循环 · Pattern 编曲",
+      "path": "components/sounds/studio-score.json",
+      "soundSource": "components/sounds/studio-score.json",
+      "type": "audio",
+      "managed": true,
+      "metadata": {
+        "duration": 33.5,
+        "sampleRate": 48000,
+        "channels": 2,
+        "hasAudio": true
+      }
+    }
+  ],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "4529db93-f7cc-40df-9897-1ba980dee296",
+  "name": "通道与多输出合成",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

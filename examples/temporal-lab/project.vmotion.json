@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "4b796bc5-fa18-4117-a020-9a029c03b778",
+  "name": "平面特效 · 时间与粒子",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

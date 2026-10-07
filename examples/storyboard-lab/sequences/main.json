@@ -1,0 +1,121 @@
+{
+  "id": "main",
+  "name": "主序列",
+  "duration": 240,
+  "tracks": [
+    {
+      "id": "visual",
+      "name": "画面",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        {
+          "id": "sb/workstation/start/visual",
+          "sceneId": "intro",
+          "start": 0,
+          "duration": 60,
+          "sourceIn": 0,
+          "sourceOut": 60,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "从稳定镜头开始",
+          "linkedGroup": "sb/workstation/start",
+          "audioEnabled": true,
+          "sourceWindow": {
+            "sourceIn": 0,
+            "duration": 60
+          }
+        },
+        {
+          "id": "sb/workstation/compose/visual",
+          "sceneId": "intro",
+          "start": 60,
+          "duration": 60,
+          "sourceIn": 60,
+          "sourceOut": 120,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "继续组织整支视频",
+          "linkedGroup": "sb/workstation/compose",
+          "audioEnabled": true,
+          "sourceWindow": {
+            "sourceIn": 60,
+            "duration": 60
+          }
+        },
+        {
+          "id": "sb/workstation/evidence/visual",
+          "sceneId": "inspect",
+          "start": 120,
+          "duration": 60,
+          "sourceIn": 0,
+          "sourceOut": 60,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "检查最终画面",
+          "linkedGroup": "sb/workstation/evidence",
+          "audioEnabled": true,
+          "sourceWindow": {
+            "sourceIn": 0,
+            "duration": 60
+          }
+        },
+        {
+          "id": "sb/workstation/render/visual",
+          "sceneId": "output",
+          "start": 180,
+          "duration": 60,
+          "sourceIn": 0,
+          "sourceOut": 60,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "导出与继续修改",
+          "linkedGroup": "sb/workstation/render",
+          "audioEnabled": true,
+          "sourceWindow": {
+            "sourceIn": 0,
+            "duration": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "voice",
+      "name": "声音",
+      "type": "audio",
+      "muted": false,
+      "clips": []
+    }
+  ],
+  "markers": [
+    {
+      "id": "sb/workstation/chapter/build",
+      "frame": 0,
+      "label": "编排",
+      "kind": "chapter",
+      "group": "sb/workstation"
+    },
+    {
+      "id": "sb/workstation/chapter/review",
+      "frame": 120,
+      "label": "检查",
+      "kind": "chapter",
+      "group": "sb/workstation"
+    },
+    {
+      "id": "sb/workstation/chapter/deliver",
+      "frame": 180,
+      "label": "交付",
+      "kind": "chapter",
+      "group": "sb/workstation"
+    }
+  ]
+}

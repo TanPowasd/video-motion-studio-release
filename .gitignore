@@ -1,0 +1,14 @@
+node_modules/
+dist/
+release/
+target/
+*.log
+.vmotion/
+artifacts/
+.dsh-tmp/
+*.tsbuildinfo
+Thumbs.db
+.DS_Store
+examples/**/exports/
+productions/**/exports/
+productions/**/assets/audio/*.wav

@@ -1,0 +1,74 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "duotone",
+  "parameters": {
+    "low": {
+      "type": "color",
+      "default": "#112c4d"
+    },
+    "high": {
+      "type": "color",
+      "default": "#91ebce"
+    },
+    "intensity": {
+      "type": "number",
+      "default": 1,
+      "min": 0,
+      "max": 1
+    }
+  },
+  "nodes": [
+    {
+      "id": "source",
+      "type": "input",
+      "slot": "source"
+    },
+    {
+      "id": "map",
+      "type": "pass",
+      "input": "source",
+      "effect": {
+        "type": "gradientMap",
+        "stops": [
+          {
+            "offset": 0,
+            "color": "#112c4d"
+          },
+          {
+            "offset": 1,
+            "color": "#91ebce"
+          }
+        ],
+        "intensity": 1
+      }
+    }
+  ],
+  "output": "map",
+  "links": [
+    {
+      "nodeId": "map",
+      "property": "effect.stops.0.color",
+      "parameter": "low",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "map",
+      "property": "effect.stops.1.color",
+      "parameter": "high",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "map",
+      "property": "effect.intensity",
+      "parameter": "intensity",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    }
+  ]
+}

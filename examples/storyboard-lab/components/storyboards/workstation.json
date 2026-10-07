@@ -1,0 +1,80 @@
+{
+  "kind": "storyboard",
+  "version": 1,
+  "id": "workstation",
+  "name": "全片创作闭环",
+  "unit": "seconds",
+  "start": 0,
+  "chapters": [
+    {
+      "id": "build",
+      "name": "编排"
+    },
+    {
+      "id": "review",
+      "name": "检查"
+    },
+    {
+      "id": "deliver",
+      "name": "交付"
+    }
+  ],
+  "shots": [
+    {
+      "id": "start",
+      "name": "从稳定镜头开始",
+      "chapterId": "build",
+      "source": {
+        "type": "scene",
+        "id": "intro"
+      },
+      "duration": 2,
+      "sourceIn": 0,
+      "speed": 1,
+      "audioEnabled": true,
+      "narration": []
+    },
+    {
+      "id": "compose",
+      "name": "继续组织整支视频",
+      "chapterId": "build",
+      "source": {
+        "type": "scene",
+        "id": "intro"
+      },
+      "duration": 2,
+      "sourceIn": 2,
+      "speed": 1,
+      "audioEnabled": true,
+      "narration": []
+    },
+    {
+      "id": "evidence",
+      "name": "检查最终画面",
+      "chapterId": "review",
+      "source": {
+        "type": "scene",
+        "id": "inspect"
+      },
+      "duration": 2,
+      "sourceIn": 0,
+      "speed": 1,
+      "audioEnabled": true,
+      "narration": []
+    },
+    {
+      "id": "render",
+      "name": "导出与继续修改",
+      "chapterId": "deliver",
+      "source": {
+        "type": "scene",
+        "id": "output"
+      },
+      "duration": 2,
+      "sourceIn": 0,
+      "speed": 1,
+      "audioEnabled": true,
+      "narration": []
+    }
+  ]
+}

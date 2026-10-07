@@ -1,0 +1,112 @@
+{
+  "id": "intro",
+  "name": "参数与数据动画",
+  "duration": 240,
+  "background": "#101525",
+  "nodes": [
+    {
+      "id": "chart",
+      "type": "component",
+      "name": "可编辑数据组件",
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 720,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "opacity": 1,
+      "fill": "#7c8cff",
+      "effects": [],
+      "stroke": "",
+      "strokeWidth": 0,
+      "radius": 0,
+      "text": "",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 48,
+      "fontWeight": 400,
+      "align": "left",
+      "lineHeight": 1.3,
+      "reveal": 1,
+      "component": "components/data.ts",
+      "audioOffset": 0,
+      "params": {
+        "mode": "bar",
+        "showLabels": true,
+        "origin": {
+          "x": 190,
+          "y": 230
+        },
+        "data": [
+          {
+            "label": "素数",
+            "value": 30
+          },
+          {
+            "label": "复数",
+            "value": 20
+          },
+          {
+            "label": "函数",
+            "value": 45
+          },
+          {
+            "label": "动画",
+            "value": 84
+          }
+        ],
+        "style": {
+          "accent": "#79b6ff",
+          "line": {
+            "width": 4
+          }
+        }
+      },
+      "overrides": {},
+      "path": "",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [
+        {
+          "property": "params.data.1.value",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 20,
+              "easing": "easeInOut"
+            },
+            {
+              "frame": 180,
+              "value": 92,
+              "easing": "easeInOut"
+            }
+          ]
+        },
+        {
+          "property": "params.origin.x",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 150,
+              "easing": "easeInOut"
+            },
+            {
+              "frame": 180,
+              "value": 225,
+              "easing": "easeInOut"
+            }
+          ]
+        }
+      ],
+      "points": []
+    }
+  ]
+}

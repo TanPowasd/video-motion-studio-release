@@ -1,0 +1,228 @@
+:root {
+  --bg: #0d1117;
+  --panel: #151b24;
+  --panel-soft: #1b2430;
+  --line: #2a3544;
+  --accent: #77d4bd;
+  --highlight: #193a37;
+  --text: #d5e0ee;
+  --muted: #8c9daf;
+  font-family: 'Segoe UI', 'Microsoft YaHei', 'Vmotion UI Sans', sans-serif;
+  font-size: 12px;
+}
+.app {
+  grid-template-rows: 58px 48px minmax(185px, 1fr) 6px minmax(140px, var(--timeline-height)) 28px;
+}
+.topbar {
+  background: #111820;
+  gap: 13px;
+  padding: 0 16px;
+}
+.brand {
+  font-size: 20px;
+  letter-spacing: -0.7px;
+  margin-right: 7px;
+}
+.brand-mark {
+  background: #77d4bd;
+  color: #122625;
+  border-radius: 8px;
+  font-size: 19px;
+  width: 28px;
+  height: 28px;
+}
+.project-title {
+  color: #d0dbea;
+  max-width: 32%;
+  font-weight: 550;
+}
+.tag {
+  border-color: #374b54;
+  color: #8eb9af;
+}
+.save-status {
+  font-size: 11px;
+  color: #90a2b4;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  white-space: nowrap;
+}
+.save-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #77d4bd;
+}
+.save-status.error i {
+  background: #e3b279;
+}
+.primary {
+  background: #77d4bd;
+  border-color: #9ce4d1;
+  color: #152824;
+}
+.primary:hover {
+  background: #a0e5d1;
+  color: #11261f;
+}
+.subtle,
+.secondary {
+  background: #1a2632;
+  border-color: #344453;
+  color: #c0d2df;
+}
+.workspaces {
+  background: #141c26;
+  padding: 0 15px;
+  gap: 9px;
+  border-bottom: 1px solid #2d3746;
+}
+.workspace-segment {
+  display: flex;
+  gap: 4px;
+  background: #0f151d;
+  padding: 4px;
+  border-radius: 7px;
+  border: 1px solid #263341;
+}
+.workspace-segment button {
+  min-width: 74px;
+  padding: 6px 10px;
+}
+.workspace-segment button.active {
+  background: #24443f;
+  color: #adf1d8;
+  border: 0;
+}
+.workspace-divider {
+  height: 20px;
+  border-left: 1px solid #344150;
+  margin: 0 2px;
+}
+.studio-launch {
+  color: #b8e3d7;
+}
+.left-panel,
+.inspector {
+  background: #131b25;
+}
+.panel-tabs {
+  height: 44px;
+  background: #151f2b;
+}
+.panel-tabs button.active {
+  color: #92e5cc;
+  border-bottom-color: #77d4bd;
+}
+.main-panel {
+  position: relative;
+  background: #0e151e;
+  min-width: 0;
+}
+.canvas-toolbar {
+  background: #141e2a;
+  padding: 8px 11px;
+  min-height: 44px;
+  gap: 6px;
+}
+.inspector-heading {
+  height: 42px;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+  background: #17212c;
+}
+.inspector-tabs {
+  padding: 5px 9px;
+  border-bottom: 1px solid var(--line);
+  gap: 4px;
+}
+.inspector-tabs button.active {
+  background: #24443e;
+  color: #abead7;
+}
+.inspector section {
+  border-bottom: 1px solid #263340;
+}
+.timeline {
+  background: #121a25;
+}
+.statusbar {
+  background: #101820;
+  color: #97aabd;
+}
+.studio-open > :not(.studio-workspace):not(.studio-loading) {
+  display: none !important;
+}
+.studio-loading {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #a7c9bc;
+}
+.driver-controls details {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.driver-controls summary {
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.driver-add {
+  display: grid;
+  gap: 8px;
+}
+.driver-controls textarea {
+  width: 100%;
+  resize: vertical;
+}
+.driver-expression span {
+  display: flex;
+  justify-content: space-between;
+}
+.driver-controls .studio-field {
+  display: grid;
+  grid-template-columns: 1fr 105px;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+.driver-controls .studio-toggle {
+  display: flex;
+  gap: 8px;
+  margin: 9px 0;
+}
+.driver-path-plot {
+  color: #77d4bd;
+  background: #0f1824;
+  border: 1px solid var(--line);
+  margin: 8px 0;
+}
+.driver-path-plot svg {
+  width: 100%;
+  height: 90px;
+}
+@media (max-width: 1050px) {
+  .save-status {
+    display: none;
+  }
+  .workspace-label {
+    display: none;
+  }
+  .workspaces .layout-control {
+    display: none;
+  }
+  .workspace-segment button {
+    min-width: 58px;
+  }
+  .brand {
+    margin-right: 0;
+  }
+  .topbar {
+    gap: 9px;
+  }
+  .project-title .tag {
+    display: none;
+  }
+}

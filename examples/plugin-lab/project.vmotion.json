@@ -1,0 +1,29 @@
+{
+  "formatVersion": 1,
+  "id": "60181704-66cd-4b9a-98d2-3476fa89e07c",
+  "name": "插件创作工作流",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0",
+  "plugins": [
+    {
+      "source": "components/plugins/creative/plugin.json",
+      "enabled": true
+    }
+  ]
+}

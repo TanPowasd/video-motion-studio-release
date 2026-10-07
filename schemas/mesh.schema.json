@@ -1,0 +1,235 @@
+{
+  "$ref": "#/definitions/mesh",
+  "definitions": {
+    "mesh": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "kind": {
+          "type": "string",
+          "const": "mesh3d"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mesh": {
+          "type": "object",
+          "properties": {
+            "vertices": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "$ref": "#/definitions/mesh/properties/mesh/properties/vertices/items/properties/x"
+                  },
+                  "z": {
+                    "$ref": "#/definitions/mesh/properties/mesh/properties/vertices/items/properties/x"
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "z"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 100000
+            },
+            "faces": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "minItems": 3,
+                "maxItems": 64
+              },
+              "maxItems": 5000
+            },
+            "colors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 5000
+            },
+            "cornerNormals": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/mesh/properties/mesh/properties/vertices/items"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "minItems": 3,
+                "maxItems": 64
+              },
+              "maxItems": 5000
+            }
+          },
+          "required": [
+            "vertices",
+            "faces"
+          ],
+          "additionalProperties": false
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "object": {
+                "type": "string"
+              },
+              "names": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "material": {
+                "type": "string"
+              },
+              "faces": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "maxItems": 5000
+              }
+            },
+            "required": [
+              "object",
+              "names",
+              "material",
+              "faces"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5000,
+          "default": []
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "type": "string",
+              "enum": [
+                "obj",
+                "primitive"
+              ]
+            },
+            "name": {
+              "type": "string"
+            },
+            "hash": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "format",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "texcoords": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "u": {
+                    "type": "number"
+                  },
+                  "v": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "u",
+                  "v"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 100000
+            },
+            "normals": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/mesh/properties/mesh/properties/vertices/items"
+              },
+              "maxItems": 100000
+            },
+            "faceTexcoords": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "maxItems": 5000
+            },
+            "faceNormals": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "maxItems": 5000
+            }
+          },
+          "required": [
+            "texcoords",
+            "normals",
+            "faceTexcoords",
+            "faceNormals"
+          ],
+          "additionalProperties": false
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "default": []
+        }
+      },
+      "required": [
+        "version",
+        "kind",
+        "name",
+        "mesh",
+        "source"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

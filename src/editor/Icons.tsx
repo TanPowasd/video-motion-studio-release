@@ -1,0 +1,143 @@
+import React from 'react';
+export function Icon({ name, size = 17 }: { name: string; size?: number }) {
+  const paths: Record<string, React.ReactNode> = {
+    cube: (
+      <>
+        <path d="m12 2 9 5v10l-9 5-9-5V7Zm-9 5 9 5 9-5M12 12v10" />
+      </>
+    ),
+    sparkles: (
+      <>
+        <path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3Zm8-1v6m-3-3h6" />
+      </>
+    ),
+    volume: (
+      <>
+        <path d="M3 9h4l5-4v14l-5-4H3Zm12-1c3 2 3 6 0 8m3-11c5 4 5 10 0 14" />
+      </>
+    ),
+    lock: (
+      <>
+        <rect x="5" y="10" width="14" height="11" rx="2" />
+        <path d="M8 10V6a4 4 0 0 1 8 0v4" />
+      </>
+    ),
+    unlock: (
+      <>
+        <rect x="5" y="10" width="14" height="11" rx="2" />
+        <path d="M8 10V6a4 4 0 0 1 7-2" />
+      </>
+    ),
+    copy: (
+      <>
+        <rect x="8" y="8" width="12" height="12" rx="2" />
+        <path d="M16 8V4H4v12h4" />
+      </>
+    ),
+    repeat: (
+      <>
+        <rect x="3" y="3" width="6" height="6" rx="1" />
+        <rect x="15" y="3" width="6" height="6" rx="1" />
+        <rect x="3" y="15" width="6" height="6" rx="1" />
+        <rect x="15" y="15" width="6" height="6" rx="1" />
+        <path d="M10 6h4M6 10v4m12-4v4m-8 4h4" />
+      </>
+    ),
+    delete: <path d="M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7" />,
+    up: <path d="m5 14 7-7 7 7" />,
+    down: <path d="m5 10 7 7 7-7" />,
+    play: <path d="m8 5 11 7-11 7Z" />,
+    pause: <path d="M8 5v14M16 5v14" />,
+    plus: <path d="M12 5v14M5 12h14" />,
+    minus: <path d="M5 12h14" />,
+    layers: <path d="m12 3 10 6-10 6L2 9Zm-10 11 10 6 10-6" />,
+    scene: (
+      <>
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="M7 7h6v6H7ZM13 13h4v4h-4M13 10h4m-7 3v4" />
+      </>
+    ),
+    film: (
+      <>
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="M7 3v18M17 3v18M3 8h4m-4 8h4m10-8h4m-4 8h4" />
+      </>
+    ),
+    music: (
+      <>
+        <path d="M9 18V5l11-2v13M9 9l11-2" />
+        <ellipse cx="6" cy="18" rx="3" ry="2" />
+      </>
+    ),
+    eye: (
+      <>
+        <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" />
+        <circle cx="12" cy="12" r="2" />
+      </>
+    ),
+    fit: <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" />,
+    grid: (
+      <>
+        <rect x="3" y="3" width="18" height="18" />
+        <path d="M3 9h18M3 15h18M9 3v18M15 3v18" />
+      </>
+    ),
+    text: <path d="M4 5h16M12 5v15M8 20h8" />,
+    rect: <rect x="4" y="4" width="16" height="16" rx="2" />,
+    ellipse: <circle cx="12" cy="12" r="8" />,
+    code: <path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-16-2 20" />,
+    brush: <path d="m9 15 8-12 4 4-12 8M9 15c0 4-3 6-7 5 3-1 0-5 4-6Z" />,
+    chart: <path d="M4 3v17h17M8 16v-5m5 5V7m5 9V4" />,
+    key: <path d="m12 4 8 8-8 8-8-8Z" />,
+    arrow: <path d="m8 4 8 8-8 8" />,
+    search: (
+      <>
+        <circle cx="10" cy="10" r="6" />
+        <path d="m15 15 6 6" />
+      </>
+    ),
+    panel: (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M9 4v16" />
+      </>
+    ),
+    settings: (
+      <>
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2" />
+      </>
+    ),
+    folder: <path d="M3 7V5h6l3 3h9v12H3Z" />,
+    close: <path d="m6 6 12 12M18 6 6 18" />,
+    undo: <path d="m9 5-5 4 5 4M4 9h9a7 7 0 0 1 7 7" />,
+    redo: <path d="m15 5 5 4-5 4M20 9h-9a7 7 0 0 0-7 7" />,
+    export: <path d="M12 15V3m-4 4 4-4 4 4M5 13v7h14v-7" />,
+    link: (
+      <path d="m9 15 6-6M8 14l-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m2 5 2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0" />
+    ),
+    check: <path d="m5 12 4 4L19 6" />,
+    image: (
+      <>
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <circle cx="8" cy="8" r="2" />
+        <path d="m3 18 6-6 4 4 4-6 4 7" />
+      </>
+    ),
+  };
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {paths[name] ?? paths.layers}
+    </svg>
+  );
+}

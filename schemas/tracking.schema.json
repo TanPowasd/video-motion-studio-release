@@ -1,0 +1,325 @@
+{
+  "$ref": "#/definitions/tracking",
+  "definitions": {
+    "tracking": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "tracking"
+        },
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "assetId": {
+              "$ref": "#/definitions/tracking/properties/id"
+            },
+            "fingerprint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "contentHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "width": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 32768
+            },
+            "height": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 32768
+            },
+            "fps": {
+              "type": "object",
+              "properties": {
+                "num": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0
+                },
+                "den": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0
+                }
+              },
+              "required": [
+                "num",
+                "den"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "assetId",
+            "fingerprint",
+            "width",
+            "height",
+            "fps"
+          ],
+          "additionalProperties": false
+        },
+        "range": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            },
+            "end": {
+              "$ref": "#/definitions/tracking/properties/range/properties/start"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        "analysis": {
+          "type": "object",
+          "properties": {
+            "width": {
+              "type": "integer",
+              "minimum": 32,
+              "maximum": 1280
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 32,
+              "maximum": 1280
+            },
+            "algorithm": {
+              "type": "string",
+              "const": "pyramidal-lk-fb-1"
+            },
+            "settings": {
+              "type": "object",
+              "properties": {
+                "levels": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5,
+                  "default": 4
+                },
+                "radius": {
+                  "type": "integer",
+                  "minimum": 3,
+                  "maximum": 15,
+                  "default": 7
+                },
+                "iterations": {
+                  "type": "integer",
+                  "minimum": 3,
+                  "maximum": 40,
+                  "default": 20
+                },
+                "minFeature": {
+                  "type": "number",
+                  "minimum": 1e-8,
+                  "maximum": 0.1,
+                  "default": 0.00003
+                },
+                "minCorrelation": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0.8
+                },
+                "maxResidual": {
+                  "type": "number",
+                  "minimum": 0.001,
+                  "maximum": 1,
+                  "default": 0.15
+                },
+                "maxForwardBackward": {
+                  "type": "number",
+                  "minimum": 0.05,
+                  "maximum": 10,
+                  "default": 1.5
+                },
+                "maxDisplacement": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 256,
+                  "default": 64
+                }
+              },
+              "additionalProperties": false
+            },
+            "metrics": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              },
+              "default": {}
+            }
+          },
+          "required": [
+            "width",
+            "height",
+            "algorithm",
+            "settings"
+          ],
+          "additionalProperties": false
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/tracking/properties/id"
+              },
+              "name": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "seeds": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "frame": {
+                      "$ref": "#/definitions/tracking/properties/range/properties/start"
+                    },
+                    "x": {
+                      "$ref": "#/definitions/tracking/properties/analysis/properties/metrics/additionalProperties"
+                    },
+                    "y": {
+                      "$ref": "#/definitions/tracking/properties/analysis/properties/metrics/additionalProperties"
+                    }
+                  },
+                  "required": [
+                    "frame",
+                    "x",
+                    "y"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 256
+              },
+              "samples": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "frame": {
+                      "$ref": "#/definitions/tracking/properties/range/properties/start"
+                    },
+                    "x": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/definitions/tracking/properties/analysis/properties/metrics/additionalProperties"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "y": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/definitions/tracking/properties/analysis/properties/metrics/additionalProperties"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "tracked",
+                        "manual",
+                        "lost"
+                      ]
+                    },
+                    "confidence": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "noSeed",
+                        "bounds",
+                        "lowTexture",
+                        "photometric",
+                        "forwardBackward",
+                        "displacement",
+                        "stopped"
+                      ]
+                    },
+                    "correlation": {
+                      "type": "number",
+                      "minimum": -1,
+                      "maximum": 1
+                    },
+                    "residual": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "forwardBackward": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "frame",
+                    "x",
+                    "y",
+                    "status",
+                    "confidence"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 3600
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "seeds",
+              "samples"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "kind",
+        "version",
+        "id",
+        "name",
+        "source",
+        "range",
+        "analysis",
+        "points"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

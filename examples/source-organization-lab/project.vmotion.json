@@ -1,0 +1,25 @@
+{
+  "formatVersion": 1,
+  "id": "744d0445-eee6-481e-babd-a6feacfcc10a",
+  "name": "工程引用与选择换源",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json",
+    "scenes/original.json",
+    "scenes/replacement.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

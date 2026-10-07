@@ -1,0 +1,302 @@
+{
+  "$ref": "#/definitions/theme",
+  "definitions": {
+    "theme": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "theme"
+        },
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "parent": {
+          "type": "string",
+          "pattern": "^components\\/themes\\/(?:[\\p{L}\\p{N}_.-]+\\/)*[\\p{L}\\p{N}_.-]+\\.json$"
+        },
+        "tokens": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "pattern": "^[a-zA-Z][\\w-]*(?:\\.[a-zA-Z][\\w-]*)*$"
+                  },
+                  "label": {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  "description": {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  "alias": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "number"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "min": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/value"
+                  },
+                  "max": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/value"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "maxLength": 40
+                  }
+                },
+                "required": [
+                  "id",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/id"
+                  },
+                  "label": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/label"
+                  },
+                  "description": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/description"
+                  },
+                  "alias": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/alias"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "color"
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "id",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/id"
+                  },
+                  "label": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/label"
+                  },
+                  "description": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/description"
+                  },
+                  "alias": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/alias"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "font"
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  }
+                },
+                "required": [
+                  "id",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/id"
+                  },
+                  "label": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/label"
+                  },
+                  "description": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/description"
+                  },
+                  "alias": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/alias"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "string"
+                  },
+                  "value": {
+                    "type": "string",
+                    "maxLength": 4000
+                  }
+                },
+                "required": [
+                  "id",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/id"
+                  },
+                  "label": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/label"
+                  },
+                  "description": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/description"
+                  },
+                  "alias": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/alias"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "boolean"
+                  },
+                  "value": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/id"
+                  },
+                  "label": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/label"
+                  },
+                  "description": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/description"
+                  },
+                  "alias": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/alias"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "vec2"
+                  },
+                  "value": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/value"
+                      },
+                      "y": {
+                        "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/value"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/id"
+                  },
+                  "label": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/label"
+                  },
+                  "description": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/description"
+                  },
+                  "alias": {
+                    "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/alias"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "vec3"
+                  },
+                  "value": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/value"
+                      },
+                      "y": {
+                        "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/value"
+                      },
+                      "z": {
+                        "$ref": "#/definitions/theme/properties/tokens/items/anyOf/0/properties/value"
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "z"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "type"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "maxItems": 1024
+        }
+      },
+      "required": [
+        "kind",
+        "version",
+        "id",
+        "name",
+        "tokens"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

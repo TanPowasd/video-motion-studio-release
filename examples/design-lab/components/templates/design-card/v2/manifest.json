@@ -1,0 +1,68 @@
+{
+  "id": "design-card",
+  "name": "信息卡",
+  "version": 2,
+  "width": 360,
+  "height": 318,
+  "duration": 180,
+  "parameters": {
+    "title": {
+      "type": "string",
+      "default": "升级后的标题"
+    },
+    "accent": {
+      "type": "color",
+      "default": "#59bada"
+    },
+    "size": {
+      "type": "number",
+      "default": 30,
+      "min": 18,
+      "max": 48
+    },
+    "value": {
+      "type": "number",
+      "default": 76,
+      "min": 0,
+      "max": 100
+    }
+  },
+  "ports": [
+    {
+      "parameter": "title",
+      "nodeId": "content",
+      "property": "params.title"
+    },
+    {
+      "parameter": "accent",
+      "nodeId": "content",
+      "property": "params.accent"
+    },
+    {
+      "parameter": "size",
+      "nodeId": "content",
+      "property": "params.size"
+    },
+    {
+      "parameter": "value",
+      "nodeId": "content",
+      "property": "params.value"
+    }
+  ],
+  "kind": "scene-template",
+  "formatVersion": 1,
+  "sceneId": "template-design-card-v2",
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "files": {
+    "components/templates/design-card/v2/code/components/card.ts": "3c495225b799954e8496aea802b576cbed8802c506927da8b2c1b665217a6b09",
+    "scenes/template-design-card-v2.json": "5f730106cd157e09710e23d566b2e2193c54f3b83f87858ba4c37b9b14d1c4ce"
+  },
+  "shared": [],
+  "migrations": {
+    "parameters": {},
+    "layers": {}
+  }
+}

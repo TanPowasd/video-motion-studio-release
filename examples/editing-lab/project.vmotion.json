@@ -1,0 +1,74 @@
+{
+  "formatVersion": 1,
+  "id": "db53cc96-e44e-4fd1-85e5-72f31c70087d",
+  "name": "电影剪辑与二创实验室",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json",
+    "scenes/source-wide.json",
+    "scenes/source-street.json",
+    "scenes/source-detail.json",
+    "scenes/captions-4f2267be-a506-41d2-b689-62b095081c3d.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [
+    {
+      "id": "3d156337-ce1e-4fd9-8d8b-bf128430826a",
+      "name": "city-source.mp4",
+      "path": "assets/city-source.mp4",
+      "type": "video",
+      "managed": false,
+      "fingerprint": "559895:1791082687621.4834",
+      "metadata": {
+        "duration": 9,
+        "hasAudio": true,
+        "sampleRate": 48000,
+        "channels": 2,
+        "width": 1280,
+        "height": 720
+      }
+    },
+    {
+      "id": "e45e0965-7692-4d0f-ba8a-fde179c562a6",
+      "name": "city-source.mp4",
+      "path": "assets/city-source.mp4",
+      "type": "video",
+      "managed": false,
+      "fingerprint": "559895:1791082687621.4834",
+      "metadata": {
+        "duration": 9,
+        "hasAudio": true,
+        "sampleRate": 48000,
+        "channels": 2,
+        "width": 1280,
+        "height": 720
+      }
+    },
+    {
+      "id": "810ca4b1-3030-4b77-ada9-7ca789226c27",
+      "name": "bed.wav",
+      "path": "assets/bed.wav",
+      "type": "audio",
+      "managed": false,
+      "fingerprint": "864078:1791082849661.9148",
+      "metadata": {
+        "duration": 9,
+        "hasAudio": true,
+        "sampleRate": 48000,
+        "channels": 1
+      }
+    }
+  ],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

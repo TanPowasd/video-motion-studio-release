@@ -1,0 +1,64 @@
+{
+  "$ref": "#/definitions/material3d",
+  "definitions": {
+    "material3d": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "enum": [
+            "standard",
+            "unlit"
+          ],
+          "default": "standard"
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[\\da-f]{6}$"
+        },
+        "metallic": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0
+        },
+        "roughness": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 1,
+          "default": 0.5
+        },
+        "emissive": {
+          "$ref": "#/definitions/material3d/properties/color",
+          "default": "#000000"
+        },
+        "emissiveIntensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 8,
+          "default": 0
+        },
+        "shading": {
+          "type": "string",
+          "enum": [
+            "flat",
+            "smooth"
+          ],
+          "default": "smooth"
+        },
+        "creaseAngle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 180,
+          "default": 60
+        },
+        "doubleSided": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

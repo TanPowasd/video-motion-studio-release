@@ -1,0 +1,51 @@
+{
+  "formatVersion": 1,
+  "id": "15155d0d-1787-4093-92f9-4daec5f96355",
+  "name": "音效与音乐制作",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [
+    {
+      "id": "chime-source",
+      "name": "原始铃声采样",
+      "path": "assets/chime.wav",
+      "type": "audio",
+      "managed": true,
+      "metadata": {
+        "duration": 0.6,
+        "sampleRate": 48000,
+        "channels": 2,
+        "hasAudio": true
+      }
+    },
+    {
+      "id": "score",
+      "name": "Luminous / 原创声音示例",
+      "path": "components/sounds/score.json",
+      "soundSource": "components/sounds/score.json",
+      "type": "audio",
+      "managed": true,
+      "metadata": {
+        "duration": 14,
+        "sampleRate": 48000,
+        "channels": 2,
+        "hasAudio": true
+      }
+    }
+  ],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

@@ -1,0 +1,2025 @@
+{
+  "kind": "sound",
+  "version": 1,
+  "id": "studio-score",
+  "name": "暖色循环 · Pattern 编曲",
+  "unit": "beats",
+  "duration": 64,
+  "tail": 1.5,
+  "seed": 73,
+  "tempo": [
+    {
+      "beat": 0,
+      "bpm": 120
+    }
+  ],
+  "timeSignature": [
+    4,
+    4
+  ],
+  "tracks": [
+    {
+      "id": "keys",
+      "name": "Keys · FM 铃音",
+      "instrument": {
+        "type": "synth",
+        "wave": "sine",
+        "gain": 0.3,
+        "attack": 0.003,
+        "decay": 0.8,
+        "sustain": 0.05,
+        "release": 0.7,
+        "fmRatio": 2.76,
+        "fmIndex": 2.2,
+        "detune": 0
+      },
+      "events": [],
+      "muted": false,
+      "solo": false,
+      "gainDb": -8,
+      "pan": -0.15,
+      "busId": "master",
+      "sends": [
+        {
+          "busId": "room",
+          "db": -15
+        }
+      ],
+      "effects": [
+        {
+          "type": "delay",
+          "seconds": 0.25,
+          "feedback": 0.25,
+          "mix": 0.18
+        }
+      ],
+      "automation": []
+    },
+    {
+      "id": "pad",
+      "name": "Pad · 和弦",
+      "instrument": {
+        "type": "synth",
+        "wave": "triangle",
+        "gain": 0.25,
+        "attack": 0.3,
+        "decay": 0.3,
+        "sustain": 0.7,
+        "release": 1,
+        "fmRatio": 2,
+        "fmIndex": 0.4,
+        "detune": 0
+      },
+      "events": [],
+      "muted": false,
+      "solo": false,
+      "gainDb": -10,
+      "pan": 0.15,
+      "busId": "master",
+      "sends": [
+        {
+          "busId": "room",
+          "db": -15
+        }
+      ],
+      "effects": [],
+      "automation": []
+    },
+    {
+      "id": "bass",
+      "name": "Bass · 低音",
+      "instrument": {
+        "type": "synth",
+        "wave": "saw",
+        "gain": 0.22,
+        "attack": 0.006,
+        "decay": 0.13,
+        "sustain": 0.45,
+        "release": 0.08,
+        "fmRatio": 0,
+        "fmIndex": 0,
+        "detune": 0
+      },
+      "events": [],
+      "muted": false,
+      "solo": false,
+      "gainDb": -10,
+      "pan": 0,
+      "busId": "master",
+      "sends": [],
+      "effects": [
+        {
+          "type": "filter",
+          "mode": "lowpass",
+          "frequency": 1400,
+          "q": 0.707,
+          "db": 0
+        }
+      ],
+      "automation": []
+    },
+    {
+      "id": "kick",
+      "name": "Kick",
+      "instrument": {
+        "type": "drum",
+        "voice": "kick",
+        "gain": 0.65,
+        "release": 0.35
+      },
+      "events": [],
+      "muted": false,
+      "solo": false,
+      "gainDb": -9,
+      "pan": 0,
+      "busId": "master",
+      "sends": [],
+      "effects": [],
+      "automation": []
+    },
+    {
+      "id": "snare",
+      "name": "Snare",
+      "instrument": {
+        "type": "drum",
+        "voice": "snare",
+        "gain": 0.35,
+        "release": 0.18
+      },
+      "events": [],
+      "muted": false,
+      "solo": false,
+      "gainDb": -9,
+      "pan": 0,
+      "busId": "master",
+      "sends": [],
+      "effects": [],
+      "automation": []
+    },
+    {
+      "id": "hat",
+      "name": "Hat",
+      "instrument": {
+        "type": "drum",
+        "voice": "hat",
+        "gain": 0.18,
+        "release": 0.05
+      },
+      "events": [],
+      "muted": false,
+      "solo": false,
+      "gainDb": -9,
+      "pan": 0,
+      "busId": "master",
+      "sends": [],
+      "effects": [],
+      "automation": []
+    }
+  ],
+  "patterns": [
+    {
+      "id": "phrase-a",
+      "name": "Pattern A · 主题",
+      "length": 16,
+      "channels": [
+        {
+          "trackId": "keys",
+          "events": [
+            {
+              "id": "key-0",
+              "at": 0,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-1",
+              "at": 0.5,
+              "duration": 0.34,
+              "note": 64,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-2",
+              "at": 1,
+              "duration": 0.34,
+              "note": 67,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-3",
+              "at": 1.5,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-4",
+              "at": 2,
+              "duration": 0.34,
+              "note": 64,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-5",
+              "at": 2.5,
+              "duration": 0.34,
+              "note": 67,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-6",
+              "at": 3,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-7",
+              "at": 3.5,
+              "duration": 0.34,
+              "note": 76,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-8",
+              "at": 4,
+              "duration": 0.34,
+              "note": 64,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-9",
+              "at": 4.5,
+              "duration": 0.34,
+              "note": 57,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-10",
+              "at": 5,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-11",
+              "at": 5.5,
+              "duration": 0.34,
+              "note": 64,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-12",
+              "at": 6,
+              "duration": 0.34,
+              "note": 57,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-13",
+              "at": 6.5,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-14",
+              "at": 7,
+              "duration": 0.34,
+              "note": 64,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-15",
+              "at": 7.5,
+              "duration": 0.34,
+              "note": 69,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-16",
+              "at": 8,
+              "duration": 0.34,
+              "note": 57,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-17",
+              "at": 8.5,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-18",
+              "at": 9,
+              "duration": 0.34,
+              "note": 53,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-19",
+              "at": 9.5,
+              "duration": 0.34,
+              "note": 57,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-20",
+              "at": 10,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-21",
+              "at": 10.5,
+              "duration": 0.34,
+              "note": 53,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-22",
+              "at": 11,
+              "duration": 0.34,
+              "note": 57,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-23",
+              "at": 11.5,
+              "duration": 0.34,
+              "note": 72,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-24",
+              "at": 12,
+              "duration": 0.34,
+              "note": 55,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-25",
+              "at": 12.5,
+              "duration": 0.34,
+              "note": 59,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-26",
+              "at": 13,
+              "duration": 0.34,
+              "note": 62,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-27",
+              "at": 13.5,
+              "duration": 0.34,
+              "note": 55,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-28",
+              "at": 14,
+              "duration": 0.34,
+              "note": 59,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-29",
+              "at": 14.5,
+              "duration": 0.34,
+              "note": 62,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-30",
+              "at": 15,
+              "duration": 0.34,
+              "note": 55,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-31",
+              "at": 15.5,
+              "duration": 0.34,
+              "note": 71,
+              "velocity": 0.48,
+              "pan": 0
+            }
+          ]
+        },
+        {
+          "trackId": "pad",
+          "events": [
+            {
+              "id": "pad-0-0",
+              "at": 0,
+              "duration": 3.8,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-0-1",
+              "at": 0,
+              "duration": 3.8,
+              "note": 64,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-0-2",
+              "at": 0,
+              "duration": 3.8,
+              "note": 67,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-1-0",
+              "at": 4,
+              "duration": 3.8,
+              "note": 57,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-1-1",
+              "at": 4,
+              "duration": 3.8,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-1-2",
+              "at": 4,
+              "duration": 3.8,
+              "note": 64,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-2-0",
+              "at": 8,
+              "duration": 3.8,
+              "note": 53,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-2-1",
+              "at": 8,
+              "duration": 3.8,
+              "note": 57,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-2-2",
+              "at": 8,
+              "duration": 3.8,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-3-0",
+              "at": 12,
+              "duration": 3.8,
+              "note": 55,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-3-1",
+              "at": 12,
+              "duration": 3.8,
+              "note": 59,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-3-2",
+              "at": 12,
+              "duration": 3.8,
+              "note": 62,
+              "velocity": 0.32,
+              "pan": 0
+            }
+          ]
+        },
+        {
+          "trackId": "bass",
+          "events": [
+            {
+              "id": "bass-0",
+              "at": 0,
+              "duration": 0.6,
+              "note": 36,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-1",
+              "at": 1,
+              "duration": 0.6,
+              "note": 36,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-2",
+              "at": 2,
+              "duration": 0.6,
+              "note": 36,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-3",
+              "at": 3,
+              "duration": 0.6,
+              "note": 36,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-4",
+              "at": 4,
+              "duration": 0.6,
+              "note": 33,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-5",
+              "at": 5,
+              "duration": 0.6,
+              "note": 33,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-6",
+              "at": 6,
+              "duration": 0.6,
+              "note": 33,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-7",
+              "at": 7,
+              "duration": 0.6,
+              "note": 33,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-8",
+              "at": 8,
+              "duration": 0.6,
+              "note": 29,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-9",
+              "at": 9,
+              "duration": 0.6,
+              "note": 29,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-10",
+              "at": 10,
+              "duration": 0.6,
+              "note": 29,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-11",
+              "at": 11,
+              "duration": 0.6,
+              "note": 29,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-12",
+              "at": 12,
+              "duration": 0.6,
+              "note": 31,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-13",
+              "at": 13,
+              "duration": 0.6,
+              "note": 31,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-14",
+              "at": 14,
+              "duration": 0.6,
+              "note": 31,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-15",
+              "at": 15,
+              "duration": 0.6,
+              "note": 31,
+              "velocity": 0.6,
+              "pan": 0
+            }
+          ]
+        },
+        {
+          "trackId": "kick",
+          "events": [
+            {
+              "id": "kick-0",
+              "at": 0,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-1",
+              "at": 2,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-2",
+              "at": 4,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-3",
+              "at": 6,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-4",
+              "at": 8,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-5",
+              "at": 10,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-6",
+              "at": 12,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-7",
+              "at": 14,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            }
+          ]
+        },
+        {
+          "trackId": "snare",
+          "events": [
+            {
+              "id": "snare-0",
+              "at": 1,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-1",
+              "at": 3,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-2",
+              "at": 5,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-3",
+              "at": 7,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-4",
+              "at": 9,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-5",
+              "at": 11,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-6",
+              "at": 13,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-7",
+              "at": 15,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            }
+          ]
+        },
+        {
+          "trackId": "hat",
+          "events": [
+            {
+              "id": "hat-0",
+              "at": 0,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-1",
+              "at": 0.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-2",
+              "at": 1,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-3",
+              "at": 1.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-4",
+              "at": 2,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-5",
+              "at": 2.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-6",
+              "at": 3,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-7",
+              "at": 3.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-8",
+              "at": 4,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-9",
+              "at": 4.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-10",
+              "at": 5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-11",
+              "at": 5.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-12",
+              "at": 6,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-13",
+              "at": 6.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-14",
+              "at": 7,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-15",
+              "at": 7.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-16",
+              "at": 8,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-17",
+              "at": 8.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-18",
+              "at": 9,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-19",
+              "at": 9.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-20",
+              "at": 10,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-21",
+              "at": 10.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-22",
+              "at": 11,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-23",
+              "at": 11.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-24",
+              "at": 12,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-25",
+              "at": 12.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-26",
+              "at": 13,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-27",
+              "at": 13.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-28",
+              "at": 14,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-29",
+              "at": 14.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-30",
+              "at": 15,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-31",
+              "at": 15.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phrase-b",
+      "name": "Pattern B · 变化",
+      "length": 16,
+      "channels": [
+        {
+          "trackId": "keys",
+          "events": [
+            {
+              "id": "key-0",
+              "at": 0,
+              "duration": 0.34,
+              "note": 64,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-1",
+              "at": 0.5,
+              "duration": 0.34,
+              "note": 67,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-2",
+              "at": 1,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-3",
+              "at": 1.5,
+              "duration": 0.34,
+              "note": 64,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-4",
+              "at": 2,
+              "duration": 0.34,
+              "note": 67,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-5",
+              "at": 2.5,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-6",
+              "at": 3,
+              "duration": 0.34,
+              "note": 64,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-7",
+              "at": 3.5,
+              "duration": 0.34,
+              "note": 79,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-8",
+              "at": 4,
+              "duration": 0.34,
+              "note": 57,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-9",
+              "at": 4.5,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-10",
+              "at": 5,
+              "duration": 0.34,
+              "note": 64,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-11",
+              "at": 5.5,
+              "duration": 0.34,
+              "note": 57,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-12",
+              "at": 6,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-13",
+              "at": 6.5,
+              "duration": 0.34,
+              "note": 64,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-14",
+              "at": 7,
+              "duration": 0.34,
+              "note": 57,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-15",
+              "at": 7.5,
+              "duration": 0.34,
+              "note": 72,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-16",
+              "at": 8,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-17",
+              "at": 8.5,
+              "duration": 0.34,
+              "note": 53,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-18",
+              "at": 9,
+              "duration": 0.34,
+              "note": 57,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-19",
+              "at": 9.5,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-20",
+              "at": 10,
+              "duration": 0.34,
+              "note": 53,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-21",
+              "at": 10.5,
+              "duration": 0.34,
+              "note": 57,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-22",
+              "at": 11,
+              "duration": 0.34,
+              "note": 60,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-23",
+              "at": 11.5,
+              "duration": 0.34,
+              "note": 65,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-24",
+              "at": 12,
+              "duration": 0.34,
+              "note": 59,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-25",
+              "at": 12.5,
+              "duration": 0.34,
+              "note": 62,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-26",
+              "at": 13,
+              "duration": 0.34,
+              "note": 55,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-27",
+              "at": 13.5,
+              "duration": 0.34,
+              "note": 59,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-28",
+              "at": 14,
+              "duration": 0.34,
+              "note": 62,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-29",
+              "at": 14.5,
+              "duration": 0.34,
+              "note": 55,
+              "velocity": 0.48,
+              "pan": 0
+            },
+            {
+              "id": "key-30",
+              "at": 15,
+              "duration": 0.34,
+              "note": 59,
+              "velocity": 0.65,
+              "pan": 0
+            },
+            {
+              "id": "key-31",
+              "at": 15.5,
+              "duration": 0.34,
+              "note": 74,
+              "velocity": 0.48,
+              "pan": 0
+            }
+          ]
+        },
+        {
+          "trackId": "pad",
+          "events": [
+            {
+              "id": "pad-0-0",
+              "at": 0,
+              "duration": 3.8,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-0-1",
+              "at": 0,
+              "duration": 3.8,
+              "note": 64,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-0-2",
+              "at": 0,
+              "duration": 3.8,
+              "note": 67,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-1-0",
+              "at": 4,
+              "duration": 3.8,
+              "note": 57,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-1-1",
+              "at": 4,
+              "duration": 3.8,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-1-2",
+              "at": 4,
+              "duration": 3.8,
+              "note": 64,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-2-0",
+              "at": 8,
+              "duration": 3.8,
+              "note": 53,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-2-1",
+              "at": 8,
+              "duration": 3.8,
+              "note": 57,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-2-2",
+              "at": 8,
+              "duration": 3.8,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-3-0",
+              "at": 12,
+              "duration": 3.8,
+              "note": 55,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-3-1",
+              "at": 12,
+              "duration": 3.8,
+              "note": 59,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "pad-3-2",
+              "at": 12,
+              "duration": 3.8,
+              "note": 62,
+              "velocity": 0.32,
+              "pan": 0
+            }
+          ]
+        },
+        {
+          "trackId": "bass",
+          "events": [
+            {
+              "id": "bass-0",
+              "at": 0,
+              "duration": 0.6,
+              "note": 36,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-1",
+              "at": 1,
+              "duration": 0.6,
+              "note": 36,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-2",
+              "at": 2,
+              "duration": 0.6,
+              "note": 36,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-3",
+              "at": 3,
+              "duration": 0.6,
+              "note": 36,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-4",
+              "at": 4,
+              "duration": 0.6,
+              "note": 33,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-5",
+              "at": 5,
+              "duration": 0.6,
+              "note": 33,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-6",
+              "at": 6,
+              "duration": 0.6,
+              "note": 33,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-7",
+              "at": 7,
+              "duration": 0.6,
+              "note": 33,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-8",
+              "at": 8,
+              "duration": 0.6,
+              "note": 29,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-9",
+              "at": 9,
+              "duration": 0.6,
+              "note": 29,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-10",
+              "at": 10,
+              "duration": 0.6,
+              "note": 29,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-11",
+              "at": 11,
+              "duration": 0.6,
+              "note": 29,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-12",
+              "at": 12,
+              "duration": 0.6,
+              "note": 31,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-13",
+              "at": 13,
+              "duration": 0.6,
+              "note": 31,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-14",
+              "at": 14,
+              "duration": 0.6,
+              "note": 31,
+              "velocity": 0.6,
+              "pan": 0
+            },
+            {
+              "id": "bass-15",
+              "at": 15,
+              "duration": 0.6,
+              "note": 31,
+              "velocity": 0.6,
+              "pan": 0
+            }
+          ]
+        },
+        {
+          "trackId": "kick",
+          "events": [
+            {
+              "id": "kick-0",
+              "at": 0,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-1",
+              "at": 2,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-2",
+              "at": 4,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-3",
+              "at": 6,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-4",
+              "at": 8,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-5",
+              "at": 10,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-6",
+              "at": 12,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            },
+            {
+              "id": "kick-7",
+              "at": 14,
+              "duration": 0.2,
+              "note": 60,
+              "velocity": 0.68,
+              "pan": 0
+            }
+          ]
+        },
+        {
+          "trackId": "snare",
+          "events": [
+            {
+              "id": "snare-0",
+              "at": 1,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-1",
+              "at": 3,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-2",
+              "at": 5,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-3",
+              "at": 7,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-4",
+              "at": 9,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-5",
+              "at": 11,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-6",
+              "at": 13,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            },
+            {
+              "id": "snare-7",
+              "at": 15,
+              "duration": 0.18,
+              "note": 60,
+              "velocity": 0.5,
+              "pan": 0
+            }
+          ]
+        },
+        {
+          "trackId": "hat",
+          "events": [
+            {
+              "id": "hat-0",
+              "at": 0,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-1",
+              "at": 0.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-2",
+              "at": 1,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-3",
+              "at": 1.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-4",
+              "at": 2,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-5",
+              "at": 2.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-6",
+              "at": 3,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-7",
+              "at": 3.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-8",
+              "at": 4,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-9",
+              "at": 4.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-10",
+              "at": 5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-11",
+              "at": 5.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-12",
+              "at": 6,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-13",
+              "at": 6.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-14",
+              "at": 7,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-15",
+              "at": 7.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-16",
+              "at": 8,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-17",
+              "at": 8.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-18",
+              "at": 9,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-19",
+              "at": 9.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-20",
+              "at": 10,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-21",
+              "at": 10.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-22",
+              "at": 11,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-23",
+              "at": 11.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-24",
+              "at": 12,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-25",
+              "at": 12.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-26",
+              "at": 13,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-27",
+              "at": 13.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-28",
+              "at": 14,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-29",
+              "at": 14.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            },
+            {
+              "id": "hat-30",
+              "at": 15,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.32,
+              "pan": 0
+            },
+            {
+              "id": "hat-31",
+              "at": 15.5,
+              "duration": 0.1,
+              "note": 60,
+              "velocity": 0.22,
+              "pan": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "arrangement": [
+    {
+      "id": "a1",
+      "patternId": "phrase-a",
+      "at": 0,
+      "repeats": 2
+    },
+    {
+      "id": "b1",
+      "patternId": "phrase-b",
+      "at": 32,
+      "repeats": 2
+    }
+  ],
+  "buses": [
+    {
+      "id": "room",
+      "name": "Room · 空间",
+      "busId": "master",
+      "gainDb": -6,
+      "pan": 0,
+      "sends": [],
+      "effects": [
+        {
+          "type": "reverb",
+          "seconds": 1.5,
+          "damping": 0.4,
+          "mix": 1
+        }
+      ]
+    }
+  ],
+  "master": {
+    "gainDb": -2,
+    "effects": [
+      {
+        "type": "limiter",
+        "ceilingDb": -1,
+        "release": 0.1
+      }
+    ]
+  }
+}

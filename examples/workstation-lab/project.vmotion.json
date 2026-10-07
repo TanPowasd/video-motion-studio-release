@@ -1,0 +1,32 @@
+{
+  "formatVersion": 1,
+  "id": "14d47212-b064-409e-b22b-1770e724982a",
+  "name": "通用创作与性能",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json",
+    "scenes/space.json",
+    "scenes/style-crossfade.json",
+    "scenes/style-slide.json",
+    "scenes/style-push.json",
+    "scenes/style-wipe.json",
+    "scenes/style-iris.json",
+    "scenes/style-zoom.json",
+    "scenes/style-dip.json",
+    "scenes/style-cut.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

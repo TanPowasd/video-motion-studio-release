@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "dc5ab4b5-1cc6-4bf6-afae-f44d24278ad1",
+  "name": "表达式、布局与曲线路径",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

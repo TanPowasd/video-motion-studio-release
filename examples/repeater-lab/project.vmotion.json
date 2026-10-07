@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "301cb754-fb1e-44ce-bbd9-745074780551",
+  "name": "程序化重复与仿射动画",
+  "width": 1920,
+  "height": 1080,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

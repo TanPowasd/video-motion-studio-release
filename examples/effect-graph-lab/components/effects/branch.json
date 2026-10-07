@@ -1,0 +1,77 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "Glow branch",
+  "parameters": {
+    "radius": {
+      "type": "number",
+      "default": 7,
+      "min": 0,
+      "max": 50
+    },
+    "offset": {
+      "type": "number",
+      "default": 8,
+      "min": -30,
+      "max": 30
+    }
+  },
+  "nodes": [
+    {
+      "id": "src",
+      "type": "input",
+      "slot": "source"
+    },
+    {
+      "id": "glow",
+      "type": "pass",
+      "input": "src",
+      "effect": {
+        "type": "glow",
+        "color": "#668bff",
+        "radius": 7,
+        "intensity": 1.4,
+        "threshold": 0.4
+      }
+    },
+    {
+      "id": "shift",
+      "type": "transform",
+      "input": "glow",
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        8,
+        0
+      ],
+      "space": "layer"
+    },
+    {
+      "id": "out",
+      "type": "blend",
+      "foreground": "shift",
+      "background": "src",
+      "mode": "screen",
+      "opacity": 0.7
+    }
+  ],
+  "output": "out",
+  "links": [
+    {
+      "nodeId": "glow",
+      "property": "effect.radius",
+      "parameter": "radius",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "shift",
+      "property": "matrix.4",
+      "parameter": "offset",
+      "scale": 1,
+      "offset": 0
+    }
+  ]
+}

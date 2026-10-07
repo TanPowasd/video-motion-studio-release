@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "3c522e8d-79cb-4844-8234-7f60e2814184",
+  "name": "三维网格 · 资源与 OBJ",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

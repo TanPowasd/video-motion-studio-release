@@ -1,0 +1,43 @@
+{
+  "$ref": "#/definitions/themeBinding",
+  "definitions": {
+    "themeBinding": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "pattern": "^components\\/themes\\/(?:[\\p{L}\\p{N}_.-]+\\/)*[\\p{L}\\p{N}_.-]+\\.json$"
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "links": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "^[a-zA-Z][\\w-]*(?:\\.[a-zA-Z][\\w-]*)*$"
+          }
+        },
+        "baseline": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "overrides": {
+          "type": "object",
+          "additionalProperties": {},
+          "default": {}
+        }
+      },
+      "required": [
+        "source",
+        "links",
+        "baseline"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

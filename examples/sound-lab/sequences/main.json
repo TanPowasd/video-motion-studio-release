@@ -1,0 +1,47 @@
+{
+  "id": "main",
+  "name": "主序列",
+  "duration": 420,
+  "tracks": [
+    {
+      "id": "visual",
+      "name": "画面",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        {
+          "id": "intro-clip",
+          "sceneId": "intro",
+          "start": 0,
+          "duration": 420,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0
+        }
+      ]
+    },
+    {
+      "id": "music",
+      "name": "音乐与音效",
+      "type": "audio",
+      "muted": false,
+      "clips": [
+        {
+          "id": "5ca97e6e-1fa8-49a8-9832-52cd5da2a1ff",
+          "assetId": "score",
+          "start": 0,
+          "duration": 420,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "Luminous / 原创声音示例"
+        }
+      ]
+    }
+  ],
+  "markers": []
+}

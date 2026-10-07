@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "af64d2e7-eb40-48e0-a5ac-92366845bda1",
+  "name": "矩阵 3D · 双相机与层级动画",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

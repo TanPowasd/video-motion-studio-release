@@ -1,0 +1,24 @@
+{
+  "formatVersion": 1,
+  "id": "8f82762b-0be2-4fa4-aa20-e81d938a46ec",
+  "name": "内容时间与重映射实验室",
+  "width": 1920,
+  "height": 1080,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json",
+    "scenes/motion.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

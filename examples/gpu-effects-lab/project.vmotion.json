@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "aafc24d9-9968-4247-8be1-42eb17b3e91c",
+  "name": "Direct3D12 逐像素特效",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

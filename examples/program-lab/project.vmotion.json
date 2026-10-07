@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "fe71cda8-7cdd-4141-8024-d69d70d7bdeb",
+  "name": "自由编程视觉",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

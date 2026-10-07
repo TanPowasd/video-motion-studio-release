@@ -1,0 +1,8 @@
+import {defineComponent,node} from '@vmotion/sdk';export default defineComponent({name:'可组合视觉图',parameters:{},render(ctx){
+const titles=['域扭曲纹理','大理石与调色','图层纹理置换','多级辉光','径向光束','渐变映射'],ids=['field','marble','distort','bloom','rays','tone'],items=[node({id:'heading',type:'text',text:'代码生成视觉，让效果保持可组合。',x:54,y:40,width:1180,height:61,fontSize:39,fontWeight:700,fill:'#edf6ff'}),node({id:'subtitle',type:'text',text:'程序化纹理 / 图层输入 / 光效 / 调色 / 明确的性能证据',x:56,y:113,width:1165,height:32,fontSize:20,fill:'#9eb7d3'})];
+ids.forEach((id,i)=>{const x=54+(i%3)*402,y=218+Math.floor(i/3)*222;
+items.push(node({id:'label-'+id,type:'text',text:titles[i],x,y:y-40,width:370,height:30,fontSize:23,fontWeight:600,fill:'#dce8fa'}));
+items.push(node({id:'panel-'+id,type:'rect',x,y,width:370,height:166,radius:12,fill:'#162a42'}));
+items.push(node({id,type:id==='rays'?'ellipse':'rect',x:x+28,y:y+22,width:id==='rays'?40:314,height:id==='rays'?40:122,radius:8,fill:id==='tone'?'#eab781':id==='rays'?'#ffffff':'#68b7d7'}));
+if(id==='distort'){items.push(node({id:'map',type:'rect',x:x+28,y:y+22,width:314,height:122,fill:'#000000'}),node({id:'mask-carrier',type:'rect',opacity:0,maskId:'map'}));items.push(node({id:'distort-text',type:'text',parentId:'distort',text:'WAVE / 纹理',x:22,y:36,width:280,height:48,fontSize:30,fontWeight:800,fill:'#ffffff'}));}
+});items.push(node({id:'footer',type:'text',text:'固定时间与种子 · 参数可动画 · 同一预览/导出管线 · 外部 Agent 通过 MCP 创作',x:56,y:678,width:1165,height:28,fontSize:17,fill:'#8ca8c6'}));return items;}});

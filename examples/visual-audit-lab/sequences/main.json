@@ -1,0 +1,38 @@
+{
+  "id": "main",
+  "name": "Main sequence",
+  "duration": 120,
+  "tracks": [
+    {
+      "id": "visual",
+      "name": "排版检查",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        {
+          "id": "layout",
+          "sceneId": "intro",
+          "start": 0,
+          "duration": 120,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0
+        }
+      ]
+    }
+  ],
+  "markers": [
+    {
+      "id": "start",
+      "frame": 0,
+      "label": "Introduction"
+    },
+    {
+      "id": "equation",
+      "frame": 180,
+      "label": "Equation"
+    }
+  ]
+}

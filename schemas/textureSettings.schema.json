@@ -1,0 +1,107 @@
+{
+  "$ref": "#/definitions/textureSettings",
+  "definitions": {
+    "textureSettings": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "enum": [
+            "fbm",
+            "turbulence",
+            "ridged",
+            "cellular",
+            "marble",
+            "waves",
+            "checker"
+          ],
+          "default": "fbm"
+        },
+        "seed": {
+          "type": "integer",
+          "default": 1
+        },
+        "scale": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 4000,
+          "default": 100
+        },
+        "octaves": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "default": 3
+        },
+        "evolution": {
+          "type": "number",
+          "default": 0
+        },
+        "angle": {
+          "$ref": "#/definitions/textureSettings/properties/evolution",
+          "default": 0
+        },
+        "contrast": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 10,
+          "default": 1
+        },
+        "bias": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "default": 0
+        },
+        "warp": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 8,
+          "default": 0
+        },
+        "stops": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "offset": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "color": {
+                "type": "string",
+                "pattern": "^#[0-9a-f]{6}$"
+              },
+              "alpha": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "default": 1
+              }
+            },
+            "required": [
+              "offset",
+              "color"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 2,
+          "maxItems": 16,
+          "default": [
+            {
+              "offset": 0,
+              "color": "#10243a"
+            },
+            {
+              "offset": 1,
+              "color": "#91d9da"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

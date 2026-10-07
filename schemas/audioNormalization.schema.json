@@ -1,0 +1,39 @@
+{
+  "$ref": "#/definitions/audioNormalization",
+  "definitions": {
+    "audioNormalization": {
+      "type": "object",
+      "properties": {
+        "targetLufs": {
+          "type": "number",
+          "minimum": -36,
+          "maximum": -5,
+          "default": -16
+        },
+        "targetLra": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 11
+        },
+        "truePeakDb": {
+          "type": "number",
+          "minimum": -9,
+          "maximum": 0,
+          "default": -1
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "linear",
+            "dynamic"
+          ],
+          "default": "auto"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

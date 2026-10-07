@@ -1,0 +1,228 @@
+{
+  "$ref": "#/definitions/plugin",
+  "definitions": {
+    "plugin": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "vmotion-plugin"
+        },
+        "apiVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9][a-z0-9-]*)*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "version": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000,
+          "default": ""
+        },
+        "dependencies": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "propertyNames": {
+            "minLength": 3,
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9][a-z0-9-]*)*$"
+          },
+          "default": {}
+        },
+        "entry": {
+          "type": "string",
+          "maxLength": 400,
+          "pattern": "^components\\/[\\p{L}\\p{N}_./-]+\\.(?:json|ts|tsx)$"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "$ref": "#/definitions/plugin/properties/entry"
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "path",
+              "hash"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 1024,
+          "default": []
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60,
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "query",
+                  "plan"
+                ]
+              },
+              "parameters": {
+                "type": "object",
+                "additionalProperties": {},
+                "default": {}
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "core",
+                    "animation",
+                    "composition",
+                    "effects",
+                    "vector",
+                    "drawing",
+                    "media",
+                    "editing",
+                    "audio",
+                    "3d",
+                    "math",
+                    "render",
+                    "recovery"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 13,
+                "default": [
+                  "composition"
+                ]
+              },
+              "keywords": {
+                "type": "string",
+                "maxLength": 1000,
+                "default": ""
+              },
+              "reads": {
+                "type": "object",
+                "properties": {
+                  "scenes": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "sequences": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "assets": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "files": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "additionalProperties": false,
+                "default": {}
+              }
+            },
+            "required": [
+              "id",
+              "description",
+              "mode"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 64,
+          "default": []
+        },
+        "contributions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "pattern": "^[a-z][a-z0-9_-]*$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "component",
+                  "effectGraph",
+                  "motion",
+                  "theme",
+                  "sound",
+                  "sceneTemplate"
+                ]
+              },
+              "source": {
+                "$ref": "#/definitions/plugin/properties/entry"
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 1000,
+                "default": ""
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "kind",
+              "source"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 128,
+          "default": []
+        }
+      },
+      "required": [
+        "kind",
+        "apiVersion",
+        "id",
+        "name",
+        "version"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

@@ -1,0 +1,307 @@
+{
+  "$ref": "#/definitions/drawingOperation",
+  "definitions": {
+    "drawingOperation": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "stroke"
+            },
+            "layerId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "stroke": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/definitions/drawingOperation/anyOf/0/properties/layerId"
+                },
+                "tool": {
+                  "type": "string",
+                  "enum": [
+                    "brush",
+                    "eraser"
+                  ],
+                  "default": "brush"
+                },
+                "color": {
+                  "type": "string",
+                  "minLength": 1,
+                  "default": "#c1b6ff"
+                },
+                "width": {
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 1000,
+                  "default": 6
+                },
+                "opacity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 1
+                },
+                "points": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "$ref": "#/definitions/drawingOperation/anyOf/0/properties/stroke/properties/points/items/properties/x"
+                      },
+                      "pressure": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "default": 1
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1,
+                  "maxItems": 100000
+                }
+              },
+              "required": [
+                "id",
+                "points"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "layerId",
+            "stroke"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "addLayer"
+            },
+            "layer": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/definitions/drawingOperation/anyOf/0/properties/layerId"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "default": "图层"
+                },
+                "visible": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "locked": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "x": {
+                  "$ref": "#/definitions/drawingOperation/anyOf/0/properties/stroke/properties/points/items/properties/x",
+                  "default": 0
+                },
+                "y": {
+                  "$ref": "#/definitions/drawingOperation/anyOf/0/properties/stroke/properties/points/items/properties/x",
+                  "default": 0
+                },
+                "opacity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 1
+                },
+                "blend": {
+                  "type": "string",
+                  "enum": [
+                    "source-over",
+                    "multiply",
+                    "screen",
+                    "overlay",
+                    "darken",
+                    "lighten",
+                    "difference"
+                  ],
+                  "default": "source-over"
+                },
+                "strokes": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/drawingOperation/anyOf/0/properties/stroke"
+                  },
+                  "maxItems": 10000,
+                  "default": []
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            },
+            "index": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "type",
+            "layer"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "updateLayer"
+            },
+            "layerId": {
+              "$ref": "#/definitions/drawingOperation/anyOf/0/properties/layerId"
+            },
+            "patch": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "$ref": "#/definitions/drawingOperation/anyOf/1/properties/layer/properties/name"
+                },
+                "visible": {
+                  "$ref": "#/definitions/drawingOperation/anyOf/1/properties/layer/properties/visible"
+                },
+                "locked": {
+                  "$ref": "#/definitions/drawingOperation/anyOf/1/properties/layer/properties/locked"
+                },
+                "x": {
+                  "$ref": "#/definitions/drawingOperation/anyOf/1/properties/layer/properties/x"
+                },
+                "y": {
+                  "$ref": "#/definitions/drawingOperation/anyOf/1/properties/layer/properties/y"
+                },
+                "opacity": {
+                  "$ref": "#/definitions/drawingOperation/anyOf/1/properties/layer/properties/opacity"
+                },
+                "blend": {
+                  "$ref": "#/definitions/drawingOperation/anyOf/1/properties/layer/properties/blend"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "layerId",
+            "patch"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "removeLayer"
+            },
+            "layerId": {
+              "$ref": "#/definitions/drawingOperation/anyOf/0/properties/layerId"
+            }
+          },
+          "required": [
+            "type",
+            "layerId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "duplicateLayer"
+            },
+            "layerId": {
+              "$ref": "#/definitions/drawingOperation/anyOf/0/properties/layerId"
+            }
+          },
+          "required": [
+            "type",
+            "layerId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "orderLayers"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/drawingOperation/anyOf/0/properties/layerId"
+              },
+              "maxItems": 256
+            }
+          },
+          "required": [
+            "type",
+            "ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "updateDocument"
+            },
+            "patch": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "width": {
+                  "type": "integer",
+                  "minimum": 16,
+                  "maximum": 8192
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 16,
+                  "maximum": 8192
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "patch"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

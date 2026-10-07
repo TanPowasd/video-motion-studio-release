@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "24d6c8a5-1073-4aca-bfff-bb01ffb26140",
+  "name": "画面检查与布局修复",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

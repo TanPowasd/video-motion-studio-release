@@ -1,0 +1,119 @@
+{
+  "id": "main",
+  "name": "主序列",
+  "duration": 240,
+  "tracks": [
+    {
+      "id": "visual",
+      "name": "画面",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        {
+          "id": "6e3b4d15-7ee2-4c80-a5be-7978d027ced0",
+          "sceneId": "style-crossfade",
+          "start": 0,
+          "duration": 30,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "转场 · crossfade"
+        },
+        {
+          "id": "6cb09e7c-8ef4-41ed-9e4c-9d72df8b5ae5",
+          "sceneId": "style-slide",
+          "start": 30,
+          "duration": 30,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "转场 · slide"
+        },
+        {
+          "id": "f4c18b72-cf2f-4f77-884f-17fabbabb938",
+          "sceneId": "style-push",
+          "start": 60,
+          "duration": 30,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "转场 · push"
+        },
+        {
+          "id": "b60ca310-7903-4b0c-ab23-26ce44480c57",
+          "sceneId": "style-wipe",
+          "start": 90,
+          "duration": 30,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "转场 · wipe"
+        },
+        {
+          "id": "223d5e2e-7dc8-450f-ac8b-251641575b92",
+          "sceneId": "style-iris",
+          "start": 120,
+          "duration": 30,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "转场 · iris"
+        },
+        {
+          "id": "39f5ea45-68af-49c7-af19-578657a5d30c",
+          "sceneId": "style-zoom",
+          "start": 150,
+          "duration": 30,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "转场 · zoom"
+        },
+        {
+          "id": "cb5fbab2-824b-4700-9065-fc30721876d8",
+          "sceneId": "style-dip",
+          "start": 180,
+          "duration": 30,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "转场 · dip"
+        },
+        {
+          "id": "5f445599-e270-4e66-8271-d1367d439b5a",
+          "sceneId": "style-cut",
+          "start": 210,
+          "duration": 30,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "转场 · cut"
+        }
+      ]
+    },
+    {
+      "id": "voice",
+      "name": "声音",
+      "type": "audio",
+      "muted": false,
+      "clips": []
+    }
+  ],
+  "markers": []
+}

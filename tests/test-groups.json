@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "fast": {
+    "timeoutMs": 300000,
+    "files": [
+      "tests/advanced-motion.test.ts",
+      "tests/animation-layers.test.ts",
+      "tests/architecture.test.ts",
+      "tests/atomic-save.test.ts",
+      "tests/audio-mix.test.ts",
+      "tests/bundled-runtime.test.ts",
+      "tests/canvas-interaction.test.ts",
+      "tests/captions.test.ts",
+      "tests/core.test.ts",
+      "tests/drivers.test.ts",
+      "tests/linear-algebra.test.ts",
+      "tests/liquify.test.ts",
+      "tests/matrix3d.test.ts",
+      "tests/package-publish.test.ts",
+      "tests/pixel-evidence.test.ts",
+      "tests/post.test.ts",
+      "tests/preview.test.ts",
+      "tests/project-references.test.ts",
+      "tests/sound.test.ts",
+      "tests/tracking-engine.test.ts",
+      "tests/visual-fields.test.ts",
+      "tests/warp.test.ts",
+      "tests/workbench-store.test.ts",
+      "tests/rpc-contract.test.ts",
+      "tests/node-renderer-registry.test.ts",
+      "tests/mcp-result.test.ts",
+      "tests/runtime-fonts.test.ts",
+      "tests/test-runner.test.ts",
+      "tests/runtime-font-route.test.ts",
+      "tests/music-patterns.test.ts",
+      "tests/midi-recording.test.ts"
+    ]
+  },
+  "integration": {
+    "timeoutMs": 1500000,
+    "files": [
+      "tests/agent-media.test.ts",
+      "tests/agent-preflight.test.ts",
+      "tests/animation-layers-plan.test.ts",
+      "tests/audio-mix-cache.test.ts",
+      "tests/audio-mixing-service.test.ts",
+      "tests/audio-preview.test.ts",
+      "tests/audio-reactive.test.ts",
+      "tests/builtin-plugins.test.ts",
+      "tests/cache-management.test.ts",
+      "tests/component-parameters.test.ts",
+      "tests/compositing.test.ts",
+      "tests/composition-scope.test.ts",
+      "tests/content-time.test.ts",
+      "tests/drawings.test.ts",
+      "tests/driver-render.test.ts",
+      "tests/drivers-plan.test.ts",
+      "tests/editing.test.ts",
+      "tests/effect-graph-plan.test.ts",
+      "tests/effect-graph.test.ts",
+      "tests/effects.test.ts",
+      "tests/effects2d.test.ts",
+      "tests/gpu-effects.test.ts",
+      "tests/graph-outputs-channels.test.ts",
+      "tests/graph-query-plan.test.ts",
+      "tests/graph-runtime-keyer.test.ts",
+      "tests/graphics-plan.test.ts",
+      "tests/keyframe-edit.test.ts",
+      "tests/layer-temporal.test.ts",
+      "tests/library-query.test.ts",
+      "tests/materials3d.test.ts",
+      "tests/mcp-discovery.test.ts",
+      "tests/mcp.test.ts",
+      "tests/media-management.test.ts",
+      "tests/media.test.ts",
+      "tests/meshes.test.ts",
+      "tests/motion-plan.test.ts",
+      "tests/parameter-query.test.ts",
+      "tests/particle-field.test.ts",
+      "tests/pixel-review.test.ts",
+      "tests/plugins.test.ts",
+      "tests/preview-rgba.test.ts",
+      "tests/project-creation.test.ts",
+      "tests/project-diagnostics.test.ts",
+      "tests/raster3d.test.ts",
+      "tests/reference-plan.test.ts",
+      "tests/render-compare.test.ts",
+      "tests/render-performance.test.ts",
+      "tests/render.test.ts",
+      "tests/repeater.test.ts",
+      "tests/riemann.test.ts",
+      "tests/service.test.ts",
+      "tests/shared-scenes.test.ts",
+      "tests/sound-plan.test.ts",
+      "tests/storyboard-sequence.test.ts",
+      "tests/structure-edit.test.ts",
+      "tests/studio-service.test.ts",
+      "tests/temporal-effects.test.ts",
+      "tests/themes-templates.test.ts",
+      "tests/tracking-service.test.ts",
+      "tests/transitions-profile.test.ts",
+      "tests/typography-shapes.test.ts",
+      "tests/vector.test.ts",
+      "tests/video-seek-clock.test.ts",
+      "tests/visual-audit.test.ts",
+      "tests/visual-plan.test.ts",
+      "tests/visual-repair.test.ts",
+      "tests/render-programs.test.ts",
+      "tests/music-export.test.ts",
+      "tests/audio-plugins.test.ts",
+      "tests/surfaces.test.ts"
+    ]
+  },
+  "acceptance": {
+    "timeoutMs": 1800000,
+    "scripts": [
+      {
+        "file": "scripts/check-workbench-selectors.mjs",
+        "args": []
+      },
+      {
+        "file": "scripts/check-mcp-budget.mjs",
+        "args": [
+          "--packaged"
+        ]
+      },
+      {
+        "file": "scripts/check-portable.mjs",
+        "args": []
+      },
+      {
+        "file": "scripts/check-desktop-projects.mjs",
+        "args": [
+          "--packaged",
+          "--isolated"
+        ]
+      },
+      {
+        "file": "scripts/check-gpu-effects.mjs",
+        "args": [
+          "--packaged"
+        ],
+        "requires": "gpu"
+      },
+      {
+        "file": "scripts/check-music-studio.mjs",
+        "args": [
+          "--packaged",
+          "--live"
+        ]
+      },
+      {
+        "file": "scripts/check-audio-plugins.mjs",
+        "args": [
+          "--packaged"
+        ]
+      },
+      {
+        "file": "scripts/check-surfaces.mjs",
+        "args": [
+          "--packaged"
+        ]
+      }
+    ]
+  }
+}

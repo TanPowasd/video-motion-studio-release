@@ -1,0 +1,103 @@
+{
+  "$ref": "#/definitions/renderProgram",
+  "definitions": {
+    "renderProgram": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "render-program"
+        },
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "backend": {
+          "type": "string",
+          "enum": [
+            "python",
+            "wgsl"
+          ]
+        },
+        "entry": {
+          "type": "string",
+          "pattern": "^components\\/(?:[\\p{L}\\p{N}_-]+\\/)*[\\p{L}\\p{N}_-]+\\.(?:py|wgsl|json)$"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/renderProgram/properties/entry"
+          },
+          "maxItems": 64,
+          "default": []
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": {},
+          "default": {}
+        },
+        "uniforms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "maxItems": 64,
+          "default": []
+        },
+        "assets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "maxItems": 32,
+          "default": []
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 60000,
+          "default": 10000
+        },
+        "workgroup": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            },
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            }
+          ],
+          "default": [
+            8,
+            8
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "version",
+        "name",
+        "backend",
+        "entry"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

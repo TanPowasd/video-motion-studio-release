@@ -1,0 +1,38 @@
+{
+  "id": "main",
+  "name": "Main sequence",
+  "duration": 240,
+  "tracks": [
+    {
+      "id": "visual",
+      "name": "数据动画",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        {
+          "id": "intro-clip",
+          "sceneId": "intro",
+          "start": 0,
+          "duration": 240,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0
+        }
+      ]
+    }
+  ],
+  "markers": [
+    {
+      "id": "start",
+      "frame": 0,
+      "label": "Introduction"
+    },
+    {
+      "id": "equation",
+      "frame": 180,
+      "label": "Equation"
+    }
+  ]
+}

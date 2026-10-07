@@ -1,0 +1,22 @@
+{
+  "formatVersion": 1,
+  "id": "d4466338-8047-4168-a8d9-e6dc54e1290b",
+  "name": "Vmotion 合成与声音实验台",
+  "width": 1920,
+  "height": 1080,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "sdkVersion": "0.1.0"
+}

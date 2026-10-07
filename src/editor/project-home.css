@@ -1,0 +1,217 @@
+.project-home {
+  height: 100%;
+  overflow: auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+.project-home > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 38px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+.project-home-content {
+  width: min(1040px, 100%);
+  padding: 58px 40px 36px;
+  margin: 0 auto;
+  flex: 1;
+}
+.project-home-eyebrow {
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+.project-home h1 {
+  font-size: 32px;
+  font-weight: 550;
+  margin: 16px 0 12px;
+  letter-spacing: 1px;
+}
+.project-home-intro p {
+  color: var(--muted);
+  font-size: 14px;
+}
+.project-home-buttons {
+  display: flex;
+  gap: 12px;
+  margin: 28px 0 50px;
+}
+.project-home-buttons button {
+  padding: 13px 18px;
+  font-size: 14px;
+}
+.project-home kbd {
+  font-size: 10px;
+  font-family: inherit;
+  opacity: 0.65;
+  margin-left: 15px;
+}
+.project-home h2 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 18px;
+}
+.recent-projects {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.recent-projects > button {
+  border-radius: 0;
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
+  gap: 18px;
+  padding: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.recent-projects > button:last-child {
+  border-bottom: 0;
+}
+.recent-project-icon {
+  background: var(--panel-soft);
+  border-radius: 6px;
+  padding: 12px;
+  color: var(--accent);
+}
+.recent-project-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  flex: 1;
+}
+.recent-project-detail strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+.recent-project-detail > span {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
+.recent-project-date {
+  color: var(--muted);
+  font-size: 11px;
+}
+.recent-empty {
+  padding: 42px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+}
+.recent-empty p {
+  font-size: 14px;
+  color: var(--text);
+}
+.project-home footer {
+  padding: 24px 40px;
+  text-align: center;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+}
+.project-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 3px;
+}
+.project-actions button {
+  font-size: 11px;
+}
+.project-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: #0009;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.new-project-form {
+  background: var(--panel);
+  border: 1px solid #46536a;
+  border-radius: 10px;
+  width: 560px;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  padding: 24px;
+  box-shadow: 0 24px 80px #0008;
+}
+.project-form-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+.project-form-heading h2 {
+  font-size: 19px;
+  font-weight: 550;
+  margin: 0;
+}
+.new-project-form fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.new-project-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: var(--text);
+}
+.new-project-form input,
+.new-project-form select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+}
+.project-directory {
+  display: flex;
+  gap: 8px;
+}
+.project-directory button {
+  flex-shrink: 0;
+  padding: 8px 15px;
+}
+.project-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+.project-form-hint {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  margin: 0 0 18px;
+}
+.project-form-error {
+  color: #ffb4ad;
+  background: #6d29292b;
+  border: 1px solid #794343;
+  border-radius: 5px;
+  padding: 12px;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.project-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+}
+.project-form-actions button {
+  padding: 10px 18px;
+}

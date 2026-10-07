@@ -1,0 +1,90 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "Green / keyed / matte",
+  "parameters": {
+    "threshold": {
+      "type": "number",
+      "default": 0.08,
+      "min": 0,
+      "max": 0.35
+    },
+    "softness": {
+      "type": "number",
+      "default": 0.15,
+      "min": 0,
+      "max": 0.4
+    }
+  },
+  "nodes": [
+    {
+      "id": "source",
+      "type": "input",
+      "slot": "source"
+    },
+    {
+      "id": "key",
+      "type": "keyer",
+      "input": "source",
+      "mode": "chroma",
+      "color": "#36ff36",
+      "threshold": 0.08,
+      "softness": 0.15,
+      "spill": 0.6,
+      "invert": false,
+      "view": "color"
+    },
+    {
+      "id": "matte",
+      "type": "keyer",
+      "input": "source",
+      "mode": "chroma",
+      "color": "#36ff36",
+      "threshold": 0.08,
+      "softness": 0.15,
+      "spill": 0,
+      "invert": false,
+      "view": "matte"
+    }
+  ],
+  "output": "key",
+  "outputs": {
+    "original": "source",
+    "keyed": "key",
+    "matte": "matte"
+  },
+  "links": [
+    {
+      "nodeId": "key",
+      "property": "threshold",
+      "parameter": "threshold",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "key",
+      "property": "softness",
+      "parameter": "softness",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "matte",
+      "property": "threshold",
+      "parameter": "threshold",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "matte",
+      "property": "softness",
+      "parameter": "softness",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    }
+  ]
+}

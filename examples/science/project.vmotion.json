@@ -1,0 +1,22 @@
+{
+  "formatVersion": 1,
+  "id": "0bae18b1-0d61-4bb9-8173-7191f06547a3",
+  "name": "The geometry of waves",
+  "width": 1920,
+  "height": 1080,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "sdkVersion": "0.1.0"
+}

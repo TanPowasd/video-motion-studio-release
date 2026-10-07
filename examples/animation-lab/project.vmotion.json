@@ -1,0 +1,129 @@
+{
+  "formatVersion": 1,
+  "id": "b36be512-38bf-4a93-a287-ba173b3f4226",
+  "name": "Vmotion 动画特效实验台",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/type.json",
+    "scenes/science.json",
+    "scenes/camera.json",
+    "scenes/scene-d4bb2f96-f478-4497-bb36-05815b7e0f28.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [
+    {
+      "id": "5dedc14d-cb89-4c11-809b-8fefad6f3234",
+      "name": "Drawing 5dedc1",
+      "path": "assets/drawing-5dedc14d-cb89-4c11-809b-8fefad6f3234.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    },
+    {
+      "id": "d38448ac-8906-4782-bf3c-0cd4287fc410",
+      "name": "Drawing d38448",
+      "path": "assets/drawing-d38448ac-8906-4782-bf3c-0cd4287fc410.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    },
+    {
+      "id": "8cabcc9a-1230-4884-82ce-5b7a12ad77f6",
+      "name": "Drawing 8cabcc",
+      "path": "assets/drawing-8cabcc9a-1230-4884-82ce-5b7a12ad77f6.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    },
+    {
+      "id": "efe2f104-32fc-4519-873c-6fcee3e6108f",
+      "name": "Drawing efe2f1",
+      "path": "assets/drawing-efe2f104-32fc-4519-873c-6fcee3e6108f.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    },
+    {
+      "id": "e7a4df68-6403-451d-8d27-2ca8a86b96b8",
+      "name": "Drawing e7a4df",
+      "path": "assets/drawing-e7a4df68-6403-451d-8d27-2ca8a86b96b8.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    },
+    {
+      "id": "8dfa6fab-2d29-49bc-9668-80e081331c72",
+      "name": "Drawing 8dfa6f",
+      "path": "assets/drawing-8dfa6fab-2d29-49bc-9668-80e081331c72.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    },
+    {
+      "id": "124070e9-02ea-4d76-bd60-aa43637f49fd",
+      "name": "Drawing 124070",
+      "path": "assets/drawing-124070e9-02ea-4d76-bd60-aa43637f49fd.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    },
+    {
+      "id": "4d08b351-e326-4c50-990a-4e4ec6c23b02",
+      "name": "Drawing 4d08b3",
+      "path": "assets/drawing-4d08b351-e326-4c50-990a-4e4ec6c23b02.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    },
+    {
+      "id": "b7622a3f-5ed6-45d2-a640-7637c3634471",
+      "name": "Drawing b7622a",
+      "path": "assets/drawing-b7622a3f-5ed6-45d2-a640-7637c3634471.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    },
+    {
+      "id": "a223113f-b21d-4dfa-9b6f-6a0d4fd98a88",
+      "name": "Drawing a22311",
+      "path": "assets/drawing-a223113f-b21d-4dfa-9b6f-6a0d4fd98a88.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    },
+    {
+      "id": "15cebbb9-bb0b-4fc7-86d2-d3e117ba58c0",
+      "name": "Drawing 15cebb",
+      "path": "assets/drawing-15cebbb9-bb0b-4fc7-86d2-d3e117ba58c0.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    },
+    {
+      "id": "a462de32-c8b9-46d6-aab6-051887f56010",
+      "name": "Drawing a462de",
+      "path": "assets/drawing-a462de32-c8b9-46d6-aab6-051887f56010.json",
+      "type": "drawing",
+      "managed": true,
+      "metadata": {}
+    }
+  ],
+  "drawings": [
+    {
+      "id": "b320a850-073c-46ab-925f-fbf63be57983",
+      "name": "Drawing a22311 · 编辑",
+      "path": "drawings/b320a850-073c-46ab-925f-fbf63be57983.json"
+    }
+  ],
+  "sdkVersion": "0.1.0"
+}

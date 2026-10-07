@@ -1,0 +1,84 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "neonBloom",
+  "parameters": {
+    "radius": {
+      "type": "number",
+      "default": 24,
+      "min": 0,
+      "max": 300
+    },
+    "intensity": {
+      "type": "number",
+      "default": 1.5,
+      "min": 0,
+      "max": 8
+    },
+    "threshold": {
+      "type": "number",
+      "default": 0.4,
+      "min": 0,
+      "max": 1
+    },
+    "color": {
+      "type": "color",
+      "default": "#a5cfff"
+    }
+  },
+  "nodes": [
+    {
+      "id": "source",
+      "type": "input",
+      "slot": "source"
+    },
+    {
+      "id": "bloom",
+      "type": "pass",
+      "input": "source",
+      "effect": {
+        "type": "bloom",
+        "radius": 24,
+        "threshold": 0.4,
+        "intensity": 1.5,
+        "levels": 4,
+        "color": "#a5cfff"
+      }
+    }
+  ],
+  "output": "bloom",
+  "links": [
+    {
+      "nodeId": "bloom",
+      "property": "effect.radius",
+      "parameter": "radius",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "bloom",
+      "property": "effect.intensity",
+      "parameter": "intensity",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "bloom",
+      "property": "effect.threshold",
+      "parameter": "threshold",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "bloom",
+      "property": "effect.color",
+      "parameter": "color",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    }
+  ]
+}

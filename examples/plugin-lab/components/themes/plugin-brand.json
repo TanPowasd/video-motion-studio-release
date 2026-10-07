@@ -1,0 +1,1 @@
+{"kind":"theme","version":1,"id":"plugin-brand","name":"插件蓝绿","tokens":[{"id":"brand.accent","type":"color","value":"#67d4db"},{"id":"type.title","type":"number","value":50,"min":20,"max":72}]}

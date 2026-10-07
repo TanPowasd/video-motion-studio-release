@@ -1,0 +1,71 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "Noise displacement",
+  "parameters": {
+    "amount": {
+      "type": "number",
+      "default": 15,
+      "min": 0,
+      "max": 100
+    },
+    "evolution": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "nodes": [
+    {
+      "id": "src",
+      "type": "input",
+      "slot": "source"
+    },
+    {
+      "id": "map",
+      "type": "noise",
+      "seed": 17,
+      "scale": 70,
+      "octaves": 3,
+      "evolution": 0,
+      "low": "#000000",
+      "high": "#ffffff",
+      "opacity": 1,
+      "space": "layer"
+    },
+    {
+      "id": "out",
+      "type": "displace",
+      "input": "src",
+      "map": "map",
+      "amountX": 15,
+      "amountY": 15,
+      "channelX": "red",
+      "channelY": "green",
+      "edge": "transparent"
+    }
+  ],
+  "output": "out",
+  "links": [
+    {
+      "nodeId": "map",
+      "property": "evolution",
+      "parameter": "evolution",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "out",
+      "property": "amountX",
+      "parameter": "amount",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "out",
+      "property": "amountY",
+      "parameter": "amount",
+      "scale": 1,
+      "offset": 0
+    }
+  ]
+}

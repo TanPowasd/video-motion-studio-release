@@ -1,0 +1,45 @@
+{
+  "id": "main",
+  "name": "Main sequence",
+  "duration": 300,
+  "markers": [
+    {
+      "id": "start",
+      "frame": 0,
+      "label": "Introduction"
+    },
+    {
+      "id": "equation",
+      "frame": 180,
+      "label": "Equation"
+    }
+  ],
+  "tracks": [
+    {
+      "id": "visual",
+      "name": "Scenes",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        {
+          "id": "intro-clip",
+          "sceneId": "intro",
+          "start": 0,
+          "duration": 300,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0
+        }
+      ]
+    },
+    {
+      "id": "voice",
+      "name": "Voice / music",
+      "type": "audio",
+      "muted": false,
+      "clips": []
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "kind": "vmotion-plugin", "apiVersion": 1,
+  "id": "example.creative", "name": "可编程创作包", "version": "1.0.0",
+  "description": "参数化动效组件、共享风格和可审阅的批量 Agent 工具。",
+  "dependencies": {"vmotion.design": "^1.0.0", "vmotion.animation": "^1.0.0"},
+  "entry": "components/plugins/creative/tools.ts",
+  "contributions": [
+    {"id": "card", "name": "数据动效卡", "kind": "component", "source": "components/plugins/creative/card.ts"},
+    {"id": "brand", "name": "蓝绿品牌", "kind": "theme", "source": "components/themes/plugin-brand.json"},
+    {"id": "shine", "name": "柔光图", "kind": "effectGraph", "source": "components/effects/plugin-shine.json"}
+  ],
+  "tools": [
+    {"id": "compose", "description": "跨场景批量编排可编辑标题、数据卡和共享效果，返回准确候选。", "mode": "plan", "categories": ["composition", "animation", "effects"], "keywords": "插件 动画 数据 卡片 批量 科普",
+      "parameters": {"sceneId": {"type": "string", "default": "intro"}, "title": {"type": "string", "default": "创作能力，由插件自由组合。"}, "accent": {"type": "color", "default": "#67d4db"}}
+    },
+    {"id": "inspect", "description": "只检查显式选定场景的图层数量和类型，不返回源码。", "mode": "query", "categories": ["composition"], "reads": {"scenes": true}, "parameters": {}}
+  ]
+}

@@ -1,0 +1,938 @@
+{
+  "kind": "sound",
+  "version": 1,
+  "id": "score",
+  "name": "Luminous / 原创声音示例",
+  "unit": "beats",
+  "duration": 24,
+  "tail": 2,
+  "seed": 1,
+  "tempo": [
+    {
+      "beat": 0,
+      "bpm": 120
+    }
+  ],
+  "timeSignature": [
+    4,
+    4
+  ],
+  "tracks": [
+    {
+      "id": "pad",
+      "name": "和弦 · FM Pad",
+      "instrument": {
+        "type": "synth",
+        "wave": "triangle",
+        "gain": 0.25,
+        "attack": 0.3,
+        "decay": 0.3,
+        "sustain": 0.7,
+        "release": 1,
+        "fmRatio": 2,
+        "fmIndex": 0.4,
+        "detune": 0
+      },
+      "events": [
+        {
+          "id": "chord-0-0",
+          "at": 0,
+          "duration": 3.5,
+          "note": 60,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-0-1",
+          "at": 0,
+          "duration": 3.5,
+          "note": 64,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-0-2",
+          "at": 0,
+          "duration": 3.5,
+          "note": 67,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-1-0",
+          "at": 4,
+          "duration": 3.5,
+          "note": 62,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-1-1",
+          "at": 4,
+          "duration": 3.5,
+          "note": 65,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-1-2",
+          "at": 4,
+          "duration": 3.5,
+          "note": 69,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-2-0",
+          "at": 8,
+          "duration": 3.5,
+          "note": 64,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-2-1",
+          "at": 8,
+          "duration": 3.5,
+          "note": 67,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-2-2",
+          "at": 8,
+          "duration": 3.5,
+          "note": 71,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-3-0",
+          "at": 12,
+          "duration": 3.5,
+          "note": 65,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-3-1",
+          "at": 12,
+          "duration": 3.5,
+          "note": 69,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-3-2",
+          "at": 12,
+          "duration": 3.5,
+          "note": 72,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-4-0",
+          "at": 16,
+          "duration": 3.5,
+          "note": 67,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-4-1",
+          "at": 16,
+          "duration": 3.5,
+          "note": 71,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-4-2",
+          "at": 16,
+          "duration": 3.5,
+          "note": 74,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-5-0",
+          "at": 20,
+          "duration": 3.5,
+          "note": 60,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-5-1",
+          "at": 20,
+          "duration": 3.5,
+          "note": 64,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "chord-5-2",
+          "at": 20,
+          "duration": 3.5,
+          "note": 67,
+          "velocity": 0.6,
+          "pan": 0
+        }
+      ],
+      "muted": false,
+      "solo": false,
+      "gainDb": -8,
+      "pan": 0,
+      "busId": "music",
+      "sends": [
+        {
+          "busId": "space",
+          "db": -14
+        }
+      ],
+      "effects": [],
+      "automation": []
+    },
+    {
+      "id": "lead",
+      "name": "旋律 · Pluck",
+      "instrument": {
+        "type": "synth",
+        "wave": "triangle",
+        "gain": 0.35,
+        "attack": 0.002,
+        "decay": 0.2,
+        "sustain": 0.08,
+        "release": 0.15,
+        "fmRatio": 2,
+        "fmIndex": 0.6,
+        "detune": 0
+      },
+      "events": [
+        {
+          "id": "lead-0",
+          "at": 0,
+          "duration": 0.65,
+          "note": 60,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "lead-1",
+          "at": 1,
+          "duration": 0.65,
+          "note": 64,
+          "velocity": 0.6599999999999999,
+          "pan": 0
+        },
+        {
+          "id": "lead-2",
+          "at": 2,
+          "duration": 0.65,
+          "note": 67,
+          "velocity": 0.72,
+          "pan": 0
+        },
+        {
+          "id": "lead-3",
+          "at": 3,
+          "duration": 0.65,
+          "note": 71,
+          "velocity": 0.78,
+          "pan": 0
+        },
+        {
+          "id": "lead-4",
+          "at": 4,
+          "duration": 0.65,
+          "note": 62,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "lead-5",
+          "at": 5,
+          "duration": 0.65,
+          "note": 65,
+          "velocity": 0.6599999999999999,
+          "pan": 0
+        },
+        {
+          "id": "lead-6",
+          "at": 6,
+          "duration": 0.65,
+          "note": 69,
+          "velocity": 0.72,
+          "pan": 0
+        },
+        {
+          "id": "lead-7",
+          "at": 7,
+          "duration": 0.65,
+          "note": 72,
+          "velocity": 0.78,
+          "pan": 0
+        },
+        {
+          "id": "lead-8",
+          "at": 8,
+          "duration": 0.65,
+          "note": 64,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "lead-9",
+          "at": 9,
+          "duration": 0.65,
+          "note": 67,
+          "velocity": 0.6599999999999999,
+          "pan": 0
+        },
+        {
+          "id": "lead-10",
+          "at": 10,
+          "duration": 0.65,
+          "note": 71,
+          "velocity": 0.72,
+          "pan": 0
+        },
+        {
+          "id": "lead-11",
+          "at": 11,
+          "duration": 0.65,
+          "note": 74,
+          "velocity": 0.78,
+          "pan": 0
+        },
+        {
+          "id": "lead-12",
+          "at": 12,
+          "duration": 0.65,
+          "note": 65,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "lead-13",
+          "at": 13,
+          "duration": 0.65,
+          "note": 69,
+          "velocity": 0.6599999999999999,
+          "pan": 0
+        },
+        {
+          "id": "lead-14",
+          "at": 14,
+          "duration": 0.65,
+          "note": 72,
+          "velocity": 0.72,
+          "pan": 0
+        },
+        {
+          "id": "lead-15",
+          "at": 15,
+          "duration": 0.65,
+          "note": 76,
+          "velocity": 0.78,
+          "pan": 0
+        },
+        {
+          "id": "lead-16",
+          "at": 16,
+          "duration": 0.65,
+          "note": 67,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "lead-17",
+          "at": 17,
+          "duration": 0.65,
+          "note": 71,
+          "velocity": 0.6599999999999999,
+          "pan": 0
+        },
+        {
+          "id": "lead-18",
+          "at": 18,
+          "duration": 0.65,
+          "note": 74,
+          "velocity": 0.72,
+          "pan": 0
+        },
+        {
+          "id": "lead-19",
+          "at": 19,
+          "duration": 0.65,
+          "note": 79,
+          "velocity": 0.78,
+          "pan": 0
+        },
+        {
+          "id": "lead-20",
+          "at": 20,
+          "duration": 0.65,
+          "note": 64,
+          "velocity": 0.6,
+          "pan": 0
+        },
+        {
+          "id": "lead-21",
+          "at": 21,
+          "duration": 0.65,
+          "note": 67,
+          "velocity": 0.6599999999999999,
+          "pan": 0
+        },
+        {
+          "id": "lead-22",
+          "at": 22,
+          "duration": 0.65,
+          "note": 72,
+          "velocity": 0.72,
+          "pan": 0
+        },
+        {
+          "id": "lead-23",
+          "at": 23,
+          "duration": 0.65,
+          "note": 76,
+          "velocity": 0.78,
+          "pan": 0
+        }
+      ],
+      "muted": false,
+      "solo": false,
+      "gainDb": -3,
+      "pan": 0,
+      "busId": "music",
+      "sends": [
+        {
+          "busId": "space",
+          "db": -10
+        }
+      ],
+      "effects": [
+        {
+          "type": "delay",
+          "seconds": 0.25,
+          "rightSeconds": 0.375,
+          "feedback": 0.25,
+          "mix": 0.2
+        }
+      ],
+      "automation": []
+    },
+    {
+      "id": "bass",
+      "name": "低音 · Subtractive",
+      "instrument": {
+        "type": "synth",
+        "wave": "saw",
+        "gain": 0.22,
+        "attack": 0.006,
+        "decay": 0.13,
+        "sustain": 0.45,
+        "release": 0.08,
+        "fmRatio": 0,
+        "fmIndex": 0,
+        "detune": 0
+      },
+      "events": [
+        {
+          "id": "bass-0-0",
+          "at": 0,
+          "duration": 1.6,
+          "note": 36,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "bass-0-1",
+          "at": 2,
+          "duration": 1.6,
+          "note": 36,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "bass-1-0",
+          "at": 4,
+          "duration": 1.6,
+          "note": 38,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "bass-1-1",
+          "at": 6,
+          "duration": 1.6,
+          "note": 38,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "bass-2-0",
+          "at": 8,
+          "duration": 1.6,
+          "note": 40,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "bass-2-1",
+          "at": 10,
+          "duration": 1.6,
+          "note": 40,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "bass-3-0",
+          "at": 12,
+          "duration": 1.6,
+          "note": 41,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "bass-3-1",
+          "at": 14,
+          "duration": 1.6,
+          "note": 41,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "bass-4-0",
+          "at": 16,
+          "duration": 1.6,
+          "note": 43,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "bass-4-1",
+          "at": 18,
+          "duration": 1.6,
+          "note": 43,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "bass-5-0",
+          "at": 20,
+          "duration": 1.6,
+          "note": 36,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "bass-5-1",
+          "at": 22,
+          "duration": 1.6,
+          "note": 36,
+          "velocity": 0.7,
+          "pan": 0
+        }
+      ],
+      "muted": false,
+      "solo": false,
+      "gainDb": -7,
+      "pan": 0,
+      "busId": "music",
+      "sends": [],
+      "effects": [
+        {
+          "type": "filter",
+          "mode": "lowpass",
+          "frequency": 850,
+          "q": 0.707,
+          "db": 0
+        }
+      ],
+      "automation": []
+    },
+    {
+      "id": "kick",
+      "name": "鼓组 · Kick",
+      "instrument": {
+        "type": "drum",
+        "voice": "kick",
+        "gain": 0.65,
+        "release": 0.35
+      },
+      "events": [
+        {
+          "id": "kick-0",
+          "at": 0,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        },
+        {
+          "id": "kick-1",
+          "at": 2,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        },
+        {
+          "id": "kick-2",
+          "at": 4,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        },
+        {
+          "id": "kick-3",
+          "at": 6,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        },
+        {
+          "id": "kick-4",
+          "at": 8,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        },
+        {
+          "id": "kick-5",
+          "at": 10,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        },
+        {
+          "id": "kick-6",
+          "at": 12,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        },
+        {
+          "id": "kick-7",
+          "at": 14,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        },
+        {
+          "id": "kick-8",
+          "at": 16,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        },
+        {
+          "id": "kick-9",
+          "at": 18,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        },
+        {
+          "id": "kick-10",
+          "at": 20,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        },
+        {
+          "id": "kick-11",
+          "at": 22,
+          "duration": 0.1,
+          "note": 33,
+          "velocity": 0.85,
+          "pan": 0
+        }
+      ],
+      "muted": false,
+      "solo": false,
+      "gainDb": -3,
+      "pan": 0,
+      "busId": "drums",
+      "sends": [],
+      "effects": [],
+      "automation": []
+    },
+    {
+      "id": "snare",
+      "name": "鼓组 · Snare + Hat",
+      "instrument": {
+        "type": "drum",
+        "voice": "snare",
+        "gain": 0.35,
+        "release": 0.18
+      },
+      "events": [
+        {
+          "id": "snare-0",
+          "at": 2,
+          "duration": 0.1,
+          "note": 60,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "snare-1",
+          "at": 6,
+          "duration": 0.1,
+          "note": 60,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "snare-2",
+          "at": 10,
+          "duration": 0.1,
+          "note": 60,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "snare-3",
+          "at": 14,
+          "duration": 0.1,
+          "note": 60,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "snare-4",
+          "at": 18,
+          "duration": 0.1,
+          "note": 60,
+          "velocity": 0.7,
+          "pan": 0
+        },
+        {
+          "id": "snare-5",
+          "at": 22,
+          "duration": 0.1,
+          "note": 60,
+          "velocity": 0.7,
+          "pan": 0
+        }
+      ],
+      "muted": false,
+      "solo": false,
+      "gainDb": -7,
+      "pan": 0,
+      "busId": "drums",
+      "sends": [],
+      "effects": [],
+      "automation": []
+    },
+    {
+      "id": "sample",
+      "name": "铃声 · 音频采样",
+      "instrument": {
+        "type": "sample",
+        "assetId": "chime-source",
+        "sourceIn": 0,
+        "sourceDuration": 0.6,
+        "rootNote": 72,
+        "loop": false,
+        "attack": 0.005,
+        "release": 0.05,
+        "gain": 0.7
+      },
+      "events": [
+        {
+          "id": "sample-0",
+          "at": 0,
+          "duration": 1,
+          "note": 72,
+          "velocity": 0.8,
+          "pan": 0
+        },
+        {
+          "id": "sample-1",
+          "at": 8,
+          "duration": 1,
+          "note": 74,
+          "velocity": 0.8,
+          "pan": 0
+        },
+        {
+          "id": "sample-2",
+          "at": 16,
+          "duration": 1,
+          "note": 76,
+          "velocity": 0.8,
+          "pan": 0
+        },
+        {
+          "id": "sample-3",
+          "at": 22,
+          "duration": 1,
+          "note": 79,
+          "velocity": 0.8,
+          "pan": 0
+        }
+      ],
+      "muted": false,
+      "solo": false,
+      "gainDb": -2,
+      "pan": 0,
+      "busId": "master",
+      "sends": [
+        {
+          "busId": "space",
+          "db": -8
+        }
+      ],
+      "effects": [],
+      "automation": []
+    },
+    {
+      "id": "riser",
+      "name": "音效 · 扫频上升",
+      "instrument": {
+        "type": "synth",
+        "wave": "sine",
+        "gain": 0.18,
+        "attack": 0.2,
+        "decay": 0.15,
+        "sustain": 0.6,
+        "release": 0.4,
+        "fmRatio": 2,
+        "fmIndex": 1.2,
+        "detune": 0
+      },
+      "events": [
+        {
+          "id": "rise",
+          "at": 14,
+          "duration": 2,
+          "note": 36,
+          "endNote": 84,
+          "velocity": 0.8,
+          "pan": 0
+        }
+      ],
+      "muted": false,
+      "solo": false,
+      "gainDb": -8,
+      "pan": -0.3,
+      "busId": "master",
+      "sends": [],
+      "effects": [],
+      "automation": [
+        {
+          "property": "gainDb",
+          "keys": [
+            {
+              "at": 0,
+              "value": -20
+            },
+            {
+              "at": 14,
+              "value": -16
+            },
+            {
+              "at": 16,
+              "value": -5
+            },
+            {
+              "at": 17,
+              "value": -30
+            },
+            {
+              "at": 24,
+              "value": -30
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "buses": [
+    {
+      "id": "music",
+      "name": "乐器总线",
+      "busId": "master",
+      "gainDb": 0,
+      "pan": 0,
+      "sends": [],
+      "effects": [
+        {
+          "type": "compressor",
+          "thresholdDb": -20,
+          "ratio": 2,
+          "kneeDb": 6,
+          "attack": 0.02,
+          "release": 0.2,
+          "makeupDb": 0
+        }
+      ]
+    },
+    {
+      "id": "drums",
+      "name": "鼓组总线",
+      "busId": "master",
+      "gainDb": 0,
+      "pan": 0,
+      "sends": [],
+      "effects": [
+        {
+          "type": "compressor",
+          "thresholdDb": -18,
+          "ratio": 3,
+          "kneeDb": 4,
+          "attack": 0.008,
+          "release": 0.12,
+          "makeupDb": 0
+        }
+      ]
+    },
+    {
+      "id": "space",
+      "name": "空间 Send",
+      "busId": "master",
+      "gainDb": 0,
+      "pan": 0,
+      "sends": [],
+      "effects": [
+        {
+          "type": "reverb",
+          "seconds": 1.6,
+          "damping": 0.45,
+          "mix": 1
+        }
+      ]
+    }
+  ],
+  "master": {
+    "gainDb": -1,
+    "effects": [
+      {
+        "type": "filter",
+        "mode": "highpass",
+        "frequency": 25,
+        "q": 0.707,
+        "db": 0
+      },
+      {
+        "type": "limiter",
+        "ceilingDb": -1,
+        "release": 0.08
+      }
+    ]
+  }
+}

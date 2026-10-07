@@ -1,0 +1,25 @@
+{
+  "formatVersion": 1,
+  "id": "d042c96c-f725-492f-bfdb-22b2d1fbd725",
+  "name": "主题与模板实例",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json",
+    "scenes/template-design-card-v1.json",
+    "scenes/template-design-card-v2.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

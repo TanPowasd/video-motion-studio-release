@@ -1,0 +1,81 @@
+{
+  "id": "intro",
+  "name": "合成 1",
+  "duration": 180,
+  "background": "#0d1728",
+  "nodes": [
+    {
+      "id": "showcase",
+      "type": "component",
+      "name": "Layer",
+      "visible": true,
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 720,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "timeMapping": {
+        "mode": "linear",
+        "anchor": 0,
+        "offset": 0,
+        "rate": 1,
+        "frame": 0,
+        "repeat": "continue"
+      },
+      "opacity": 1,
+      "fill": "#7c8cff",
+      "effects": [],
+      "stroke": "",
+      "strokeWidth": 0,
+      "strokeDash": [],
+      "strokeDashOffset": 0,
+      "strokeCap": "butt",
+      "strokeJoin": "miter",
+      "strokeMiterLimit": 10,
+      "fillRule": "nonzero",
+      "pathTrim": {
+        "start": 0,
+        "end": 1,
+        "offset": 0
+      },
+      "shapeOperators": [],
+      "radius": 0,
+      "text": "",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 48,
+      "fontWeight": 400,
+      "align": "left",
+      "lineHeight": 1.3,
+      "textAnimators": [],
+      "reveal": 1,
+      "component": "components/showcase.ts",
+      "audioOffset": 0,
+      "params": {
+        "amplitude": 24
+      },
+      "overrides": {},
+      "path": "",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [],
+      "points": []
+    }
+  ]
+}

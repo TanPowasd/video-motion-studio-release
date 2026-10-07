@@ -1,0 +1,124 @@
+{
+  "$ref": "#/definitions/layout",
+  "definitions": {
+    "layout": {
+      "type": "object",
+      "properties": {
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "parent",
+                "scene"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "nodeId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "nodeId"
+              ],
+              "additionalProperties": false
+            }
+          ],
+          "default": "parent"
+        },
+        "x": {
+          "type": "object",
+          "properties": {
+            "at": {
+              "type": "string",
+              "enum": [
+                "start",
+                "center",
+                "end"
+              ],
+              "default": "center"
+            },
+            "self": {
+              "type": "string",
+              "enum": [
+                "start",
+                "center",
+                "end"
+              ],
+              "default": "center"
+            },
+            "offset": {
+              "type": "number",
+              "default": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "y": {
+          "$ref": "#/definitions/layout/properties/x"
+        },
+        "width": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 0
+            },
+            "unit": {
+              "type": "string",
+              "enum": [
+                "pixels",
+                "fraction"
+              ],
+              "default": "fraction"
+            },
+            "min": {
+              "type": "number",
+              "minimum": 0,
+              "default": 0
+            },
+            "max": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        "height": {
+          "$ref": "#/definitions/layout/properties/width"
+        },
+        "aspectRatio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "insets": {
+          "type": "object",
+          "properties": {
+            "left": {
+              "$ref": "#/definitions/layout/properties/x/properties/offset"
+            },
+            "right": {
+              "$ref": "#/definitions/layout/properties/x/properties/offset"
+            },
+            "top": {
+              "$ref": "#/definitions/layout/properties/x/properties/offset"
+            },
+            "bottom": {
+              "$ref": "#/definitions/layout/properties/x/properties/offset"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

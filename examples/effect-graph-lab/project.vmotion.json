@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "a12f1035-5ad3-4eac-a62c-059c2dc0f413",
+  "name": "Agent 特效节点图",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

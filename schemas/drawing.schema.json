@@ -1,0 +1,169 @@
+{
+  "$ref": "#/definitions/drawing",
+  "definitions": {
+    "drawing": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1,
+          "default": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "default": "未命名画稿"
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 16,
+          "maximum": 8192
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 16,
+          "maximum": 8192
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/drawing/properties/id"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "default": "图层"
+              },
+              "visible": {
+                "type": "boolean",
+                "default": true
+              },
+              "locked": {
+                "type": "boolean",
+                "default": false
+              },
+              "x": {
+                "type": "number",
+                "default": 0
+              },
+              "y": {
+                "$ref": "#/definitions/drawing/properties/layers/items/properties/x",
+                "default": 0
+              },
+              "opacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "default": 1
+              },
+              "blend": {
+                "type": "string",
+                "enum": [
+                  "source-over",
+                  "multiply",
+                  "screen",
+                  "overlay",
+                  "darken",
+                  "lighten",
+                  "difference"
+                ],
+                "default": "source-over"
+              },
+              "strokes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "$ref": "#/definitions/drawing/properties/id"
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "brush",
+                        "eraser"
+                      ],
+                      "default": "brush"
+                    },
+                    "color": {
+                      "type": "string",
+                      "minLength": 1,
+                      "default": "#c1b6ff"
+                    },
+                    "width": {
+                      "type": "number",
+                      "minimum": 0.5,
+                      "maximum": 1000,
+                      "default": 6
+                    },
+                    "opacity": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1,
+                      "default": 1
+                    },
+                    "points": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "x": {
+                            "$ref": "#/definitions/drawing/properties/layers/items/properties/x"
+                          },
+                          "y": {
+                            "$ref": "#/definitions/drawing/properties/layers/items/properties/x"
+                          },
+                          "pressure": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          }
+                        },
+                        "required": [
+                          "x",
+                          "y"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1,
+                      "maxItems": 100000
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "points"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10000,
+                "default": []
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 256,
+          "default": []
+        }
+      },
+      "required": [
+        "id",
+        "width",
+        "height"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

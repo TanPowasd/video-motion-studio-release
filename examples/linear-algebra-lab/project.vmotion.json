@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "31d289ba-8667-4463-b06e-3917d4c1f270",
+  "name": "线性代数 · 变换、拟合与优化",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

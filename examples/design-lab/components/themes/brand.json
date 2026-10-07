@@ -1,0 +1,20 @@
+{
+  "kind": "theme",
+  "version": 1,
+  "id": "brand",
+  "name": "统一蓝色主题",
+  "tokens": [
+    {
+      "id": "brand.accent",
+      "type": "color",
+      "value": "#65cfda"
+    },
+    {
+      "id": "type.heading",
+      "type": "number",
+      "value": 30,
+      "min": 18,
+      "max": 48
+    }
+  ]
+}

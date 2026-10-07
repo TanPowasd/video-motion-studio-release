@@ -1,0 +1,25 @@
+{
+  "formatVersion": 1,
+  "id": "b04b6165-828a-4b4a-83d7-ba728bb86ad0",
+  "name": "分镜与全片检查",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json",
+    "scenes/inspect.json",
+    "scenes/output.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

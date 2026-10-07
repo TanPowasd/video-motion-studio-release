@@ -1,0 +1,77 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "Reusable glow",
+  "parameters": {
+    "opacity": {
+      "type": "number",
+      "default": 0.7,
+      "min": 0,
+      "max": 1
+    },
+    "shift": {
+      "type": "number",
+      "default": 12,
+      "min": -50,
+      "max": 50
+    }
+  },
+  "nodes": [
+    {
+      "id": "src",
+      "type": "input",
+      "slot": "source"
+    },
+    {
+      "id": "child",
+      "type": "subgraph",
+      "source": "components/effects/branch.json",
+      "inputs": {
+        "source": "src"
+      },
+      "params": {
+        "radius": 5,
+        "offset": 2
+      }
+    },
+    {
+      "id": "shift",
+      "type": "transform",
+      "input": "child",
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "space": "layer"
+    },
+    {
+      "id": "out",
+      "type": "blend",
+      "foreground": "shift",
+      "background": "src",
+      "mode": "screen",
+      "opacity": 1
+    }
+  ],
+  "output": "out",
+  "links": [
+    {
+      "nodeId": "shift",
+      "property": "matrix.4",
+      "parameter": "shift",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "out",
+      "property": "opacity",
+      "parameter": "opacity",
+      "scale": 1,
+      "offset": 0
+    }
+  ]
+}

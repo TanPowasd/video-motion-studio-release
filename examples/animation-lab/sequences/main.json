@@ -1,0 +1,65 @@
+{
+  "id": "main",
+  "name": "动效 · 数学动画 · 空间镜头",
+  "duration": 540,
+  "tracks": [
+    {
+      "id": "visual",
+      "name": "Effects demonstration",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        {
+          "id": "clip-type",
+          "sceneId": "type",
+          "start": 0,
+          "duration": 180,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0
+        },
+        {
+          "id": "clip-science",
+          "sceneId": "science",
+          "start": 180,
+          "duration": 180,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0
+        },
+        {
+          "id": "clip-camera",
+          "sceneId": "camera",
+          "start": 360,
+          "duration": 180,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0
+        }
+      ]
+    }
+  ],
+  "markers": [
+    {
+      "id": "marker-type",
+      "frame": 0,
+      "label": "文字与粒子"
+    },
+    {
+      "id": "marker-science",
+      "frame": 180,
+      "label": "科学图形与轨迹"
+    },
+    {
+      "id": "marker-camera",
+      "frame": 360,
+      "label": "透视镜头与空间"
+    }
+  ]
+}

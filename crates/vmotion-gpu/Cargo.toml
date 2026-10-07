@@ -1,0 +1,16 @@
+[package]
+name = "vmotion-gpu"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[dependencies]
+serde_json = "1.0"
+wgpu = { version = "0.19.4", default-features = false, features = ["dx12", "wgsl"] }
+pollster = "0.3"
+bytemuck = "1.25"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

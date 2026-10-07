@@ -1,0 +1,36 @@
+{
+  "formatVersion": 1,
+  "id": "62d1b68f-4230-42d4-aa6d-6246047fc35c",
+  "name": "运动跟踪与视频稳定",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [
+    {
+      "id": "tracking-footage",
+      "name": "运动素材",
+      "path": "assets/tracking-source.mkv",
+      "type": "video",
+      "managed": true,
+      "metadata": {
+        "width": 640,
+        "height": 360,
+        "duration": 6
+      }
+    }
+  ],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

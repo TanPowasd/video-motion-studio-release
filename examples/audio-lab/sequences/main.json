@@ -1,0 +1,58 @@
+{
+  "id": "main",
+  "name": "Main sequence",
+  "duration": 360,
+  "tracks": [
+    {
+      "id": "visual",
+      "name": "节奏画面",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        {
+          "id": "scene",
+          "sceneId": "intro",
+          "start": 0,
+          "duration": 360,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0
+        }
+      ]
+    },
+    {
+      "id": "voice",
+      "name": "节奏音轨",
+      "type": "audio",
+      "muted": false,
+      "clips": [
+        {
+          "id": "sound",
+          "assetId": "2f48328c-551f-4950-bf38-0b1268c53318",
+          "start": 0,
+          "duration": 360,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 0.8,
+          "fadeIn": 15,
+          "fadeOut": 30
+        }
+      ]
+    }
+  ],
+  "workflow": "general",
+  "markers": [
+    {
+      "id": "start",
+      "frame": 0,
+      "label": "Introduction"
+    },
+    {
+      "id": "equation",
+      "frame": 180,
+      "label": "Equation"
+    }
+  ]
+}

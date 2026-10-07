@@ -1,0 +1,3056 @@
+{
+  "$ref": "#/definitions/effect",
+  "definitions": {
+    "effect": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "program"
+            },
+            "source": {
+              "type": "string",
+              "pattern": "^components\\/renderers\\/(?:[\\p{L}\\p{N}_-]+\\/)*[\\p{L}\\p{N}_-]+\\.json$"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": {},
+              "default": {}
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "gradientMap"
+            },
+            "stops": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "offset": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "color": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-f]{6}$"
+                  }
+                },
+                "required": [
+                  "offset",
+                  "color"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 2,
+              "maxItems": 16
+            },
+            "intensity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 1
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "stops"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "radialRays"
+            },
+            "center": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+                }
+              },
+              "required": [
+                "x",
+                "y"
+              ],
+              "additionalProperties": false,
+              "default": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4,
+              "default": 0.5
+            },
+            "samples": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 64,
+              "default": 16
+            },
+            "intensity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 8,
+              "default": 1
+            },
+            "decay": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 1,
+              "default": 0.92
+            },
+            "threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.5
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9a-f]{6}$",
+              "default": "#dcecff"
+            },
+            "mix": {
+              "type": "string",
+              "enum": [
+                "screen",
+                "add"
+              ],
+              "default": "screen"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "bloom"
+            },
+            "radius": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300,
+              "default": 30
+            },
+            "threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.65
+            },
+            "intensity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 8,
+              "default": 1
+            },
+            "levels": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6,
+              "default": 4
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9a-f]{6}$",
+              "default": "#ffffff"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "blur"
+            },
+            "radius": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "radius"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "glow"
+            },
+            "color": {
+              "type": "string",
+              "minLength": 1
+            },
+            "radius": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300
+            },
+            "intensity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4,
+              "default": 1
+            },
+            "threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "color",
+            "radius"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "color"
+            },
+            "brightness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4,
+              "default": 1
+            },
+            "contrast": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4,
+              "default": 1
+            },
+            "saturation": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4,
+              "default": 1
+            },
+            "hue": {
+              "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x",
+              "default": 0
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "shadow"
+            },
+            "color": {
+              "$ref": "#/definitions/effect/anyOf/5/properties/color"
+            },
+            "blur": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300
+            },
+            "x": {
+              "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+            },
+            "y": {
+              "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "color",
+            "blur",
+            "x",
+            "y"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "chromaKey"
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9a-f]{6}$"
+            },
+            "tolerance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.12
+            },
+            "softness": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 1,
+              "default": 0.15
+            },
+            "despill": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.8
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "color"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "levels"
+            },
+            "inputBlack": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.999,
+              "default": 0
+            },
+            "inputWhite": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 1,
+              "default": 1
+            },
+            "gamma": {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 20,
+              "default": 1
+            },
+            "outputBlack": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0
+            },
+            "outputWhite": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 1
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "curves"
+            },
+            "master": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 2,
+              "maxItems": 32
+            },
+            "red": {
+              "$ref": "#/definitions/effect/anyOf/10/properties/master"
+            },
+            "green": {
+              "$ref": "#/definitions/effect/anyOf/10/properties/master"
+            },
+            "blue": {
+              "$ref": "#/definitions/effect/anyOf/10/properties/master"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "lut3d"
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 33
+            },
+            "data": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+              },
+              "minItems": 24,
+              "maxItems": 107811
+            },
+            "domainMin": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": [
+                {
+                  "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+                },
+                {
+                  "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+                },
+                {
+                  "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+                }
+              ],
+              "default": [
+                0,
+                0,
+                0
+              ]
+            },
+            "domainMax": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": [
+                {
+                  "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+                },
+                {
+                  "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+                },
+                {
+                  "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+                }
+              ],
+              "default": [
+                1,
+                1,
+                1
+              ]
+            },
+            "intensity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 1
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "size",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "vignette"
+            },
+            "amount": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.5
+            },
+            "radius": {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 2,
+              "default": 0.75
+            },
+            "softness": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 2,
+              "default": 0.6
+            },
+            "center": {
+              "$ref": "#/definitions/effect/anyOf/2/properties/center",
+              "default": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "grain"
+            },
+            "amount": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.08
+            },
+            "seed": {
+              "type": "integer",
+              "default": 1
+            },
+            "monochrome": {
+              "type": "boolean",
+              "default": true
+            },
+            "animated": {
+              "type": "boolean",
+              "default": true
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "displacement"
+            },
+            "amountX": {
+              "type": "number",
+              "minimum": -500,
+              "maximum": 500,
+              "default": 20
+            },
+            "amountY": {
+              "type": "number",
+              "minimum": -500,
+              "maximum": 500,
+              "default": 20
+            },
+            "scale": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 2000,
+              "default": 100
+            },
+            "seed": {
+              "type": "integer",
+              "default": 1
+            },
+            "evolution": {
+              "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x",
+              "default": 0
+            },
+            "octaves": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6,
+              "default": 3
+            },
+            "edge": {
+              "type": "string",
+              "enum": [
+                "transparent",
+                "clamp",
+                "wrap"
+              ],
+              "default": "transparent"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "pixelate"
+            },
+            "size": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 12
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "liquify"
+            },
+            "space": {
+              "type": "string",
+              "enum": [
+                "layer",
+                "canvas"
+              ],
+              "default": "layer"
+            },
+            "region": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "$ref": "#/definitions/effect/anyOf/16/properties/region/properties/x"
+                },
+                "width": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "height": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              },
+              "required": [
+                "x",
+                "y",
+                "width",
+                "height"
+              ],
+              "additionalProperties": false
+            },
+            "amount": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 1
+            },
+            "edge": {
+              "type": "string",
+              "enum": [
+                "transparent",
+                "clamp",
+                "wrap"
+              ],
+              "default": "transparent"
+            },
+            "brushes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "push",
+                      "twirl",
+                      "inflate"
+                    ],
+                    "default": "push"
+                  },
+                  "center": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number",
+                        "minimum": -2,
+                        "maximum": 3
+                      },
+                      "y": {
+                        "type": "number",
+                        "minimum": -2,
+                        "maximum": 3
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
+                    ],
+                    "additionalProperties": false,
+                    "default": {
+                      "x": 0.5,
+                      "y": 0.5
+                    }
+                  },
+                  "radius": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 4000,
+                    "default": 100
+                  },
+                  "dx": {
+                    "type": "number",
+                    "minimum": -1000,
+                    "maximum": 1000,
+                    "default": 0
+                  },
+                  "dy": {
+                    "type": "number",
+                    "minimum": -1000,
+                    "maximum": 1000,
+                    "default": 0
+                  },
+                  "angle": {
+                    "type": "number",
+                    "minimum": -1440,
+                    "maximum": 1440,
+                    "default": 90
+                  },
+                  "amount": {
+                    "type": "number",
+                    "minimum": -1,
+                    "maximum": 1,
+                    "default": 1
+                  }
+                },
+                "additionalProperties": false
+              },
+              "maxItems": 128,
+              "default": []
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "meshWarp"
+            },
+            "space": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/space"
+            },
+            "region": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/region"
+            },
+            "columns": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32
+            },
+            "rows": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32
+            },
+            "points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": -4,
+                    "maximum": 5
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": -4,
+                    "maximum": 5
+                  },
+                  "weight": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100,
+                    "default": 1
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 4,
+              "maxItems": 1089
+            },
+            "amount": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 1
+            },
+            "samples": {
+              "type": "number",
+              "enum": [
+                1,
+                4
+              ],
+              "default": 4
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "columns",
+            "rows",
+            "points"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "cornerPin"
+            },
+            "space": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/space"
+            },
+            "region": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/region"
+            },
+            "corners": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": -4,
+                    "maximum": 5
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": -4,
+                    "maximum": 5
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "amount": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 1
+            },
+            "samples": {
+              "type": "number",
+              "enum": [
+                1,
+                4
+              ],
+              "default": 4
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "corners"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "waveWarp"
+            },
+            "space": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/space"
+            },
+            "region": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/region"
+            },
+            "amountX": {
+              "type": "number",
+              "minimum": -1000,
+              "maximum": 1000,
+              "default": 20
+            },
+            "amountY": {
+              "type": "number",
+              "minimum": -1000,
+              "maximum": 1000,
+              "default": 0
+            },
+            "wavelength": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 4000,
+              "default": 120
+            },
+            "angle": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/region/properties/x",
+              "default": 0
+            },
+            "phase": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/region/properties/x",
+              "default": 0
+            },
+            "edge": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/edge"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "twirl"
+            },
+            "space": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/space"
+            },
+            "region": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/region"
+            },
+            "center": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/brushes/items/properties/center",
+              "default": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            "radius": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 4000,
+              "default": 150
+            },
+            "amount": {
+              "type": "number",
+              "minimum": -1440,
+              "maximum": 1440,
+              "default": 90
+            },
+            "edge": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/edge"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "bulge"
+            },
+            "space": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/space"
+            },
+            "region": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/region"
+            },
+            "center": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/brushes/items/properties/center",
+              "default": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            "radius": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 4000,
+              "default": 150
+            },
+            "amount": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1,
+              "default": 0.5
+            },
+            "edge": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/edge"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "rgbSplit"
+            },
+            "space": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/space"
+            },
+            "region": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/region"
+            },
+            "amountX": {
+              "type": "number",
+              "minimum": -1000,
+              "maximum": 1000,
+              "default": 6
+            },
+            "amountY": {
+              "type": "number",
+              "minimum": -1000,
+              "maximum": 1000,
+              "default": 0
+            },
+            "intensity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 1
+            },
+            "edge": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/edge"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "linearWipe"
+            },
+            "space": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/space"
+            },
+            "region": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/region"
+            },
+            "progress": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 1
+            },
+            "angle": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/region/properties/x",
+              "default": 0
+            },
+            "feather": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2000,
+              "default": 0
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "radialWipe"
+            },
+            "space": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/space"
+            },
+            "region": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/region"
+            },
+            "progress": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 1
+            },
+            "center": {
+              "$ref": "#/definitions/effect/anyOf/16/properties/brushes/items/properties/center",
+              "default": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            },
+            "feather": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2000,
+              "default": 0
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "motionBlur"
+            },
+            "samples": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 32,
+              "default": 8
+            },
+            "shutterAngle": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360,
+              "default": 180
+            },
+            "phase": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1,
+              "default": 0
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "echo"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32,
+              "default": 8
+            },
+            "spacing": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 600,
+              "default": 2
+            },
+            "units": {
+              "type": "string",
+              "enum": [
+                "frames",
+                "seconds"
+              ],
+              "default": "frames"
+            },
+            "decay": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.65
+            },
+            "strength": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.65
+            },
+            "operator": {
+              "type": "string",
+              "enum": [
+                "over",
+                "add",
+                "screen"
+              ],
+              "default": "over"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "effectGraph"
+            },
+            "source": {
+              "type": "string",
+              "pattern": "^components\\/effects\\/(?:[\\p{L}\\p{N}_-]+\\/)*[\\p{L}\\p{N}_-]+\\.json$"
+            },
+            "graph": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "effect-graph"
+                },
+                "version": {
+                  "type": "number",
+                  "const": 1
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "parameters": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "default": {}
+                },
+                "nodes": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "pattern": "^[\\p{L}\\p{N}_-]+$"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "input"
+                          },
+                          "slot": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id",
+                            "default": "source"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "keyer"
+                          },
+                          "input": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "mode": {
+                            "type": "string",
+                            "enum": [
+                              "chroma",
+                              "luma"
+                            ],
+                            "default": "chroma"
+                          },
+                          "color": {
+                            "type": "string",
+                            "pattern": "^#[0-9a-f]{6}$",
+                            "default": "#00ff00"
+                          },
+                          "threshold": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0.12
+                          },
+                          "softness": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0.08
+                          },
+                          "spill": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0
+                          },
+                          "invert": {
+                            "type": "boolean",
+                            "default": false
+                          },
+                          "view": {
+                            "type": "string",
+                            "enum": [
+                              "color",
+                              "matte"
+                            ],
+                            "default": "color"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "input"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "channels"
+                          },
+                          "red": {
+                            "anyOf": [
+                              {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "input": {
+                                    "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                                  },
+                                  "channel": {
+                                    "type": "string",
+                                    "enum": [
+                                      "red",
+                                      "green",
+                                      "blue",
+                                      "alpha",
+                                      "luma"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "input",
+                                  "channel"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          },
+                          "green": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/2/properties/red"
+                          },
+                          "blue": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/2/properties/red"
+                          },
+                          "alpha": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/2/properties/red"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "red",
+                          "green",
+                          "blue",
+                          "alpha"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "colorMatrix"
+                          },
+                          "input": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                          },
+                          "matrix": {
+                            "type": "array",
+                            "items": {
+                              "type": "number",
+                              "minimum": -100,
+                              "maximum": 100
+                            },
+                            "minItems": 20,
+                            "maxItems": 20,
+                            "default": [
+                              1,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              1,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              1,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              1,
+                              0
+                            ]
+                          },
+                          "colorSpace": {
+                            "type": "string",
+                            "enum": [
+                              "srgb",
+                              "linear"
+                            ],
+                            "default": "srgb"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "input"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "texture"
+                          },
+                          "settings": {
+                            "type": "object",
+                            "properties": {
+                              "pattern": {
+                                "type": "string",
+                                "enum": [
+                                  "fbm",
+                                  "turbulence",
+                                  "ridged",
+                                  "cellular",
+                                  "marble",
+                                  "waves",
+                                  "checker"
+                                ],
+                                "default": "fbm"
+                              },
+                              "seed": {
+                                "type": "integer",
+                                "default": 1
+                              },
+                              "scale": {
+                                "type": "number",
+                                "minimum": 1,
+                                "maximum": 4000,
+                                "default": 100
+                              },
+                              "octaves": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 6,
+                                "default": 3
+                              },
+                              "evolution": {
+                                "type": "number",
+                                "default": 0
+                              },
+                              "angle": {
+                                "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/settings/properties/evolution",
+                                "default": 0
+                              },
+                              "contrast": {
+                                "type": "number",
+                                "minimum": 0.01,
+                                "maximum": 10,
+                                "default": 1
+                              },
+                              "bias": {
+                                "type": "number",
+                                "minimum": -1,
+                                "maximum": 1,
+                                "default": 0
+                              },
+                              "warp": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 8,
+                                "default": 0
+                              },
+                              "stops": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "offset": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 1
+                                    },
+                                    "color": {
+                                      "type": "string",
+                                      "pattern": "^#[0-9a-f]{6}$"
+                                    },
+                                    "alpha": {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 1,
+                                      "default": 1
+                                    }
+                                  },
+                                  "required": [
+                                    "offset",
+                                    "color"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "minItems": 2,
+                                "maxItems": 16,
+                                "default": [
+                                  {
+                                    "offset": 0,
+                                    "color": "#10243a"
+                                  },
+                                  {
+                                    "offset": 1,
+                                    "color": "#91d9da"
+                                  }
+                                ]
+                              }
+                            },
+                            "additionalProperties": false,
+                            "default": {}
+                          },
+                          "opacity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          },
+                          "space": {
+                            "type": "string",
+                            "enum": [
+                              "layer",
+                              "canvas"
+                            ],
+                            "default": "layer"
+                          },
+                          "region": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                              },
+                              "width": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              },
+                              "height": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y",
+                              "width",
+                              "height"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "pass"
+                          },
+                          "input": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                          },
+                          "effect": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/0/properties/type"
+                                  },
+                                  "source": {
+                                    "$ref": "#/definitions/effect/anyOf/0/properties/source"
+                                  },
+                                  "params": {
+                                    "$ref": "#/definitions/effect/anyOf/0/properties/params"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "source"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/1/properties/type"
+                                  },
+                                  "stops": {
+                                    "$ref": "#/definitions/effect/anyOf/1/properties/stops"
+                                  },
+                                  "intensity": {
+                                    "$ref": "#/definitions/effect/anyOf/1/properties/intensity"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "stops"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/2/properties/type"
+                                  },
+                                  "center": {
+                                    "$ref": "#/definitions/effect/anyOf/2/properties/center"
+                                  },
+                                  "length": {
+                                    "$ref": "#/definitions/effect/anyOf/2/properties/length"
+                                  },
+                                  "samples": {
+                                    "$ref": "#/definitions/effect/anyOf/2/properties/samples"
+                                  },
+                                  "intensity": {
+                                    "$ref": "#/definitions/effect/anyOf/2/properties/intensity"
+                                  },
+                                  "decay": {
+                                    "$ref": "#/definitions/effect/anyOf/2/properties/decay"
+                                  },
+                                  "threshold": {
+                                    "$ref": "#/definitions/effect/anyOf/2/properties/threshold"
+                                  },
+                                  "color": {
+                                    "$ref": "#/definitions/effect/anyOf/2/properties/color"
+                                  },
+                                  "mix": {
+                                    "$ref": "#/definitions/effect/anyOf/2/properties/mix"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/3/properties/type"
+                                  },
+                                  "radius": {
+                                    "$ref": "#/definitions/effect/anyOf/3/properties/radius"
+                                  },
+                                  "threshold": {
+                                    "$ref": "#/definitions/effect/anyOf/3/properties/threshold"
+                                  },
+                                  "intensity": {
+                                    "$ref": "#/definitions/effect/anyOf/3/properties/intensity"
+                                  },
+                                  "levels": {
+                                    "$ref": "#/definitions/effect/anyOf/3/properties/levels"
+                                  },
+                                  "color": {
+                                    "$ref": "#/definitions/effect/anyOf/3/properties/color"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/4/properties/type"
+                                  },
+                                  "radius": {
+                                    "$ref": "#/definitions/effect/anyOf/4/properties/radius"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "radius"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/5/properties/type"
+                                  },
+                                  "color": {
+                                    "$ref": "#/definitions/effect/anyOf/5/properties/color"
+                                  },
+                                  "radius": {
+                                    "$ref": "#/definitions/effect/anyOf/5/properties/radius"
+                                  },
+                                  "intensity": {
+                                    "$ref": "#/definitions/effect/anyOf/5/properties/intensity"
+                                  },
+                                  "threshold": {
+                                    "$ref": "#/definitions/effect/anyOf/5/properties/threshold"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "color",
+                                  "radius"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/6/properties/type"
+                                  },
+                                  "brightness": {
+                                    "$ref": "#/definitions/effect/anyOf/6/properties/brightness"
+                                  },
+                                  "contrast": {
+                                    "$ref": "#/definitions/effect/anyOf/6/properties/contrast"
+                                  },
+                                  "saturation": {
+                                    "$ref": "#/definitions/effect/anyOf/6/properties/saturation"
+                                  },
+                                  "hue": {
+                                    "$ref": "#/definitions/effect/anyOf/6/properties/hue"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/7/properties/type"
+                                  },
+                                  "color": {
+                                    "$ref": "#/definitions/effect/anyOf/5/properties/color"
+                                  },
+                                  "blur": {
+                                    "$ref": "#/definitions/effect/anyOf/7/properties/blur"
+                                  },
+                                  "x": {
+                                    "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+                                  },
+                                  "y": {
+                                    "$ref": "#/definitions/effect/anyOf/2/properties/center/properties/x"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "color",
+                                  "blur",
+                                  "x",
+                                  "y"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/8/properties/type"
+                                  },
+                                  "color": {
+                                    "$ref": "#/definitions/effect/anyOf/8/properties/color"
+                                  },
+                                  "tolerance": {
+                                    "$ref": "#/definitions/effect/anyOf/8/properties/tolerance"
+                                  },
+                                  "softness": {
+                                    "$ref": "#/definitions/effect/anyOf/8/properties/softness"
+                                  },
+                                  "despill": {
+                                    "$ref": "#/definitions/effect/anyOf/8/properties/despill"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "color"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/9/properties/type"
+                                  },
+                                  "inputBlack": {
+                                    "$ref": "#/definitions/effect/anyOf/9/properties/inputBlack"
+                                  },
+                                  "inputWhite": {
+                                    "$ref": "#/definitions/effect/anyOf/9/properties/inputWhite"
+                                  },
+                                  "gamma": {
+                                    "$ref": "#/definitions/effect/anyOf/9/properties/gamma"
+                                  },
+                                  "outputBlack": {
+                                    "$ref": "#/definitions/effect/anyOf/9/properties/outputBlack"
+                                  },
+                                  "outputWhite": {
+                                    "$ref": "#/definitions/effect/anyOf/9/properties/outputWhite"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/10/properties/type"
+                                  },
+                                  "master": {
+                                    "$ref": "#/definitions/effect/anyOf/10/properties/master"
+                                  },
+                                  "red": {
+                                    "$ref": "#/definitions/effect/anyOf/10/properties/red"
+                                  },
+                                  "green": {
+                                    "$ref": "#/definitions/effect/anyOf/10/properties/green"
+                                  },
+                                  "blue": {
+                                    "$ref": "#/definitions/effect/anyOf/10/properties/blue"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/11/properties/type"
+                                  },
+                                  "size": {
+                                    "$ref": "#/definitions/effect/anyOf/11/properties/size"
+                                  },
+                                  "data": {
+                                    "$ref": "#/definitions/effect/anyOf/11/properties/data"
+                                  },
+                                  "domainMin": {
+                                    "$ref": "#/definitions/effect/anyOf/11/properties/domainMin"
+                                  },
+                                  "domainMax": {
+                                    "$ref": "#/definitions/effect/anyOf/11/properties/domainMax"
+                                  },
+                                  "intensity": {
+                                    "$ref": "#/definitions/effect/anyOf/11/properties/intensity"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "size",
+                                  "data"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/12/properties/type"
+                                  },
+                                  "amount": {
+                                    "$ref": "#/definitions/effect/anyOf/12/properties/amount"
+                                  },
+                                  "radius": {
+                                    "$ref": "#/definitions/effect/anyOf/12/properties/radius"
+                                  },
+                                  "softness": {
+                                    "$ref": "#/definitions/effect/anyOf/12/properties/softness"
+                                  },
+                                  "center": {
+                                    "$ref": "#/definitions/effect/anyOf/12/properties/center"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/13/properties/type"
+                                  },
+                                  "amount": {
+                                    "$ref": "#/definitions/effect/anyOf/13/properties/amount"
+                                  },
+                                  "seed": {
+                                    "$ref": "#/definitions/effect/anyOf/13/properties/seed"
+                                  },
+                                  "monochrome": {
+                                    "$ref": "#/definitions/effect/anyOf/13/properties/monochrome"
+                                  },
+                                  "animated": {
+                                    "$ref": "#/definitions/effect/anyOf/13/properties/animated"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/14/properties/type"
+                                  },
+                                  "amountX": {
+                                    "$ref": "#/definitions/effect/anyOf/14/properties/amountX"
+                                  },
+                                  "amountY": {
+                                    "$ref": "#/definitions/effect/anyOf/14/properties/amountY"
+                                  },
+                                  "scale": {
+                                    "$ref": "#/definitions/effect/anyOf/14/properties/scale"
+                                  },
+                                  "seed": {
+                                    "$ref": "#/definitions/effect/anyOf/14/properties/seed"
+                                  },
+                                  "evolution": {
+                                    "$ref": "#/definitions/effect/anyOf/14/properties/evolution"
+                                  },
+                                  "octaves": {
+                                    "$ref": "#/definitions/effect/anyOf/14/properties/octaves"
+                                  },
+                                  "edge": {
+                                    "$ref": "#/definitions/effect/anyOf/14/properties/edge"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/15/properties/type"
+                                  },
+                                  "size": {
+                                    "$ref": "#/definitions/effect/anyOf/15/properties/size"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/type"
+                                  },
+                                  "space": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/space"
+                                  },
+                                  "region": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/region"
+                                  },
+                                  "amount": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/amount"
+                                  },
+                                  "edge": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/edge"
+                                  },
+                                  "brushes": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/brushes"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/17/properties/type"
+                                  },
+                                  "space": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/space"
+                                  },
+                                  "region": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/region"
+                                  },
+                                  "columns": {
+                                    "$ref": "#/definitions/effect/anyOf/17/properties/columns"
+                                  },
+                                  "rows": {
+                                    "$ref": "#/definitions/effect/anyOf/17/properties/rows"
+                                  },
+                                  "points": {
+                                    "$ref": "#/definitions/effect/anyOf/17/properties/points"
+                                  },
+                                  "amount": {
+                                    "$ref": "#/definitions/effect/anyOf/17/properties/amount"
+                                  },
+                                  "samples": {
+                                    "$ref": "#/definitions/effect/anyOf/17/properties/samples"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "columns",
+                                  "rows",
+                                  "points"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/18/properties/type"
+                                  },
+                                  "space": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/space"
+                                  },
+                                  "region": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/region"
+                                  },
+                                  "corners": {
+                                    "$ref": "#/definitions/effect/anyOf/18/properties/corners"
+                                  },
+                                  "amount": {
+                                    "$ref": "#/definitions/effect/anyOf/18/properties/amount"
+                                  },
+                                  "samples": {
+                                    "$ref": "#/definitions/effect/anyOf/18/properties/samples"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "corners"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/19/properties/type"
+                                  },
+                                  "space": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/space"
+                                  },
+                                  "region": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/region"
+                                  },
+                                  "amountX": {
+                                    "$ref": "#/definitions/effect/anyOf/19/properties/amountX"
+                                  },
+                                  "amountY": {
+                                    "$ref": "#/definitions/effect/anyOf/19/properties/amountY"
+                                  },
+                                  "wavelength": {
+                                    "$ref": "#/definitions/effect/anyOf/19/properties/wavelength"
+                                  },
+                                  "angle": {
+                                    "$ref": "#/definitions/effect/anyOf/19/properties/angle"
+                                  },
+                                  "phase": {
+                                    "$ref": "#/definitions/effect/anyOf/19/properties/phase"
+                                  },
+                                  "edge": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/edge"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/20/properties/type"
+                                  },
+                                  "space": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/space"
+                                  },
+                                  "region": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/region"
+                                  },
+                                  "center": {
+                                    "$ref": "#/definitions/effect/anyOf/20/properties/center"
+                                  },
+                                  "radius": {
+                                    "$ref": "#/definitions/effect/anyOf/20/properties/radius"
+                                  },
+                                  "amount": {
+                                    "$ref": "#/definitions/effect/anyOf/20/properties/amount"
+                                  },
+                                  "edge": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/edge"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/21/properties/type"
+                                  },
+                                  "space": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/space"
+                                  },
+                                  "region": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/region"
+                                  },
+                                  "center": {
+                                    "$ref": "#/definitions/effect/anyOf/21/properties/center"
+                                  },
+                                  "radius": {
+                                    "$ref": "#/definitions/effect/anyOf/21/properties/radius"
+                                  },
+                                  "amount": {
+                                    "$ref": "#/definitions/effect/anyOf/21/properties/amount"
+                                  },
+                                  "edge": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/edge"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/22/properties/type"
+                                  },
+                                  "space": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/space"
+                                  },
+                                  "region": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/region"
+                                  },
+                                  "amountX": {
+                                    "$ref": "#/definitions/effect/anyOf/22/properties/amountX"
+                                  },
+                                  "amountY": {
+                                    "$ref": "#/definitions/effect/anyOf/22/properties/amountY"
+                                  },
+                                  "intensity": {
+                                    "$ref": "#/definitions/effect/anyOf/22/properties/intensity"
+                                  },
+                                  "edge": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/edge"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/23/properties/type"
+                                  },
+                                  "space": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/space"
+                                  },
+                                  "region": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/region"
+                                  },
+                                  "progress": {
+                                    "$ref": "#/definitions/effect/anyOf/23/properties/progress"
+                                  },
+                                  "angle": {
+                                    "$ref": "#/definitions/effect/anyOf/23/properties/angle"
+                                  },
+                                  "feather": {
+                                    "$ref": "#/definitions/effect/anyOf/23/properties/feather"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "$ref": "#/definitions/effect/anyOf/24/properties/type"
+                                  },
+                                  "space": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/space"
+                                  },
+                                  "region": {
+                                    "$ref": "#/definitions/effect/anyOf/16/properties/region"
+                                  },
+                                  "progress": {
+                                    "$ref": "#/definitions/effect/anyOf/24/properties/progress"
+                                  },
+                                  "center": {
+                                    "$ref": "#/definitions/effect/anyOf/24/properties/center"
+                                  },
+                                  "feather": {
+                                    "$ref": "#/definitions/effect/anyOf/24/properties/feather"
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "input",
+                          "effect"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "blend"
+                          },
+                          "foreground": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                          },
+                          "background": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                          },
+                          "mode": {
+                            "type": "string",
+                            "enum": [
+                              "source-over",
+                              "screen",
+                              "multiply",
+                              "overlay",
+                              "difference",
+                              "lighter",
+                              "darken",
+                              "lighten"
+                            ],
+                            "default": "source-over"
+                          },
+                          "opacity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "foreground",
+                          "background"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "mask"
+                          },
+                          "input": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                          },
+                          "matte": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                          },
+                          "mode": {
+                            "type": "string",
+                            "enum": [
+                              "alpha",
+                              "alphaInverted",
+                              "luma",
+                              "lumaInverted"
+                            ],
+                            "default": "alpha"
+                          },
+                          "feather": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 300,
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "input",
+                          "matte"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "transform"
+                          },
+                          "input": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                          },
+                          "matrix": {
+                            "type": "array",
+                            "minItems": 6,
+                            "maxItems": 6,
+                            "items": [
+                              {
+                                "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                              },
+                              {
+                                "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                              },
+                              {
+                                "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                              },
+                              {
+                                "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                              },
+                              {
+                                "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                              },
+                              {
+                                "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                              }
+                            ],
+                            "default": [
+                              1,
+                              0,
+                              0,
+                              1,
+                              0,
+                              0
+                            ]
+                          },
+                          "space": {
+                            "type": "string",
+                            "enum": [
+                              "layer",
+                              "canvas"
+                            ],
+                            "default": "layer"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "input"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "displace"
+                          },
+                          "input": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                          },
+                          "map": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                          },
+                          "amountX": {
+                            "type": "number",
+                            "minimum": -1000,
+                            "maximum": 1000,
+                            "default": 20
+                          },
+                          "amountY": {
+                            "type": "number",
+                            "minimum": -1000,
+                            "maximum": 1000,
+                            "default": 20
+                          },
+                          "channelX": {
+                            "type": "string",
+                            "enum": [
+                              "red",
+                              "green",
+                              "blue",
+                              "alpha",
+                              "luma"
+                            ],
+                            "default": "red"
+                          },
+                          "channelY": {
+                            "type": "string",
+                            "enum": [
+                              "red",
+                              "green",
+                              "blue",
+                              "alpha",
+                              "luma"
+                            ],
+                            "default": "green"
+                          },
+                          "midpointX": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0.5
+                          },
+                          "midpointY": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0.5
+                          },
+                          "mapAlpha": {
+                            "type": "string",
+                            "enum": [
+                              "multiply",
+                              "ignore"
+                            ],
+                            "default": "multiply"
+                          },
+                          "space": {
+                            "type": "string",
+                            "enum": [
+                              "layer",
+                              "canvas"
+                            ],
+                            "default": "layer"
+                          },
+                          "edge": {
+                            "type": "string",
+                            "enum": [
+                              "transparent",
+                              "clamp",
+                              "wrap"
+                            ],
+                            "default": "transparent"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "input",
+                          "map"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "noise"
+                          },
+                          "seed": {
+                            "type": "integer",
+                            "default": 1
+                          },
+                          "scale": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 4000,
+                            "default": 100
+                          },
+                          "octaves": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 6,
+                            "default": 3
+                          },
+                          "evolution": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region/properties/x",
+                            "default": 0
+                          },
+                          "low": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/color",
+                            "default": "#000000"
+                          },
+                          "high": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/color",
+                            "default": "#ffffff"
+                          },
+                          "opacity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          },
+                          "space": {
+                            "type": "string",
+                            "enum": [
+                              "layer",
+                              "canvas"
+                            ],
+                            "default": "layer"
+                          },
+                          "region": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "solid"
+                          },
+                          "color": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/color"
+                          },
+                          "opacity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          },
+                          "space": {
+                            "type": "string",
+                            "enum": [
+                              "layer",
+                              "canvas"
+                            ],
+                            "default": "layer"
+                          },
+                          "region": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "color"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "type": {
+                            "type": "string",
+                            "const": "subgraph"
+                          },
+                          "source": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/source"
+                          },
+                          "output": {
+                            "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+                          },
+                          "inputs": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                            },
+                            "default": {}
+                          },
+                          "params": {
+                            "type": "object",
+                            "additionalProperties": {},
+                            "default": {}
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "type",
+                          "source"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "minItems": 1,
+                  "maxItems": 128
+                },
+                "output": {
+                  "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                },
+                "outputs": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                  }
+                },
+                "links": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "nodeId": {
+                        "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/1/properties/input"
+                      },
+                      "property": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "parameter": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "direct",
+                          "number"
+                        ],
+                        "default": "direct"
+                      },
+                      "scale": {
+                        "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region/properties/x",
+                        "default": 1
+                      },
+                      "offset": {
+                        "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/4/properties/region/properties/x",
+                        "default": 0
+                      }
+                    },
+                    "required": [
+                      "nodeId",
+                      "property",
+                      "parameter"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 512,
+                  "default": []
+                }
+              },
+              "required": [
+                "kind",
+                "version",
+                "name",
+                "nodes",
+                "output"
+              ],
+              "additionalProperties": false
+            },
+            "output": {
+              "$ref": "#/definitions/effect/anyOf/27/properties/graph/properties/nodes/items/anyOf/0/properties/id"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": {},
+              "default": {}
+            },
+            "bindings": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              },
+              "default": {}
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

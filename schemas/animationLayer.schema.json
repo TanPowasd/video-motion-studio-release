@@ -1,0 +1,152 @@
+{
+  "$ref": "#/definitions/animationLayer",
+  "definitions": {
+    "animationLayer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "blend": {
+          "type": "string",
+          "enum": [
+            "add",
+            "multiply",
+            "replace"
+          ],
+          "default": "add"
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1
+        },
+        "start": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0
+        },
+        "end": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "offset": {
+          "type": "number",
+          "default": 0
+        },
+        "rate": {
+          "type": "number",
+          "minimum": -1000,
+          "maximum": 1000,
+          "default": 1
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "property": {
+                "type": "string",
+                "pattern": "^(animationLayers\\.\\d+\\.(?:weight|offset|rate)|x|y|width|height|rotation|scaleX|scaleY|originX|originY|opacity|fontSize|reveal|blur|brightness|saturation|maskFeather|strokeWidth|strokeDashOffset|strokeMiterLimit|radius|layout\\.(?:[xy]\\.offset|(?:width|height)\\.(?:value|min|max)|insets\\.(?:left|right|top|bottom))|motionPath\\.(?:progress|rotationOffset|offsetX|offsetY)|timeMapping\\.(anchor|offset|rate|frame)|matrix\\.[0-5]|scene3d\\.(camera\\.(position|target|up)\\.[xyz]|camera\\.(fov|near|far|orthographicHeight)|instances\\.\\d+\\.transform\\.(position|rotation|scale|pivot)\\.[xyz]|instances\\.\\d+\\.matrix\\.\\d+|instances\\.\\d+\\.material\\.(metallic|roughness|emissiveIntensity|creaseAngle)|options\\.light\\.[xyz]|options\\.(ambient|exposure)|options\\.lights\\.\\d+\\.(intensity|range|position\\.[xyz]|direction\\.[xyz]))|pathText\\.(?:offset|normalOffset|tracking)|textAnimators\\.\\d+\\.(?:selector\\.(?:start|end|offset|amount)|values\\.(?:x|y|rotation|scaleX|scaleY|opacity|tracking))|shapeOperators\\.\\d+\\.(?:start|end|offset|radius|width|on|off|phase|amount|miterLimit|matrix\\.[0-5]|paths\\.\\d+\\.transform\\.[0-5])|pathTrim\\.(start|end|offset)|strokeDash\\.\\d+|params\\.[a-zA-Z][\\w-]*(?:\\.(?:[a-zA-Z][\\w-]*|\\d+))*|effects\\.\\d+\\.(radius|intensity|threshold|length|brightness|contrast|saturation|hue|amount|amountX|amountY|wavelength|angle|phase|shutterAngle|spacing|decay|strength|progress|feather|params\\.[a-zA-Z][\\w-]*(?:\\.(?:[a-zA-Z][\\w-]*|\\d+))*|brushes\\.\\d+\\.(radius|dx|dy|angle|amount|center\\.[xy])|points\\.\\d+\\.(x|y|weight)|corners\\.\\d+\\.[xy]|center\\.[xy]|region\\.(x|y|width|height)|scale|evolution|size|gamma|inputBlack|inputWhite|outputBlack|outputWhite|tolerance|softness|despill|blur|x|y)|gradient\\.(from|to|center)\\.(x|y)|gradient\\.radius|gradient\\.stops\\.\\d+\\.offset|clip\\.(x|y|width|height))$"
+              },
+              "keys": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "frame": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "value": {
+                      "$ref": "#/definitions/animationLayer/properties/offset"
+                    },
+                    "easing": {
+                      "type": "string",
+                      "enum": [
+                        "linear",
+                        "easeIn",
+                        "easeOut",
+                        "easeInOut",
+                        "hold",
+                        "spring",
+                        "bezier"
+                      ],
+                      "default": "linear"
+                    },
+                    "bezier": {
+                      "type": "array",
+                      "minItems": 4,
+                      "maxItems": 4,
+                      "items": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "$ref": "#/definitions/animationLayer/properties/offset"
+                        },
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "$ref": "#/definitions/animationLayer/properties/offset"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "frame",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "before": {
+                "type": "string",
+                "enum": [
+                  "constant",
+                  "linear",
+                  "cycle",
+                  "cycleOffset",
+                  "pingpong"
+                ]
+              },
+              "after": {
+                "$ref": "#/definitions/animationLayer/properties/channels/items/properties/before"
+              }
+            },
+            "required": [
+              "property",
+              "keys"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "id",
+        "channels"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

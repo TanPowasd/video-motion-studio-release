@@ -1,0 +1,24 @@
+{
+  "formatVersion": 1,
+  "id": "98c0960f-0ab7-4b0a-bd77-fc3d880e4ed7",
+  "name": "共享场景与实例覆盖",
+  "width": 1920,
+  "height": 1080,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json",
+    "scenes/card.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

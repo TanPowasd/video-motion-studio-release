@@ -1,0 +1,96 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "Visual / color + matte",
+  "parameters": {
+    "exposure": {
+      "type": "number",
+      "default": 1,
+      "min": 0.2,
+      "max": 2
+    }
+  },
+  "nodes": [
+    {
+      "id": "source",
+      "type": "input",
+      "slot": "source"
+    },
+    {
+      "id": "grade",
+      "type": "colorMatrix",
+      "input": "source",
+      "matrix": [
+        1.15,
+        0.1,
+        0.02,
+        0,
+        0,
+        0.1,
+        0.7,
+        0.1,
+        0,
+        0,
+        0.03,
+        0.04,
+        0.6,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "colorSpace": "linear"
+    },
+    {
+      "id": "matte",
+      "type": "channels",
+      "red": 1,
+      "green": 1,
+      "blue": 1,
+      "alpha": {
+        "input": "source",
+        "channel": "alpha"
+      }
+    },
+    {
+      "id": "swap",
+      "type": "channels",
+      "red": {
+        "input": "source",
+        "channel": "blue"
+      },
+      "green": {
+        "input": "source",
+        "channel": "red"
+      },
+      "blue": {
+        "input": "source",
+        "channel": "green"
+      },
+      "alpha": {
+        "input": "source",
+        "channel": "alpha"
+      }
+    }
+  ],
+  "output": "grade",
+  "outputs": {
+    "original": "source",
+    "graded": "grade",
+    "matte": "matte",
+    "swapped": "swap"
+  },
+  "links": [
+    {
+      "nodeId": "grade",
+      "property": "matrix.0",
+      "parameter": "exposure",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    }
+  ]
+}

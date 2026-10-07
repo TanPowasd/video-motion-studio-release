@@ -1,0 +1,118 @@
+{
+  "$ref": "#/definitions/textAnimator",
+  "definitions": {
+    "textAnimator": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "selector": {
+          "type": "object",
+          "properties": {
+            "unit": {
+              "type": "string",
+              "enum": [
+                "grapheme",
+                "word",
+                "line"
+              ],
+              "default": "grapheme"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "percent",
+                "index"
+              ],
+              "default": "percent"
+            },
+            "start": {
+              "type": "number",
+              "default": 0
+            },
+            "end": {
+              "$ref": "#/definitions/textAnimator/properties/selector/properties/start",
+              "default": 100
+            },
+            "offset": {
+              "$ref": "#/definitions/textAnimator/properties/selector/properties/start",
+              "default": 0
+            },
+            "shape": {
+              "type": "string",
+              "enum": [
+                "square",
+                "rampUp",
+                "rampDown",
+                "triangle",
+                "smooth"
+              ],
+              "default": "square"
+            },
+            "amount": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1,
+              "default": 1
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "values": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "$ref": "#/definitions/textAnimator/properties/selector/properties/start",
+              "default": 0
+            },
+            "y": {
+              "$ref": "#/definitions/textAnimator/properties/selector/properties/start",
+              "default": 0
+            },
+            "rotation": {
+              "$ref": "#/definitions/textAnimator/properties/selector/properties/start",
+              "default": 0
+            },
+            "scaleX": {
+              "$ref": "#/definitions/textAnimator/properties/selector/properties/start",
+              "default": 1
+            },
+            "scaleY": {
+              "$ref": "#/definitions/textAnimator/properties/selector/properties/start",
+              "default": 1
+            },
+            "opacity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 1
+            },
+            "tracking": {
+              "$ref": "#/definitions/textAnimator/properties/selector/properties/start",
+              "default": 0
+            },
+            "fill": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

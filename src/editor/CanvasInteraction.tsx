@@ -1,0 +1,250 @@
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  canvasTarget,
+  marqueeLayers,
+  movingLayers,
+  movePatch,
+  parentDelta,
+  pointerSelection,
+  toggleSelection,
+  type CompositionDraft,
+  type InteractionGraph,
+  type InteractionLayer,
+  type Point,
+} from '../core/interaction.js';
+
+type Gesture = {
+  kind: 'move' | 'marquee';
+  pointerId: number;
+  start: Point;
+  client: Point;
+  delta: Point;
+  moved: boolean;
+  capture: HTMLDivElement;
+  revision: string;
+  before: string[];
+  ids: string[];
+  layers: InteractionLayer[];
+  toggle?: string;
+  additive: boolean;
+};
+export function CanvasInteraction({
+  graph,
+  selection,
+  frame,
+  width,
+  height,
+  stage,
+  onSelect,
+  onDraft,
+  onCommit,
+  onEnter,
+}: {
+  graph: InteractionGraph;
+  selection: string[];
+  frame: number;
+  width: number;
+  height: number;
+  stage: React.RefObject<HTMLDivElement | null>;
+  onSelect: (ids: string[]) => void;
+  onDraft: (draft: CompositionDraft[] | undefined) => void;
+  onCommit: (draft: CompositionDraft[], revision: string) => Promise<unknown>;
+  onEnter: (id: string) => void;
+}) {
+  const gesture = useRef<Gesture | undefined>(undefined),
+    [delta, setDelta] = useState<Point>(),
+    [box, setBox] = useState<{ a: Point; b: Point }>(),
+    [committing, setCommitting] = useState(false);
+  const point = (e: React.PointerEvent): Point => {
+    const bounds = stage.current!.getBoundingClientRect();
+    return {
+      x: ((e.clientX - bounds.left) * width) / bounds.width,
+      y: ((e.clientY - bounds.top) * height) / bounds.height,
+    };
+  };
+  const cancel = () => {
+    const g = gesture.current;
+    gesture.current = undefined;
+    if (g?.capture.hasPointerCapture(g.pointerId)) g.capture.releasePointerCapture(g.pointerId);
+    if (g) onSelect(g.before);
+    setDelta(undefined);
+    setBox(undefined);
+    onDraft(undefined);
+  };
+  const cancelRef = useRef(cancel);
+  cancelRef.current = cancel;
+  useEffect(() => {
+    const escape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && gesture.current) {
+        e.preventDefault();
+        cancelRef.current();
+      }
+    };
+    window.addEventListener('keydown', escape);
+    return () => window.removeEventListener('keydown', escape);
+  }, []);
+  useEffect(
+    () => () => {
+      gesture.current = undefined;
+      onDraft(undefined);
+    },
+    [],
+  );
+  const draft = (g: Gesture): CompositionDraft[] =>
+    g.layers.flatMap((layer) => {
+      const local = parentDelta(layer, g.delta);
+      return local
+        ? [
+            {
+              path: layer.path,
+              nodeId: layer.node.id,
+              frame: layer.frame ?? frame,
+              contextFrames: layer.contextFrames,
+              patch: movePatch(layer.node, layer.frame ?? frame, local),
+            },
+          ]
+        : [];
+    });
+  const move = (e: React.PointerEvent) => {
+    const g = gesture.current;
+    if (!g || g.pointerId !== e.pointerId) return;
+    const p = point(e);
+    if (!g.moved && Math.hypot(e.clientX - g.client.x, e.clientY - g.client.y) < 3) return;
+    g.moved = true;
+    if (g.kind === 'marquee') {
+      setBox({ a: g.start, b: p });
+      const found = marqueeLayers(graph.layers, g.start, p);
+      g.ids = g.additive ? [...new Set([...g.before, ...found])] : found;
+      onSelect(g.ids);
+      return;
+    }
+    g.delta = { x: p.x - g.start.x, y: p.y - g.start.y };
+    if (e.shiftKey) {
+      if (Math.abs(g.delta.x) >= Math.abs(g.delta.y)) g.delta.y = 0;
+      else g.delta.x = 0;
+    }
+    setDelta(g.delta);
+    onDraft(draft(g));
+  };
+  const active = graph.layers.filter((layer) => selection.includes(layer.node.id));
+  return (
+    <div
+      className={`canvas-picking ${active.length ? 'has-selection' : ''} ${delta ? 'dragging' : ''}`}
+      aria-label="画布交互区域"
+      data-selected-nodes={JSON.stringify(selection)}
+      data-selected-node={selection.at(-1) ?? ''}
+      onPointerDown={(e) => {
+        if (e.button !== 0 || e.altKey || committing || !e.isPrimary) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const bounds = stage.current!.getBoundingClientRect(),
+          p = point(e),
+          control = e.ctrlKey || e.metaKey,
+          hit = canvasTarget(graph.layers, selection, p, control, (3 * width) / bounds.width),
+          ids = hit ? pointerSelection(selection, hit.node.id, control) : control ? selection : [];
+        onSelect(ids);
+        gesture.current = {
+          kind: hit ? 'move' : 'marquee',
+          pointerId: e.pointerId,
+          start: p,
+          client: { x: e.clientX, y: e.clientY },
+          delta: { x: 0, y: 0 },
+          moved: false,
+          capture: e.currentTarget,
+          revision: graph.revision,
+          before: selection,
+          ids,
+          layers: movingLayers(graph.layers, ids),
+          toggle: hit && control && selection.includes(hit.node.id) ? hit.node.id : undefined,
+          additive: control,
+        };
+        e.currentTarget.setPointerCapture(e.pointerId);
+      }}
+      onPointerMove={(e) => {
+        if (gesture.current) {
+          e.stopPropagation();
+          move(e);
+        }
+      }}
+      onPointerUp={async (e) => {
+        const g = gesture.current;
+        if (!g || g.pointerId !== e.pointerId) return;
+        e.stopPropagation();
+        move(e);
+        gesture.current = undefined;
+        if (g.capture.hasPointerCapture(e.pointerId)) g.capture.releasePointerCapture(e.pointerId);
+        if (!g.moved || Math.hypot(e.clientX - g.client.x, e.clientY - g.client.y) < 3) {
+          if (g.toggle) onSelect(toggleSelection(g.before, g.toggle));
+          else if (g.kind === 'marquee') onSelect(g.additive ? g.before : []);
+          setDelta(undefined);
+          setBox(undefined);
+          onDraft(undefined);
+          return;
+        }
+        if (g.kind === 'marquee') {
+          setBox(undefined);
+          return;
+        }
+        const edits = draft(g);
+        if (!edits.length || Math.hypot(g.delta.x, g.delta.y) < 1e-6) {
+          setDelta(undefined);
+          onDraft(undefined);
+          return;
+        }
+        setCommitting(true);
+        try {
+          await onCommit(edits, g.revision);
+        } finally {
+          setCommitting(false);
+          setDelta(undefined);
+          onDraft(undefined);
+        }
+      }}
+      onPointerCancel={cancel}
+      onLostPointerCapture={() => {
+        if (gesture.current) cancel();
+      }}
+      onDoubleClick={(e) => {
+        if (e.altKey || e.ctrlKey || e.metaKey || selection.length !== 1) return;
+        const layer = graph.layers.find((l) => l.node.id === selection[0]);
+        if (layer?.container) onEnter(layer.node.id);
+      }}
+    >
+      {active.map((layer) => {
+        const m = layer.matrix,
+          b = layer.bounds;
+        return (
+          <div
+            key={layer.node.id}
+            className="node-hit selected"
+            data-node-id={layer.node.id}
+            style={{
+              left: `${((m[0] * b.x + m[2] * b.y + m[4] + (delta?.x ?? 0)) / width) * 100}%`,
+              top: `${((m[1] * b.x + m[3] * b.y + m[5] + (delta?.y ?? 0)) / height) * 100}%`,
+              width: `${(b.width / width) * 100}%`,
+              height: `${(b.height / height) * 100}%`,
+              transformOrigin: '0 0',
+              transform: `matrix(${m[0]},${m[1]},${m[2]},${m[3]},0,0)`,
+            }}
+          >
+            <span className="selection-label">{layer.node.name}</span>
+            {[0, 1, 2, 3].map((i) => (
+              <i key={i} className={`handle h${i}`} />
+            ))}
+          </div>
+        );
+      })}
+      {box && (
+        <div
+          className="canvas-marquee"
+          style={{
+            left: `${(Math.min(box.a.x, box.b.x) / width) * 100}%`,
+            top: `${(Math.min(box.a.y, box.b.y) / height) * 100}%`,
+            width: `${(Math.abs(box.a.x - box.b.x) / width) * 100}%`,
+            height: `${(Math.abs(box.a.y - box.b.y) / height) * 100}%`,
+          }}
+        />
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "839b5f60-cf4f-4dfa-8d25-2d321752c451",
+  "name": "原生深度 3D · 穿插遮挡",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

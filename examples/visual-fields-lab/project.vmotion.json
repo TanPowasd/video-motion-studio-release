@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "913b1848-56de-47f1-bb55-6e524ffa07c8",
+  "name": "程序化纹理与光效",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

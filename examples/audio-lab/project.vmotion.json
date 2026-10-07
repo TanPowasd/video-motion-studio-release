@@ -1,0 +1,38 @@
+{
+  "formatVersion": 1,
+  "id": "96da83c5-8bf6-4b3e-b528-7b07acb4e46a",
+  "name": "声音与画面同步实验",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [
+    {
+      "id": "2f48328c-551f-4950-bf38-0b1268c53318",
+      "name": "beat.wav",
+      "path": "assets/beat.wav",
+      "type": "audio",
+      "managed": false,
+      "fingerprint": "1152078:1791064294762.3667",
+      "metadata": {
+        "hasAudio": true,
+        "channels": 1,
+        "sampleRate": 48000,
+        "duration": 12
+      }
+    }
+  ],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

@@ -1,0 +1,946 @@
+{
+  "id": "intro",
+  "name": "合成 1",
+  "duration": 180,
+  "background": "#0b1220",
+  "nodes": [
+    {
+      "id": "title",
+      "type": "text",
+      "name": "Layer",
+      "visible": true,
+      "x": 58,
+      "y": 42,
+      "width": 1164,
+      "height": 68,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "timeMapping": {
+        "mode": "linear",
+        "anchor": 0,
+        "offset": 0,
+        "rate": 1,
+        "frame": 0,
+        "repeat": "continue"
+      },
+      "opacity": 1,
+      "fill": "#eef6ff",
+      "effects": [],
+      "stroke": "",
+      "strokeWidth": 0,
+      "strokeDash": [],
+      "strokeDashOffset": 0,
+      "strokeCap": "butt",
+      "strokeJoin": "miter",
+      "strokeMiterLimit": 10,
+      "fillRule": "nonzero",
+      "pathTrim": {
+        "start": 0,
+        "end": 1,
+        "offset": 0
+      },
+      "shapeOperators": [],
+      "radius": 0,
+      "text": "让文字与形状，保持可编程。",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 42,
+      "fontWeight": 700,
+      "align": "left",
+      "lineHeight": 1.3,
+      "textAnimators": [],
+      "reveal": 1,
+      "audioOffset": 0,
+      "params": {},
+      "overrides": {},
+      "path": "",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [],
+      "points": []
+    },
+    {
+      "id": "subtitle",
+      "type": "text",
+      "name": "Layer",
+      "visible": true,
+      "x": 60,
+      "y": 117,
+      "width": 1160,
+      "height": 36,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "timeMapping": {
+        "mode": "linear",
+        "anchor": 0,
+        "offset": 0,
+        "rate": 1,
+        "frame": 0,
+        "repeat": "continue"
+      },
+      "opacity": 1,
+      "fill": "#9ab5cf",
+      "effects": [],
+      "stroke": "",
+      "strokeWidth": 0,
+      "strokeDash": [],
+      "strokeDashOffset": 0,
+      "strokeCap": "butt",
+      "strokeJoin": "miter",
+      "strokeMiterLimit": 10,
+      "fillRule": "nonzero",
+      "pathTrim": {
+        "start": 0,
+        "end": 1,
+        "offset": 0
+      },
+      "shapeOperators": [],
+      "radius": 0,
+      "text": "路径文字 · 字 / 词 / 行选择器 · 七种有序算子 · 原生几何缓存",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 22,
+      "fontWeight": 400,
+      "align": "left",
+      "lineHeight": 1.3,
+      "textAnimators": [],
+      "reveal": 1,
+      "audioOffset": 0,
+      "params": {},
+      "overrides": {},
+      "path": "",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [],
+      "points": []
+    },
+    {
+      "id": "curve",
+      "type": "path",
+      "name": "Layer",
+      "visible": true,
+      "x": 60,
+      "y": 176,
+      "width": 200,
+      "height": 100,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "timeMapping": {
+        "mode": "linear",
+        "anchor": 0,
+        "offset": 0,
+        "rate": 1,
+        "frame": 0,
+        "repeat": "continue"
+      },
+      "opacity": 1,
+      "fill": "transparent",
+      "effects": [],
+      "stroke": "#294966",
+      "strokeWidth": 2,
+      "strokeDash": [],
+      "strokeDashOffset": 0,
+      "strokeCap": "butt",
+      "strokeJoin": "miter",
+      "strokeMiterLimit": 10,
+      "fillRule": "nonzero",
+      "pathTrim": {
+        "start": 0,
+        "end": 1,
+        "offset": 0
+      },
+      "shapeOperators": [],
+      "radius": 0,
+      "text": "",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 48,
+      "fontWeight": 400,
+      "align": "left",
+      "lineHeight": 1.3,
+      "textAnimators": [],
+      "reveal": 1,
+      "audioOffset": 0,
+      "params": {},
+      "overrides": {},
+      "path": "M0 98C250 -30 680 230 1080 62",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [],
+      "points": []
+    },
+    {
+      "id": "path-label",
+      "type": "text",
+      "name": "Layer",
+      "visible": true,
+      "x": 60,
+      "y": 176,
+      "width": 200,
+      "height": 100,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "timeMapping": {
+        "mode": "linear",
+        "anchor": 0,
+        "offset": 0,
+        "rate": 1,
+        "frame": 0,
+        "repeat": "continue"
+      },
+      "opacity": 1,
+      "fill": "#7edbfb",
+      "effects": [],
+      "stroke": "",
+      "strokeWidth": 0,
+      "strokeDash": [],
+      "strokeDashOffset": 0,
+      "strokeCap": "butt",
+      "strokeJoin": "miter",
+      "strokeMiterLimit": 10,
+      "fillRule": "nonzero",
+      "pathTrim": {
+        "start": 0,
+        "end": 1,
+        "offset": 0
+      },
+      "shapeOperators": [],
+      "radius": 0,
+      "text": "PATH TYPOGRAPHY  跟随曲线，让语言成为画面的一部分",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 32,
+      "fontWeight": 600,
+      "align": "left",
+      "lineHeight": 1.3,
+      "pathText": {
+        "path": "M0 98C250 -30 680 230 1080 62",
+        "offset": 0,
+        "normalOffset": 0,
+        "tracking": 0,
+        "align": "center",
+        "reverse": false,
+        "tangent": true,
+        "overflow": "hide"
+      },
+      "textAnimators": [],
+      "reveal": 1,
+      "audioOffset": 0,
+      "params": {},
+      "overrides": {},
+      "path": "",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [
+        {
+          "property": "pathText.normalOffset",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "frame": 90,
+              "value": -12,
+              "easing": "easeInOut"
+            },
+            {
+              "frame": 179,
+              "value": 0,
+              "easing": "linear"
+            }
+          ]
+        },
+        {
+          "property": "pathText.tracking",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "frame": 90,
+              "value": 1.2,
+              "easing": "easeInOut"
+            },
+            {
+              "frame": 179,
+              "value": 0,
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "points": []
+    },
+    {
+      "id": "range-caption",
+      "type": "text",
+      "name": "Layer",
+      "visible": true,
+      "x": 60,
+      "y": 355,
+      "width": 500,
+      "height": 32,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "timeMapping": {
+        "mode": "linear",
+        "anchor": 0,
+        "offset": 0,
+        "rate": 1,
+        "frame": 0,
+        "repeat": "continue"
+      },
+      "opacity": 1,
+      "fill": "#cedcf1",
+      "effects": [],
+      "stroke": "",
+      "strokeWidth": 0,
+      "strokeDash": [],
+      "strokeDashOffset": 0,
+      "strokeCap": "butt",
+      "strokeJoin": "miter",
+      "strokeMiterLimit": 10,
+      "fillRule": "nonzero",
+      "pathTrim": {
+        "start": 0,
+        "end": 1,
+        "offset": 0
+      },
+      "shapeOperators": [],
+      "radius": 0,
+      "text": "01  固定排版，范围动画",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 22,
+      "fontWeight": 600,
+      "align": "left",
+      "lineHeight": 1.3,
+      "textAnimators": [],
+      "reveal": 1,
+      "audioOffset": 0,
+      "params": {},
+      "overrides": {},
+      "path": "",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [],
+      "points": []
+    },
+    {
+      "id": "range-text",
+      "type": "text",
+      "name": "Layer",
+      "visible": true,
+      "x": 60,
+      "y": 417,
+      "width": 560,
+      "height": 138,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "timeMapping": {
+        "mode": "linear",
+        "anchor": 0,
+        "offset": 0,
+        "rate": 1,
+        "frame": 0,
+        "repeat": "continue"
+      },
+      "opacity": 1,
+      "fill": "#fafbff",
+      "effects": [],
+      "stroke": "",
+      "strokeWidth": 0,
+      "strokeDash": [],
+      "strokeDashOffset": 0,
+      "strokeCap": "butt",
+      "strokeJoin": "miter",
+      "strokeMiterLimit": 10,
+      "fillRule": "nonzero",
+      "pathTrim": {
+        "start": 0,
+        "end": 1,
+        "offset": 0
+      },
+      "shapeOperators": [],
+      "radius": 0,
+      "text": "选择 · 组合 · 自由创作\nStable words and lines",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 30,
+      "fontWeight": 400,
+      "align": "left",
+      "lineHeight": 1.65,
+      "textAnimators": [
+        {
+          "id": "reveal",
+          "enabled": true,
+          "selector": {
+            "unit": "grapheme",
+            "mode": "percent",
+            "start": 0,
+            "end": 0,
+            "offset": 0,
+            "shape": "square",
+            "amount": 1
+          },
+          "values": {
+            "x": 0,
+            "y": 20,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 0.7,
+            "opacity": 0,
+            "tracking": 0
+          }
+        },
+        {
+          "id": "line-lift",
+          "enabled": true,
+          "selector": {
+            "unit": "line",
+            "mode": "index",
+            "start": 1,
+            "end": 2,
+            "offset": 0,
+            "shape": "square",
+            "amount": 1
+          },
+          "values": {
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "opacity": 1,
+            "tracking": 0
+          }
+        }
+      ],
+      "reveal": 1,
+      "audioOffset": 0,
+      "params": {},
+      "overrides": {},
+      "path": "",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [
+        {
+          "property": "textAnimators.0.selector.start",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "frame": 100,
+              "value": 100,
+              "easing": "easeInOut"
+            }
+          ]
+        },
+        {
+          "property": "textAnimators.0.selector.end",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 100,
+              "easing": "linear"
+            },
+            {
+              "frame": 100,
+              "value": 100,
+              "easing": "linear"
+            }
+          ]
+        },
+        {
+          "property": "textAnimators.1.values.x",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "frame": 90,
+              "value": 12,
+              "easing": "easeInOut"
+            },
+            {
+              "frame": 179,
+              "value": 0,
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "points": []
+    },
+    {
+      "id": "shape-caption",
+      "type": "text",
+      "name": "Layer",
+      "visible": true,
+      "x": 722,
+      "y": 355,
+      "width": 500,
+      "height": 32,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "timeMapping": {
+        "mode": "linear",
+        "anchor": 0,
+        "offset": 0,
+        "rate": 1,
+        "frame": 0,
+        "repeat": "continue"
+      },
+      "opacity": 1,
+      "fill": "#cedcf1",
+      "effects": [],
+      "stroke": "",
+      "strokeWidth": 0,
+      "strokeDash": [],
+      "strokeDashOffset": 0,
+      "strokeCap": "butt",
+      "strokeJoin": "miter",
+      "strokeMiterLimit": 10,
+      "fillRule": "nonzero",
+      "pathTrim": {
+        "start": 0,
+        "end": 1,
+        "offset": 0
+      },
+      "shapeOperators": [],
+      "radius": 0,
+      "text": "02  布尔 → 偏移 → 轮廓",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 22,
+      "fontWeight": 600,
+      "align": "left",
+      "lineHeight": 1.3,
+      "textAnimators": [],
+      "reveal": 1,
+      "audioOffset": 0,
+      "params": {},
+      "overrides": {},
+      "path": "",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [],
+      "points": []
+    },
+    {
+      "id": "shape",
+      "type": "rect",
+      "name": "Layer",
+      "visible": true,
+      "x": 773,
+      "y": 427,
+      "width": 300,
+      "height": 130,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "timeMapping": {
+        "mode": "linear",
+        "anchor": 0,
+        "offset": 0,
+        "rate": 1,
+        "frame": 0,
+        "repeat": "continue"
+      },
+      "opacity": 1,
+      "fill": "#72ddc5",
+      "effects": [],
+      "stroke": "",
+      "strokeWidth": 0,
+      "strokeDash": [],
+      "strokeDashOffset": 0,
+      "strokeCap": "butt",
+      "strokeJoin": "miter",
+      "strokeMiterLimit": 10,
+      "fillRule": "nonzero",
+      "pathTrim": {
+        "start": 0,
+        "end": 1,
+        "offset": 0
+      },
+      "shapeOperators": [
+        {
+          "id": "round",
+          "enabled": true,
+          "type": "round",
+          "radius": 22
+        },
+        {
+          "id": "hole",
+          "enabled": true,
+          "type": "boolean",
+          "operation": "difference",
+          "paths": [
+            {
+              "path": "M90 30H210V100H90Z",
+              "fillRule": "nonzero"
+            }
+          ]
+        },
+        {
+          "id": "offset",
+          "enabled": true,
+          "type": "offset",
+          "amount": 0,
+          "join": "round",
+          "miterLimit": 10
+        },
+        {
+          "id": "outline",
+          "enabled": true,
+          "type": "outline",
+          "width": 3,
+          "cap": "butt",
+          "join": "round",
+          "miterLimit": 10
+        }
+      ],
+      "radius": 0,
+      "text": "",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 48,
+      "fontWeight": 400,
+      "align": "left",
+      "lineHeight": 1.3,
+      "textAnimators": [],
+      "reveal": 1,
+      "audioOffset": 0,
+      "params": {},
+      "overrides": {},
+      "path": "",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [
+        {
+          "property": "shapeOperators.2.amount",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "frame": 90,
+              "value": 14,
+              "easing": "easeInOut"
+            },
+            {
+              "frame": 179,
+              "value": 0,
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "points": []
+    },
+    {
+      "id": "dash",
+      "type": "path",
+      "name": "Layer",
+      "visible": true,
+      "x": 724,
+      "y": 603,
+      "width": 200,
+      "height": 100,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "timeMapping": {
+        "mode": "linear",
+        "anchor": 0,
+        "offset": 0,
+        "rate": 1,
+        "frame": 0,
+        "repeat": "continue"
+      },
+      "opacity": 1,
+      "fill": "#b49aff",
+      "effects": [],
+      "stroke": "",
+      "strokeWidth": 0,
+      "strokeDash": [],
+      "strokeDashOffset": 0,
+      "strokeCap": "butt",
+      "strokeJoin": "miter",
+      "strokeMiterLimit": 10,
+      "fillRule": "nonzero",
+      "pathTrim": {
+        "start": 0,
+        "end": 1,
+        "offset": 0
+      },
+      "shapeOperators": [
+        {
+          "id": "flow",
+          "enabled": true,
+          "type": "dash",
+          "on": 18,
+          "off": 10,
+          "phase": 0
+        },
+        {
+          "id": "outline",
+          "enabled": true,
+          "type": "outline",
+          "width": 5,
+          "cap": "round",
+          "join": "miter",
+          "miterLimit": 10
+        }
+      ],
+      "radius": 0,
+      "text": "",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 48,
+      "fontWeight": 400,
+      "align": "left",
+      "lineHeight": 1.3,
+      "textAnimators": [],
+      "reveal": 1,
+      "audioOffset": 0,
+      "params": {},
+      "overrides": {},
+      "path": "M0 0C130 -50 320 50 444 0",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [
+        {
+          "property": "shapeOperators.0.phase",
+          "keys": [
+            {
+              "frame": 0,
+              "value": 0,
+              "easing": "linear"
+            },
+            {
+              "frame": 179,
+              "value": 84,
+              "easing": "linear"
+            }
+          ]
+        }
+      ],
+      "points": []
+    },
+    {
+      "id": "footer",
+      "type": "text",
+      "name": "Layer",
+      "visible": true,
+      "x": 60,
+      "y": 660,
+      "width": 1160,
+      "height": 32,
+      "rotation": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "originX": 0,
+      "originY": 0,
+      "matrix": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "timeMapping": {
+        "mode": "linear",
+        "anchor": 0,
+        "offset": 0,
+        "rate": 1,
+        "frame": 0,
+        "repeat": "continue"
+      },
+      "opacity": 1,
+      "fill": "#7899b6",
+      "effects": [],
+      "stroke": "",
+      "strokeWidth": 0,
+      "strokeDash": [],
+      "strokeDashOffset": 0,
+      "strokeCap": "butt",
+      "strokeJoin": "miter",
+      "strokeMiterLimit": 10,
+      "fillRule": "nonzero",
+      "pathTrim": {
+        "start": 0,
+        "end": 1,
+        "offset": 0
+      },
+      "shapeOperators": [],
+      "radius": 0,
+      "text": "稳定 ID · 精简 MCP 候选 · 随机跳帧一致 · 预览与导出共用布局",
+      "fontFamily": "Microsoft YaHei",
+      "fontSize": 20,
+      "fontWeight": 400,
+      "align": "left",
+      "lineHeight": 1.3,
+      "textAnimators": [],
+      "reveal": 1,
+      "audioOffset": 0,
+      "params": {},
+      "overrides": {},
+      "path": "",
+      "blend": "source-over",
+      "blur": 0,
+      "maskMode": "alpha",
+      "maskFeather": 0,
+      "brightness": 1,
+      "saturation": 1,
+      "start": 0,
+      "animations": [],
+      "points": []
+    }
+  ]
+}

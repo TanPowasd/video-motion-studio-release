@@ -1,0 +1,223 @@
+{
+  "$ref": "#/definitions/project",
+  "definitions": {
+    "project": {
+      "type": "object",
+      "properties": {
+        "formatVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 16,
+          "maximum": 3840
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 16,
+          "maximum": 2160
+        },
+        "fps": {
+          "type": "object",
+          "properties": {
+            "num": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 60000
+            },
+            "den": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 1001
+            }
+          },
+          "required": [
+            "num",
+            "den"
+          ],
+          "additionalProperties": false
+        },
+        "colorSpace": {
+          "type": "string",
+          "const": "srgb",
+          "default": "srgb"
+        },
+        "sampleRate": {
+          "type": "number",
+          "const": 48000,
+          "default": 48000
+        },
+        "activeSequence": {
+          "$ref": "#/definitions/project/properties/id"
+        },
+        "scenes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sequences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "assets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/project/properties/id"
+              },
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "soundSource": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "image",
+                  "video",
+                  "audio",
+                  "font",
+                  "drawing"
+                ]
+              },
+              "managed": {
+                "type": "boolean",
+                "default": false
+              },
+              "fingerprint": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {},
+                "default": {}
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "path",
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "drawings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/project/properties/id"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "path"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "sdkVersion": {
+          "type": "string",
+          "default": "0.1.0"
+        },
+        "plugins": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "maxLength": 400,
+                "pattern": "^components\\/[\\p{L}\\p{N}_./-]+\\.(?:json|ts|tsx)$"
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "contentHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "source"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 128
+        },
+        "motionBlur": {
+          "type": "object",
+          "properties": {
+            "samples": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 16
+            },
+            "shutterAngle": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360,
+              "default": 180
+            }
+          },
+          "required": [
+            "samples"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "formatVersion",
+        "id",
+        "name",
+        "width",
+        "height",
+        "fps",
+        "activeSequence",
+        "scenes",
+        "sequences",
+        "assets"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

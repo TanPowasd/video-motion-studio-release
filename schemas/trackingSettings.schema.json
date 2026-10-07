@@ -1,0 +1,60 @@
+{
+  "$ref": "#/definitions/trackingSettings",
+  "definitions": {
+    "trackingSettings": {
+      "type": "object",
+      "properties": {
+        "levels": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "default": 4
+        },
+        "radius": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 15,
+          "default": 7
+        },
+        "iterations": {
+          "type": "integer",
+          "minimum": 3,
+          "maximum": 40,
+          "default": 20
+        },
+        "minFeature": {
+          "type": "number",
+          "minimum": 1e-8,
+          "maximum": 0.1,
+          "default": 0.00003
+        },
+        "minCorrelation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.8
+        },
+        "maxResidual": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 1,
+          "default": 0.15
+        },
+        "maxForwardBackward": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 10,
+          "default": 1.5
+        },
+        "maxDisplacement": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 256,
+          "default": 64
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

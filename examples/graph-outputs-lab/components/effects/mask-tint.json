@@ -1,0 +1,43 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "Shared matte / violet ink",
+  "parameters": {
+    "exposure": {
+      "type": "number",
+      "default": 1,
+      "min": 0.2,
+      "max": 2
+    }
+  },
+  "nodes": [
+    {
+      "id": "source",
+      "type": "input",
+      "slot": "source"
+    },
+    {
+      "id": "mask",
+      "type": "subgraph",
+      "source": "components/effects/visual.json",
+      "output": "matte",
+      "inputs": {
+        "source": "source"
+      },
+      "params": {}
+    },
+    {
+      "id": "ink",
+      "type": "channels",
+      "red": 0.65,
+      "green": 0.53,
+      "blue": 1,
+      "alpha": {
+        "input": "mask",
+        "channel": "alpha"
+      }
+    }
+  ],
+  "output": "ink",
+  "links": []
+}

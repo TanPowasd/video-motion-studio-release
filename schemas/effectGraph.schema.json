@@ -1,0 +1,2043 @@
+{
+  "$ref": "#/definitions/effectGraph",
+  "definitions": {
+    "effectGraph": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "effect-graph"
+        },
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": {},
+          "default": {}
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "pattern": "^[\\p{L}\\p{N}_-]+$"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "input"
+                  },
+                  "slot": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id",
+                    "default": "source"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "keyer"
+                  },
+                  "input": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "chroma",
+                      "luma"
+                    ],
+                    "default": "chroma"
+                  },
+                  "color": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-f]{6}$",
+                    "default": "#00ff00"
+                  },
+                  "threshold": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 0.12
+                  },
+                  "softness": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 0.08
+                  },
+                  "spill": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 0
+                  },
+                  "invert": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "view": {
+                    "type": "string",
+                    "enum": [
+                      "color",
+                      "matte"
+                    ],
+                    "default": "color"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "input"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "channels"
+                  },
+                  "red": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "input": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+                          },
+                          "channel": {
+                            "type": "string",
+                            "enum": [
+                              "red",
+                              "green",
+                              "blue",
+                              "alpha",
+                              "luma"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "input",
+                          "channel"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "green": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/2/properties/red"
+                  },
+                  "blue": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/2/properties/red"
+                  },
+                  "alpha": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/2/properties/red"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "red",
+                  "green",
+                  "blue",
+                  "alpha"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "colorMatrix"
+                  },
+                  "input": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+                  },
+                  "matrix": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -100,
+                      "maximum": 100
+                    },
+                    "minItems": 20,
+                    "maxItems": 20,
+                    "default": [
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0
+                    ]
+                  },
+                  "colorSpace": {
+                    "type": "string",
+                    "enum": [
+                      "srgb",
+                      "linear"
+                    ],
+                    "default": "srgb"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "input"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "texture"
+                  },
+                  "settings": {
+                    "type": "object",
+                    "properties": {
+                      "pattern": {
+                        "type": "string",
+                        "enum": [
+                          "fbm",
+                          "turbulence",
+                          "ridged",
+                          "cellular",
+                          "marble",
+                          "waves",
+                          "checker"
+                        ],
+                        "default": "fbm"
+                      },
+                      "seed": {
+                        "type": "integer",
+                        "default": 1
+                      },
+                      "scale": {
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 4000,
+                        "default": 100
+                      },
+                      "octaves": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 6,
+                        "default": 3
+                      },
+                      "evolution": {
+                        "type": "number",
+                        "default": 0
+                      },
+                      "angle": {
+                        "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/settings/properties/evolution",
+                        "default": 0
+                      },
+                      "contrast": {
+                        "type": "number",
+                        "minimum": 0.01,
+                        "maximum": 10,
+                        "default": 1
+                      },
+                      "bias": {
+                        "type": "number",
+                        "minimum": -1,
+                        "maximum": 1,
+                        "default": 0
+                      },
+                      "warp": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 8,
+                        "default": 0
+                      },
+                      "stops": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "offset": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            "color": {
+                              "type": "string",
+                              "pattern": "^#[0-9a-f]{6}$"
+                            },
+                            "alpha": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1,
+                              "default": 1
+                            }
+                          },
+                          "required": [
+                            "offset",
+                            "color"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "minItems": 2,
+                        "maxItems": 16,
+                        "default": [
+                          {
+                            "offset": 0,
+                            "color": "#10243a"
+                          },
+                          {
+                            "offset": 1,
+                            "color": "#91d9da"
+                          }
+                        ]
+                      }
+                    },
+                    "additionalProperties": false,
+                    "default": {}
+                  },
+                  "opacity": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 1
+                  },
+                  "space": {
+                    "type": "string",
+                    "enum": [
+                      "layer",
+                      "canvas"
+                    ],
+                    "default": "layer"
+                  },
+                  "region": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "number"
+                      },
+                      "y": {
+                        "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                      },
+                      "width": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "height": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y",
+                      "width",
+                      "height"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "pass"
+                  },
+                  "input": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+                  },
+                  "effect": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "program"
+                          },
+                          "source": {
+                            "type": "string",
+                            "pattern": "^components\\/renderers\\/(?:[\\p{L}\\p{N}_-]+\\/)*[\\p{L}\\p{N}_-]+\\.json$"
+                          },
+                          "params": {
+                            "type": "object",
+                            "additionalProperties": {},
+                            "default": {}
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "source"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "gradientMap"
+                          },
+                          "stops": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "offset": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 1
+                                },
+                                "color": {
+                                  "type": "string",
+                                  "pattern": "^#[0-9a-f]{6}$"
+                                }
+                              },
+                              "required": [
+                                "offset",
+                                "color"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "minItems": 2,
+                            "maxItems": 16
+                          },
+                          "intensity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "stops"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "radialRays"
+                          },
+                          "center": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x"
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y"
+                            ],
+                            "additionalProperties": false,
+                            "default": {
+                              "x": 0.5,
+                              "y": 0.5
+                            }
+                          },
+                          "length": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 4,
+                            "default": 0.5
+                          },
+                          "samples": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 64,
+                            "default": 16
+                          },
+                          "intensity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 8,
+                            "default": 1
+                          },
+                          "decay": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 1,
+                            "default": 0.92
+                          },
+                          "threshold": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0.5
+                          },
+                          "color": {
+                            "type": "string",
+                            "pattern": "^#[0-9a-f]{6}$",
+                            "default": "#dcecff"
+                          },
+                          "mix": {
+                            "type": "string",
+                            "enum": [
+                              "screen",
+                              "add"
+                            ],
+                            "default": "screen"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "bloom"
+                          },
+                          "radius": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 300,
+                            "default": 30
+                          },
+                          "threshold": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0.65
+                          },
+                          "intensity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 8,
+                            "default": 1
+                          },
+                          "levels": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 6,
+                            "default": 4
+                          },
+                          "color": {
+                            "type": "string",
+                            "pattern": "^#[0-9a-f]{6}$",
+                            "default": "#ffffff"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "blur"
+                          },
+                          "radius": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 300
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "radius"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "glow"
+                          },
+                          "color": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "radius": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 300
+                          },
+                          "intensity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 4,
+                            "default": 1
+                          },
+                          "threshold": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "color",
+                          "radius"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "color"
+                          },
+                          "brightness": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 4,
+                            "default": 1
+                          },
+                          "contrast": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 4,
+                            "default": 1
+                          },
+                          "saturation": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 4,
+                            "default": 1
+                          },
+                          "hue": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x",
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "shadow"
+                          },
+                          "color": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/5/properties/color"
+                          },
+                          "blur": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 300
+                          },
+                          "x": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x"
+                          },
+                          "y": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "color",
+                          "blur",
+                          "x",
+                          "y"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "chromaKey"
+                          },
+                          "color": {
+                            "type": "string",
+                            "pattern": "^#[0-9a-f]{6}$"
+                          },
+                          "tolerance": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0.12
+                          },
+                          "softness": {
+                            "type": "number",
+                            "minimum": 0.001,
+                            "maximum": 1,
+                            "default": 0.15
+                          },
+                          "despill": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0.8
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "color"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "levels"
+                          },
+                          "inputBlack": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 0.999,
+                            "default": 0
+                          },
+                          "inputWhite": {
+                            "type": "number",
+                            "minimum": 0.001,
+                            "maximum": 1,
+                            "default": 1
+                          },
+                          "gamma": {
+                            "type": "number",
+                            "minimum": 0.05,
+                            "maximum": 20,
+                            "default": 1
+                          },
+                          "outputBlack": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0
+                          },
+                          "outputWhite": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "curves"
+                          },
+                          "master": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 1
+                                },
+                                "y": {
+                                  "type": "number",
+                                  "minimum": 0,
+                                  "maximum": 1
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "minItems": 2,
+                            "maxItems": 32
+                          },
+                          "red": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/10/properties/master"
+                          },
+                          "green": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/10/properties/master"
+                          },
+                          "blue": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/10/properties/master"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "lut3d"
+                          },
+                          "size": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 33
+                          },
+                          "data": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x"
+                            },
+                            "minItems": 24,
+                            "maxItems": 107811
+                          },
+                          "domainMin": {
+                            "type": "array",
+                            "minItems": 3,
+                            "maxItems": 3,
+                            "items": [
+                              {
+                                "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x"
+                              },
+                              {
+                                "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x"
+                              },
+                              {
+                                "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x"
+                              }
+                            ],
+                            "default": [
+                              0,
+                              0,
+                              0
+                            ]
+                          },
+                          "domainMax": {
+                            "type": "array",
+                            "minItems": 3,
+                            "maxItems": 3,
+                            "items": [
+                              {
+                                "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x"
+                              },
+                              {
+                                "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x"
+                              },
+                              {
+                                "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x"
+                              }
+                            ],
+                            "default": [
+                              1,
+                              1,
+                              1
+                            ]
+                          },
+                          "intensity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "size",
+                          "data"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "vignette"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0.5
+                          },
+                          "radius": {
+                            "type": "number",
+                            "minimum": 0.05,
+                            "maximum": 2,
+                            "default": 0.75
+                          },
+                          "softness": {
+                            "type": "number",
+                            "minimum": 0.01,
+                            "maximum": 2,
+                            "default": 0.6
+                          },
+                          "center": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center",
+                            "default": {
+                              "x": 0.5,
+                              "y": 0.5
+                            }
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "grain"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 0.08
+                          },
+                          "seed": {
+                            "type": "integer",
+                            "default": 1
+                          },
+                          "monochrome": {
+                            "type": "boolean",
+                            "default": true
+                          },
+                          "animated": {
+                            "type": "boolean",
+                            "default": true
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "displacement"
+                          },
+                          "amountX": {
+                            "type": "number",
+                            "minimum": -500,
+                            "maximum": 500,
+                            "default": 20
+                          },
+                          "amountY": {
+                            "type": "number",
+                            "minimum": -500,
+                            "maximum": 500,
+                            "default": 20
+                          },
+                          "scale": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 2000,
+                            "default": 100
+                          },
+                          "seed": {
+                            "type": "integer",
+                            "default": 1
+                          },
+                          "evolution": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/2/properties/center/properties/x",
+                            "default": 0
+                          },
+                          "octaves": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 6,
+                            "default": 3
+                          },
+                          "edge": {
+                            "type": "string",
+                            "enum": [
+                              "transparent",
+                              "clamp",
+                              "wrap"
+                            ],
+                            "default": "transparent"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "pixelate"
+                          },
+                          "size": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 500,
+                            "default": 12
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "liquify"
+                          },
+                          "space": {
+                            "type": "string",
+                            "enum": [
+                              "layer",
+                              "canvas"
+                            ],
+                            "default": "layer"
+                          },
+                          "region": {
+                            "type": "object",
+                            "properties": {
+                              "x": {
+                                "type": "number"
+                              },
+                              "y": {
+                                "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region/properties/x"
+                              },
+                              "width": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              },
+                              "height": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              }
+                            },
+                            "required": [
+                              "x",
+                              "y",
+                              "width",
+                              "height"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "amount": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          },
+                          "edge": {
+                            "type": "string",
+                            "enum": [
+                              "transparent",
+                              "clamp",
+                              "wrap"
+                            ],
+                            "default": "transparent"
+                          },
+                          "brushes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "mode": {
+                                  "type": "string",
+                                  "enum": [
+                                    "push",
+                                    "twirl",
+                                    "inflate"
+                                  ],
+                                  "default": "push"
+                                },
+                                "center": {
+                                  "type": "object",
+                                  "properties": {
+                                    "x": {
+                                      "type": "number",
+                                      "minimum": -2,
+                                      "maximum": 3
+                                    },
+                                    "y": {
+                                      "type": "number",
+                                      "minimum": -2,
+                                      "maximum": 3
+                                    }
+                                  },
+                                  "required": [
+                                    "x",
+                                    "y"
+                                  ],
+                                  "additionalProperties": false,
+                                  "default": {
+                                    "x": 0.5,
+                                    "y": 0.5
+                                  }
+                                },
+                                "radius": {
+                                  "type": "number",
+                                  "minimum": 0.1,
+                                  "maximum": 4000,
+                                  "default": 100
+                                },
+                                "dx": {
+                                  "type": "number",
+                                  "minimum": -1000,
+                                  "maximum": 1000,
+                                  "default": 0
+                                },
+                                "dy": {
+                                  "type": "number",
+                                  "minimum": -1000,
+                                  "maximum": 1000,
+                                  "default": 0
+                                },
+                                "angle": {
+                                  "type": "number",
+                                  "minimum": -1440,
+                                  "maximum": 1440,
+                                  "default": 90
+                                },
+                                "amount": {
+                                  "type": "number",
+                                  "minimum": -1,
+                                  "maximum": 1,
+                                  "default": 1
+                                }
+                              },
+                              "additionalProperties": false
+                            },
+                            "maxItems": 128,
+                            "default": []
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "meshWarp"
+                          },
+                          "space": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/space"
+                          },
+                          "region": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region"
+                          },
+                          "columns": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 32
+                          },
+                          "rows": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 32
+                          },
+                          "points": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "number",
+                                  "minimum": -4,
+                                  "maximum": 5
+                                },
+                                "y": {
+                                  "type": "number",
+                                  "minimum": -4,
+                                  "maximum": 5
+                                },
+                                "weight": {
+                                  "type": "number",
+                                  "minimum": 0.01,
+                                  "maximum": 100,
+                                  "default": 1
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "minItems": 4,
+                            "maxItems": 1089
+                          },
+                          "amount": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          },
+                          "samples": {
+                            "type": "number",
+                            "enum": [
+                              1,
+                              4
+                            ],
+                            "default": 4
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "columns",
+                          "rows",
+                          "points"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "cornerPin"
+                          },
+                          "space": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/space"
+                          },
+                          "region": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region"
+                          },
+                          "corners": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "number",
+                                  "minimum": -4,
+                                  "maximum": 5
+                                },
+                                "y": {
+                                  "type": "number",
+                                  "minimum": -4,
+                                  "maximum": 5
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "minItems": 4,
+                            "maxItems": 4
+                          },
+                          "amount": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          },
+                          "samples": {
+                            "type": "number",
+                            "enum": [
+                              1,
+                              4
+                            ],
+                            "default": 4
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "corners"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "waveWarp"
+                          },
+                          "space": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/space"
+                          },
+                          "region": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region"
+                          },
+                          "amountX": {
+                            "type": "number",
+                            "minimum": -1000,
+                            "maximum": 1000,
+                            "default": 20
+                          },
+                          "amountY": {
+                            "type": "number",
+                            "minimum": -1000,
+                            "maximum": 1000,
+                            "default": 0
+                          },
+                          "wavelength": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 4000,
+                            "default": 120
+                          },
+                          "angle": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region/properties/x",
+                            "default": 0
+                          },
+                          "phase": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region/properties/x",
+                            "default": 0
+                          },
+                          "edge": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/edge"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "twirl"
+                          },
+                          "space": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/space"
+                          },
+                          "region": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region"
+                          },
+                          "center": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/brushes/items/properties/center",
+                            "default": {
+                              "x": 0.5,
+                              "y": 0.5
+                            }
+                          },
+                          "radius": {
+                            "type": "number",
+                            "minimum": 0.1,
+                            "maximum": 4000,
+                            "default": 150
+                          },
+                          "amount": {
+                            "type": "number",
+                            "minimum": -1440,
+                            "maximum": 1440,
+                            "default": 90
+                          },
+                          "edge": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/edge"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "bulge"
+                          },
+                          "space": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/space"
+                          },
+                          "region": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region"
+                          },
+                          "center": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/brushes/items/properties/center",
+                            "default": {
+                              "x": 0.5,
+                              "y": 0.5
+                            }
+                          },
+                          "radius": {
+                            "type": "number",
+                            "minimum": 0.1,
+                            "maximum": 4000,
+                            "default": 150
+                          },
+                          "amount": {
+                            "type": "number",
+                            "minimum": -1,
+                            "maximum": 1,
+                            "default": 0.5
+                          },
+                          "edge": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/edge"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "rgbSplit"
+                          },
+                          "space": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/space"
+                          },
+                          "region": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region"
+                          },
+                          "amountX": {
+                            "type": "number",
+                            "minimum": -1000,
+                            "maximum": 1000,
+                            "default": 6
+                          },
+                          "amountY": {
+                            "type": "number",
+                            "minimum": -1000,
+                            "maximum": 1000,
+                            "default": 0
+                          },
+                          "intensity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          },
+                          "edge": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/edge"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "linearWipe"
+                          },
+                          "space": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/space"
+                          },
+                          "region": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region"
+                          },
+                          "progress": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          },
+                          "angle": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region/properties/x",
+                            "default": 0
+                          },
+                          "feather": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 2000,
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "radialWipe"
+                          },
+                          "space": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/space"
+                          },
+                          "region": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/region"
+                          },
+                          "progress": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "default": 1
+                          },
+                          "center": {
+                            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/5/properties/effect/anyOf/16/properties/brushes/items/properties/center",
+                            "default": {
+                              "x": 0.5,
+                              "y": 0.5
+                            }
+                          },
+                          "feather": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 2000,
+                            "default": 0
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "input",
+                  "effect"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "blend"
+                  },
+                  "foreground": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+                  },
+                  "background": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "source-over",
+                      "screen",
+                      "multiply",
+                      "overlay",
+                      "difference",
+                      "lighter",
+                      "darken",
+                      "lighten"
+                    ],
+                    "default": "source-over"
+                  },
+                  "opacity": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 1
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "foreground",
+                  "background"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "mask"
+                  },
+                  "input": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+                  },
+                  "matte": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "alpha",
+                      "alphaInverted",
+                      "luma",
+                      "lumaInverted"
+                    ],
+                    "default": "alpha"
+                  },
+                  "feather": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 300,
+                    "default": 0
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "input",
+                  "matte"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "transform"
+                  },
+                  "input": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+                  },
+                  "matrix": {
+                    "type": "array",
+                    "minItems": 6,
+                    "maxItems": 6,
+                    "items": [
+                      {
+                        "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                      },
+                      {
+                        "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                      },
+                      {
+                        "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                      },
+                      {
+                        "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                      },
+                      {
+                        "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                      },
+                      {
+                        "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region/properties/x"
+                      }
+                    ],
+                    "default": [
+                      1,
+                      0,
+                      0,
+                      1,
+                      0,
+                      0
+                    ]
+                  },
+                  "space": {
+                    "type": "string",
+                    "enum": [
+                      "layer",
+                      "canvas"
+                    ],
+                    "default": "layer"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "input"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "displace"
+                  },
+                  "input": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+                  },
+                  "map": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+                  },
+                  "amountX": {
+                    "type": "number",
+                    "minimum": -1000,
+                    "maximum": 1000,
+                    "default": 20
+                  },
+                  "amountY": {
+                    "type": "number",
+                    "minimum": -1000,
+                    "maximum": 1000,
+                    "default": 20
+                  },
+                  "channelX": {
+                    "type": "string",
+                    "enum": [
+                      "red",
+                      "green",
+                      "blue",
+                      "alpha",
+                      "luma"
+                    ],
+                    "default": "red"
+                  },
+                  "channelY": {
+                    "type": "string",
+                    "enum": [
+                      "red",
+                      "green",
+                      "blue",
+                      "alpha",
+                      "luma"
+                    ],
+                    "default": "green"
+                  },
+                  "midpointX": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 0.5
+                  },
+                  "midpointY": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 0.5
+                  },
+                  "mapAlpha": {
+                    "type": "string",
+                    "enum": [
+                      "multiply",
+                      "ignore"
+                    ],
+                    "default": "multiply"
+                  },
+                  "space": {
+                    "type": "string",
+                    "enum": [
+                      "layer",
+                      "canvas"
+                    ],
+                    "default": "layer"
+                  },
+                  "edge": {
+                    "type": "string",
+                    "enum": [
+                      "transparent",
+                      "clamp",
+                      "wrap"
+                    ],
+                    "default": "transparent"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "input",
+                  "map"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "noise"
+                  },
+                  "seed": {
+                    "type": "integer",
+                    "default": 1
+                  },
+                  "scale": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 4000,
+                    "default": 100
+                  },
+                  "octaves": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 6,
+                    "default": 3
+                  },
+                  "evolution": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region/properties/x",
+                    "default": 0
+                  },
+                  "low": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/color",
+                    "default": "#000000"
+                  },
+                  "high": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/color",
+                    "default": "#ffffff"
+                  },
+                  "opacity": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 1
+                  },
+                  "space": {
+                    "type": "string",
+                    "enum": [
+                      "layer",
+                      "canvas"
+                    ],
+                    "default": "layer"
+                  },
+                  "region": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "solid"
+                  },
+                  "color": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/color"
+                  },
+                  "opacity": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 1
+                  },
+                  "space": {
+                    "type": "string",
+                    "enum": [
+                      "layer",
+                      "canvas"
+                    ],
+                    "default": "layer"
+                  },
+                  "region": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region"
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "color"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "type": {
+                    "type": "string",
+                    "const": "subgraph"
+                  },
+                  "source": {
+                    "type": "string",
+                    "pattern": "^components\\/effects\\/(?:[\\p{L}\\p{N}_-]+\\/)*[\\p{L}\\p{N}_-]+\\.json$"
+                  },
+                  "output": {
+                    "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/0/properties/id"
+                  },
+                  "inputs": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+                    },
+                    "default": {}
+                  },
+                  "params": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "default": {}
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "source"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 128
+        },
+        "output": {
+          "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+        },
+        "outputs": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+          }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "nodeId": {
+                "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/1/properties/input"
+              },
+              "property": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "parameter": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "direct",
+                  "number"
+                ],
+                "default": "direct"
+              },
+              "scale": {
+                "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region/properties/x",
+                "default": 1
+              },
+              "offset": {
+                "$ref": "#/definitions/effectGraph/properties/nodes/items/anyOf/4/properties/region/properties/x",
+                "default": 0
+              }
+            },
+            "required": [
+              "nodeId",
+              "property",
+              "parameter"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 512,
+          "default": []
+        }
+      },
+      "required": [
+        "kind",
+        "version",
+        "name",
+        "nodes",
+        "output"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

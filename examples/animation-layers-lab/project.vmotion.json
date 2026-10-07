@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "e056aa8c-1d17-4877-8280-9f0ee56d6f2a",
+  "name": "动作层与循环编排",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

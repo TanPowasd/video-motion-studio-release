@@ -1,0 +1,93 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "layerDisplace",
+  "parameters": {
+    "amountX": {
+      "type": "number",
+      "default": 20,
+      "min": -1000,
+      "max": 1000
+    },
+    "amountY": {
+      "type": "number",
+      "default": 20,
+      "min": -1000,
+      "max": 1000
+    },
+    "midpointX": {
+      "type": "number",
+      "default": 0.5,
+      "min": 0,
+      "max": 1
+    },
+    "midpointY": {
+      "type": "number",
+      "default": 0.5,
+      "min": 0,
+      "max": 1
+    }
+  },
+  "nodes": [
+    {
+      "id": "source",
+      "type": "input",
+      "slot": "source"
+    },
+    {
+      "id": "field",
+      "type": "input",
+      "slot": "map"
+    },
+    {
+      "id": "warp",
+      "type": "displace",
+      "input": "source",
+      "map": "field",
+      "amountX": 20,
+      "amountY": 20,
+      "channelX": "red",
+      "channelY": "green",
+      "midpointX": 0.5,
+      "midpointY": 0.5,
+      "mapAlpha": "multiply",
+      "space": "layer",
+      "edge": "transparent"
+    }
+  ],
+  "output": "warp",
+  "links": [
+    {
+      "nodeId": "warp",
+      "property": "amountX",
+      "parameter": "amountX",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "warp",
+      "property": "amountY",
+      "parameter": "amountY",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "warp",
+      "property": "midpointX",
+      "parameter": "midpointX",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "warp",
+      "property": "midpointY",
+      "parameter": "midpointY",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    }
+  ]
+}

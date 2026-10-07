@@ -1,0 +1,27 @@
+{
+  "id": "main",
+  "name": "主序列",
+  "duration": 180,
+  "tracks": [
+    {
+      "id": "video",
+      "name": "文字与形状",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        {
+          "id": "intro",
+          "sceneId": "intro",
+          "start": 0,
+          "duration": 180,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0
+        }
+      ]
+    }
+  ],
+  "markers": []
+}

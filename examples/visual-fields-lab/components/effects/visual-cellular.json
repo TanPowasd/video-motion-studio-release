@@ -1,0 +1,121 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "cellular",
+  "parameters": {
+    "scale": {
+      "type": "number",
+      "default": 70,
+      "min": 1,
+      "max": 4000
+    },
+    "evolution": {
+      "type": "number",
+      "default": 0,
+      "min": -100000,
+      "max": 100000
+    },
+    "warp": {
+      "type": "number",
+      "default": 0,
+      "min": 0,
+      "max": 8
+    },
+    "contrast": {
+      "type": "number",
+      "default": 1,
+      "min": 0.01,
+      "max": 10
+    },
+    "low": {
+      "type": "color",
+      "default": "#10263d"
+    },
+    "high": {
+      "type": "color",
+      "default": "#9bdbd6"
+    }
+  },
+  "nodes": [
+    {
+      "id": "field",
+      "type": "texture",
+      "settings": {
+        "pattern": "cellular",
+        "seed": 1,
+        "scale": 70,
+        "octaves": 3,
+        "evolution": 0,
+        "angle": 0,
+        "contrast": 1,
+        "bias": 0,
+        "warp": 0,
+        "stops": [
+          {
+            "offset": 0,
+            "color": "#10263d",
+            "alpha": 1
+          },
+          {
+            "offset": 1,
+            "color": "#9bdbd6",
+            "alpha": 1
+          }
+        ]
+      },
+      "opacity": 1,
+      "space": "layer"
+    }
+  ],
+  "output": "field",
+  "links": [
+    {
+      "nodeId": "field",
+      "property": "settings.scale",
+      "parameter": "scale",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "field",
+      "property": "settings.evolution",
+      "parameter": "evolution",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "field",
+      "property": "settings.warp",
+      "parameter": "warp",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "field",
+      "property": "settings.contrast",
+      "parameter": "contrast",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "field",
+      "property": "settings.stops.0.color",
+      "parameter": "low",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "field",
+      "property": "settings.stops.1.color",
+      "parameter": "high",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    }
+  ]
+}

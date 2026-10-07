@@ -1,0 +1,28 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "Named layer mask",
+  "parameters": {},
+  "nodes": [
+    {
+      "id": "src",
+      "type": "input",
+      "slot": "source"
+    },
+    {
+      "id": "matte",
+      "type": "input",
+      "slot": "matte"
+    },
+    {
+      "id": "out",
+      "type": "mask",
+      "input": "src",
+      "matte": "matte",
+      "mode": "alpha",
+      "feather": 0
+    }
+  ],
+  "output": "out",
+  "links": []
+}

@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "6fabac60-8a50-456f-8c7f-40dbc6258e35",
+  "name": "三维材质 · 光照与法线",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

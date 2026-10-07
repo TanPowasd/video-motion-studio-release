@@ -1,0 +1,220 @@
+{
+  "id": "main",
+  "name": "Night City · 电影剪辑",
+  "duration": 270,
+  "tracks": [
+    {
+      "id": "picture",
+      "name": "画面 / 镜头",
+      "type": "video",
+      "muted": false,
+      "locked": false,
+      "clips": [
+        {
+          "id": "shot-0",
+          "assetId": "e45e0965-7692-4d0f-ba8a-fde179c562a6",
+          "start": 0,
+          "duration": 90,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 12,
+          "fadeOut": 0,
+          "name": "远景",
+          "audioEnabled": false
+        },
+        {
+          "id": "shot-1",
+          "assetId": "e45e0965-7692-4d0f-ba8a-fde179c562a6",
+          "start": 90,
+          "duration": 45,
+          "sourceIn": 90,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "街道",
+          "audioEnabled": false,
+          "fadeWindow": {
+            "offset": 0,
+            "duration": 90
+          },
+          "sourceWindow": {
+            "sourceIn": 90,
+            "duration": 90
+          }
+        },
+        {
+          "id": "96ccae64-d4a0-4afd-94fa-e6946906239e",
+          "assetId": "e45e0965-7692-4d0f-ba8a-fde179c562a6",
+          "start": 135,
+          "duration": 45,
+          "sourceIn": 135,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "街道",
+          "audioEnabled": false,
+          "fadeWindow": {
+            "offset": 45,
+            "duration": 90
+          },
+          "sourceWindow": {
+            "sourceIn": 90,
+            "duration": 90
+          }
+        },
+        {
+          "id": "shot-2",
+          "assetId": "e45e0965-7692-4d0f-ba8a-fde179c562a6",
+          "start": 180,
+          "duration": 90,
+          "sourceIn": 180,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 18,
+          "name": "细节",
+          "audioEnabled": false
+        }
+      ]
+    },
+    {
+      "id": "music",
+      "name": "音乐",
+      "type": "audio",
+      "muted": false,
+      "clips": [
+        {
+          "id": "bed",
+          "assetId": "810ca4b1-3030-4b77-ada9-7ca789226c27",
+          "start": 0,
+          "duration": 270,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 0.7,
+          "fadeIn": 20,
+          "fadeOut": 30,
+          "name": "原创环境音乐"
+        }
+      ]
+    },
+    {
+      "id": "b1fd0466-caaa-4ba3-8581-b0472b6af522",
+      "name": "中文字幕",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        {
+          "id": "f962df69-e730-4d07-9739-e690a02a57bb",
+          "sceneId": "captions-4f2267be-a506-41d2-b689-62b095081c3d",
+          "start": 0,
+          "duration": 270,
+          "sourceIn": 0,
+          "speed": 1,
+          "volume": 1,
+          "fadeIn": 0,
+          "fadeOut": 0,
+          "name": "中文字幕",
+          "audioEnabled": false
+        }
+      ]
+    }
+  ],
+  "workflow": "remix",
+  "workArea": {
+    "start": 30,
+    "end": 180
+  },
+  "markers": [
+    {
+      "id": "wide",
+      "frame": 0,
+      "label": "远景",
+      "kind": "chapter"
+    },
+    {
+      "id": "a466ec33-59d4-4ceb-b402-6f44ba07f302",
+      "frame": 30,
+      "label": "节拍 1",
+      "kind": "beat",
+      "group": "beat-grid"
+    },
+    {
+      "id": "e400047e-fe41-4823-b7c8-2926b6a74c71",
+      "frame": 45,
+      "label": "节拍 2",
+      "kind": "beat",
+      "group": "beat-grid"
+    },
+    {
+      "id": "00da34eb-59e8-4bad-8bf6-df2a971f8517",
+      "frame": 60,
+      "label": "节拍 3",
+      "kind": "beat",
+      "group": "beat-grid"
+    },
+    {
+      "id": "a93c03fc-2cf4-4a10-80d5-df58423137e2",
+      "frame": 75,
+      "label": "节拍 4",
+      "kind": "beat",
+      "group": "beat-grid"
+    },
+    {
+      "id": "street",
+      "frame": 90,
+      "label": "街道",
+      "kind": "chapter"
+    },
+    {
+      "id": "a5791367-823c-416d-b3e8-39b9d2e18bab",
+      "frame": 90,
+      "label": "节拍 5",
+      "kind": "beat",
+      "group": "beat-grid"
+    },
+    {
+      "id": "2e245733-5a05-4eeb-9445-293934e1fde5",
+      "frame": 105,
+      "label": "节拍 6",
+      "kind": "beat",
+      "group": "beat-grid"
+    },
+    {
+      "id": "802291b6-b4d0-4ae2-b886-ce8aece1d812",
+      "frame": 120,
+      "label": "节拍 7",
+      "kind": "beat",
+      "group": "beat-grid"
+    },
+    {
+      "id": "5fcd854f-490d-4e69-96d1-a70fa0410071",
+      "frame": 135,
+      "label": "节拍 8",
+      "kind": "beat",
+      "group": "beat-grid"
+    },
+    {
+      "id": "9587f765-c0a6-4758-913f-9b949d54e2a3",
+      "frame": 150,
+      "label": "节拍 9",
+      "kind": "beat",
+      "group": "beat-grid"
+    },
+    {
+      "id": "af09be53-0c34-4aa6-8156-bf96e012beb7",
+      "frame": 165,
+      "label": "节拍 10",
+      "kind": "beat",
+      "group": "beat-grid"
+    },
+    {
+      "id": "detail",
+      "frame": 180,
+      "label": "细节",
+      "kind": "chapter"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "kind": "effect-graph",
+  "version": 1,
+  "name": "radialRays",
+  "parameters": {
+    "center": {
+      "type": "vec2",
+      "default": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "min": -2,
+      "max": 3
+    },
+    "length": {
+      "type": "number",
+      "default": 0.7,
+      "min": 0,
+      "max": 4
+    },
+    "intensity": {
+      "type": "number",
+      "default": 1.5,
+      "min": 0,
+      "max": 8
+    },
+    "threshold": {
+      "type": "number",
+      "default": 0.35,
+      "min": 0,
+      "max": 1
+    },
+    "color": {
+      "type": "color",
+      "default": "#deecff"
+    }
+  },
+  "nodes": [
+    {
+      "id": "source",
+      "type": "input",
+      "slot": "source"
+    },
+    {
+      "id": "rays",
+      "type": "pass",
+      "input": "source",
+      "effect": {
+        "type": "radialRays",
+        "center": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "length": 0.7,
+        "samples": 16,
+        "intensity": 1.5,
+        "decay": 0.92,
+        "threshold": 0.35,
+        "color": "#dcecff",
+        "mix": "screen"
+      }
+    }
+  ],
+  "output": "rays",
+  "links": [
+    {
+      "nodeId": "rays",
+      "property": "effect.center",
+      "parameter": "center",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "rays",
+      "property": "effect.length",
+      "parameter": "length",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "rays",
+      "property": "effect.intensity",
+      "parameter": "intensity",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "rays",
+      "property": "effect.threshold",
+      "parameter": "threshold",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    },
+    {
+      "nodeId": "rays",
+      "property": "effect.color",
+      "parameter": "color",
+      "mode": "direct",
+      "scale": 1,
+      "offset": 0
+    }
+  ]
+}

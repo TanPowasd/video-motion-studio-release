@@ -1,0 +1,571 @@
+{
+  "$ref": "#/definitions/audioMix",
+  "definitions": {
+    "audioMix": {
+      "type": "object",
+      "properties": {
+        "tracks": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "gainDb": {
+                "type": "number",
+                "minimum": -80,
+                "maximum": 24,
+                "default": 0
+              },
+              "pan": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1,
+                "default": 0
+              },
+              "effects": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "gain"
+                        },
+                        "db": {
+                          "type": "number",
+                          "minimum": -80,
+                          "maximum": 24
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "db"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "filter"
+                        },
+                        "mode": {
+                          "type": "string",
+                          "enum": [
+                            "lowpass",
+                            "highpass",
+                            "peaking",
+                            "lowshelf",
+                            "highshelf"
+                          ]
+                        },
+                        "frequency": {
+                          "type": "number",
+                          "minimum": 10,
+                          "maximum": 22000
+                        },
+                        "q": {
+                          "type": "number",
+                          "minimum": 0.1,
+                          "maximum": 20,
+                          "default": 0.707
+                        },
+                        "db": {
+                          "type": "number",
+                          "minimum": -24,
+                          "maximum": 24,
+                          "default": 0
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "mode",
+                        "frequency"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "distortion"
+                        },
+                        "drive": {
+                          "type": "number",
+                          "minimum": 1,
+                          "maximum": 30,
+                          "default": 3
+                        },
+                        "mix": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1,
+                          "default": 0.5
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "delay"
+                        },
+                        "seconds": {
+                          "type": "number",
+                          "minimum": 0.001,
+                          "maximum": 3,
+                          "default": 0.25
+                        },
+                        "rightSeconds": {
+                          "type": "number",
+                          "minimum": 0.001,
+                          "maximum": 3
+                        },
+                        "feedback": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 0.9,
+                          "default": 0.3
+                        },
+                        "mix": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1,
+                          "default": 0.25
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "chorus"
+                        },
+                        "rate": {
+                          "type": "number",
+                          "minimum": 0.01,
+                          "maximum": 10,
+                          "default": 0.8
+                        },
+                        "depth": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 0.015,
+                          "default": 0.003
+                        },
+                        "delay": {
+                          "type": "number",
+                          "minimum": 0.016,
+                          "maximum": 0.05,
+                          "default": 0.02
+                        },
+                        "mix": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1,
+                          "default": 0.3
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "reverb"
+                        },
+                        "seconds": {
+                          "type": "number",
+                          "minimum": 0.1,
+                          "maximum": 8,
+                          "default": 1.5
+                        },
+                        "damping": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 0.95,
+                          "default": 0.4
+                        },
+                        "mix": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1,
+                          "default": 0.2
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "compressor"
+                        },
+                        "thresholdDb": {
+                          "type": "number",
+                          "minimum": -60,
+                          "maximum": 0,
+                          "default": -18
+                        },
+                        "ratio": {
+                          "type": "number",
+                          "minimum": 1,
+                          "maximum": 30,
+                          "default": 4
+                        },
+                        "kneeDb": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 24,
+                          "default": 6
+                        },
+                        "attack": {
+                          "type": "number",
+                          "minimum": 0.0001,
+                          "maximum": 0.5,
+                          "default": 0.01
+                        },
+                        "release": {
+                          "type": "number",
+                          "minimum": 0.001,
+                          "maximum": 3,
+                          "default": 0.15
+                        },
+                        "makeupDb": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 24,
+                          "default": 0
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "limiter"
+                        },
+                        "ceilingDb": {
+                          "type": "number",
+                          "minimum": -24,
+                          "maximum": 0,
+                          "default": -1
+                        },
+                        "release": {
+                          "type": "number",
+                          "minimum": 0.001,
+                          "maximum": 3,
+                          "default": 0.1
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "maxItems": 12,
+                "default": []
+              },
+              "ducking": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "track",
+                              "bus"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "id"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "thresholdDb": {
+                        "type": "number",
+                        "minimum": -60,
+                        "maximum": 0,
+                        "default": -24
+                      },
+                      "ratio": {
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 20,
+                        "default": 4
+                      },
+                      "kneeDb": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 24,
+                        "default": 6
+                      },
+                      "attack": {
+                        "type": "number",
+                        "minimum": 0.0001,
+                        "maximum": 2,
+                        "default": 0.01
+                      },
+                      "release": {
+                        "type": "number",
+                        "minimum": 0.001,
+                        "maximum": 9,
+                        "default": 0.25
+                      },
+                      "maxReductionDb": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 60,
+                        "default": 24
+                      }
+                    },
+                    "required": [
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "busId": {
+                "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/ducking/anyOf/0/properties/source/properties/id",
+                "default": "master"
+              },
+              "sends": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "busId": {
+                      "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/ducking/anyOf/0/properties/source/properties/id"
+                    },
+                    "db": {
+                      "type": "number",
+                      "minimum": -80,
+                      "maximum": 12,
+                      "default": -12
+                    }
+                  },
+                  "required": [
+                    "busId"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 8,
+                "default": []
+              },
+              "solo": {
+                "type": "boolean",
+                "default": false
+              },
+              "automation": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "property": {
+                      "type": "string",
+                      "enum": [
+                        "gainDb",
+                        "pan"
+                      ]
+                    },
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          "value": {
+                            "type": "number"
+                          },
+                          "easing": {
+                            "type": "string",
+                            "enum": [
+                              "linear",
+                              "hold"
+                            ],
+                            "default": "linear"
+                          }
+                        },
+                        "required": [
+                          "at",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "minItems": 1,
+                      "maxItems": 2000
+                    }
+                  },
+                  "required": [
+                    "property",
+                    "keys"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 2,
+                "default": []
+              }
+            },
+            "additionalProperties": false
+          },
+          "default": {}
+        },
+        "buses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "gainDb": {
+                "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/gainDb"
+              },
+              "pan": {
+                "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/pan"
+              },
+              "effects": {
+                "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/effects"
+              },
+              "ducking": {
+                "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/ducking"
+              },
+              "busId": {
+                "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/busId"
+              },
+              "sends": {
+                "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/sends"
+              },
+              "automation": {
+                "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/automation"
+              },
+              "id": {
+                "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/ducking/anyOf/0/properties/source/properties/id"
+              },
+              "name": {
+                "type": "string",
+                "default": "Bus"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 16,
+          "default": []
+        },
+        "master": {
+          "type": "object",
+          "properties": {
+            "gainDb": {
+              "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/gainDb"
+            },
+            "pan": {
+              "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/pan"
+            },
+            "effects": {
+              "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/effects"
+            },
+            "ducking": {
+              "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/ducking"
+            },
+            "normalization": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "targetLufs": {
+                      "type": "number",
+                      "minimum": -36,
+                      "maximum": -5,
+                      "default": -16
+                    },
+                    "targetLra": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 50,
+                      "default": 11
+                    },
+                    "truePeakDb": {
+                      "type": "number",
+                      "minimum": -9,
+                      "maximum": 0,
+                      "default": -1
+                    },
+                    "mode": {
+                      "type": "string",
+                      "enum": [
+                        "auto",
+                        "linear",
+                        "dynamic"
+                      ],
+                      "default": "auto"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "scratchBudgetMb": {
+          "type": "integer",
+          "minimum": 64,
+          "maximum": 131072,
+          "default": 20480
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
