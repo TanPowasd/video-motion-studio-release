@@ -33,7 +33,9 @@
       "tests/test-runner.test.ts",
       "tests/runtime-font-route.test.ts",
       "tests/music-patterns.test.ts",
-      "tests/midi-recording.test.ts"
+      "tests/midi-recording.test.ts",
+      "tests/change-journal.test.ts",
+      "tests/studio-shell.test.ts"
     ]
   },
   "integration": {
@@ -78,6 +80,7 @@
       "tests/parameter-query.test.ts",
       "tests/particle-field.test.ts",
       "tests/pixel-review.test.ts",
+      "tests/plugin-bundles.test.ts",
       "tests/plugins.test.ts",
       "tests/preview-rgba.test.ts",
       "tests/project-creation.test.ts",
@@ -108,7 +111,9 @@
       "tests/render-programs.test.ts",
       "tests/music-export.test.ts",
       "tests/audio-plugins.test.ts",
-      "tests/surfaces.test.ts"
+      "tests/surfaces.test.ts",
+      "tests/stills.test.ts",
+      "tests/glyphs.test.ts"
     ]
   },
   "acceptance": {
@@ -120,9 +125,7 @@
       },
       {
         "file": "scripts/check-mcp-budget.mjs",
-        "args": [
-          "--packaged"
-        ]
+        "args": ["--packaged"]
       },
       {
         "file": "scripts/check-portable.mjs",
@@ -130,36 +133,36 @@
       },
       {
         "file": "scripts/check-desktop-projects.mjs",
-        "args": [
-          "--packaged",
-          "--isolated"
-        ]
+        "args": ["--packaged", "--isolated"]
       },
       {
         "file": "scripts/check-gpu-effects.mjs",
-        "args": [
-          "--packaged"
-        ],
+        "args": ["--packaged"],
         "requires": "gpu"
       },
       {
         "file": "scripts/check-music-studio.mjs",
-        "args": [
-          "--packaged",
-          "--live"
-        ]
+        "args": ["--packaged", "--live"]
       },
       {
         "file": "scripts/check-audio-plugins.mjs",
-        "args": [
-          "--packaged"
-        ]
+        "args": ["--packaged"]
       },
       {
         "file": "scripts/check-surfaces.mjs",
-        "args": [
-          "--packaged"
-        ]
+        "args": ["--packaged"]
+      },
+      {
+        "file": "scripts/check-stills.mjs",
+        "args": ["--packaged"]
+      },
+      {
+        "file": "scripts/check-glyphs.mjs",
+        "args": ["--packaged"]
+      },
+      {
+        "file": "scripts/check-plugin-bundles.mjs",
+        "args": ["--packaged"]
       }
     ]
   }

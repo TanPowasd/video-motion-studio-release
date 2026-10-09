@@ -86,12 +86,12 @@ export function applyOperations(root: string, input: Snapshot, raw: Operation[])
         for (const n of s.nodes) if (n.maskId && remove.has(n.maskId)) delete n.maskId;
         break;
       }
-      case 'updateScene':
-        Object.assign(
-          scene(op.sceneId),
-          sceneSchema.parse({ ...scene(op.sceneId), ...op.patch, id: op.sceneId }),
-        );
+      case 'updateScene': {
+        const target = scene(op.sceneId);
+        Object.assign(target, sceneSchema.parse({ ...target, ...op.patch, id: op.sceneId }));
+        if (target.still === null) delete target.still;
         break;
+      }
       case 'addScene':
         candidate.scenes.push(sceneSchema.parse(op.scene));
         candidate.project.scenes.push(`scenes/${op.scene.id.replace(/[^\w-]/g, '_')}.json`);

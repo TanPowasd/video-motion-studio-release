@@ -19,12 +19,12 @@
         "width": {
           "type": "integer",
           "minimum": 16,
-          "maximum": 3840
+          "maximum": 8192
         },
         "height": {
           "type": "integer",
           "minimum": 16,
-          "maximum": 2160
+          "maximum": 8192
         },
         "background": {
           "type": "string",
@@ -3821,6 +3821,25 @@
                 "maximum": 900,
                 "default": 400
               },
+              "glyphSet": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^(builtin:)?[a-z0-9][a-z0-9-]{0,62}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "glyphFallback": {
+                "type": "string",
+                "enum": [
+                  "font",
+                  "none",
+                  "tofu"
+                ]
+              },
               "align": {
                 "type": "string",
                 "enum": [
@@ -4605,6 +4624,19 @@
                       "minimum": 100,
                       "maximum": 900
                     },
+                    "glyphSet": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/definitions/scene/properties/nodes/items/properties/glyphSet/anyOf/0"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "glyphFallback": {
+                      "$ref": "#/definitions/scene/properties/nodes/items/properties/glyphFallback"
+                    },
                     "align": {
                       "type": "string",
                       "enum": [
@@ -5357,6 +5389,12 @@
                         "fontWeight": {
                           "$ref": "#/definitions/scene/properties/nodes/items/properties/fontWeight"
                         },
+                        "glyphSet": {
+                          "$ref": "#/definitions/scene/properties/nodes/items/properties/glyphSet"
+                        },
+                        "glyphFallback": {
+                          "$ref": "#/definitions/scene/properties/nodes/items/properties/glyphFallback"
+                        },
                         "align": {
                           "$ref": "#/definitions/scene/properties/nodes/items/properties/align"
                         },
@@ -5553,6 +5591,100 @@
             "rotation"
           ],
           "additionalProperties": false
+        },
+        "still": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "preset": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "dpi": {
+                  "type": "integer",
+                  "minimum": 36,
+                  "maximum": 2400,
+                  "default": 72
+                },
+                "bleed": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1024,
+                  "default": 0
+                },
+                "safeArea": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 4096,
+                  "default": 0
+                },
+                "transparent": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "variants": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "pattern": "^[\\w.-]+$"
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "width": {
+                        "type": "integer",
+                        "minimum": 16,
+                        "maximum": 8192
+                      },
+                      "height": {
+                        "type": "integer",
+                        "minimum": 16,
+                        "maximum": 8192
+                      },
+                      "fit": {
+                        "type": "string",
+                        "enum": [
+                          "contain",
+                          "cover",
+                          "reflow"
+                        ],
+                        "default": "contain"
+                      },
+                      "background": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "preset": {
+                        "type": "string",
+                        "maxLength": 64
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "width",
+                      "height"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 16,
+                  "default": []
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [

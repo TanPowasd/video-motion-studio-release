@@ -110,7 +110,7 @@ async function verify(BrowserWindow, root, url, options) {
       ),
     );
     await ev(`document.querySelector('[aria-label="关闭 MCP 连接"]').click()`);
-    await click('动画');
+    await click('动效');
     const before = await call('project_inspect');
     const original = before.snapshot.scenes[0].nodes.map((n) => n.id);
     await ev(`document.querySelector('[aria-label="Shape"]').click()`);
@@ -184,7 +184,7 @@ async function verify(BrowserWindow, root, url, options) {
     check('human code workspace is available directly in the editor', true);
     await w.loadURL(url + '/#/music');
     await until(
-      `!!document.querySelector('.music-header [aria-label="连接 MCP"]')`,
+      `!!document.querySelector('.music-app.embedded')&&!!document.querySelector('.studio-topbar [aria-label="连接 MCP"]')`,
       'Music MCP entry missing',
     );
     check('music uses direct UI plus simple MCP configuration', true);

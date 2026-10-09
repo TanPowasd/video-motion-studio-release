@@ -64,6 +64,8 @@ const imageMethods = new Set([
   'projectPreflight',
   'visualAudit',
   'mediaSample',
+  'glyphsInspect',
+  'glyphsPlan',
 ]);
 const retry: Record<string, string> = {
   PARAMETER_PATH:

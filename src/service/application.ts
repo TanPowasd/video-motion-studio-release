@@ -45,6 +45,22 @@ import { pluginCatalog, callPluginTool } from './plugins.js';
 import { projectPluginTools } from '../mcp/plugin-tools.js';
 import { TrackingManager } from './tracking-jobs.js';
 import type { FrameRequest, FrameResult, RpcInput, RpcMethod, RpcOutput } from './rpc-contract.js';
+import { withChangeOrigin, type ChangeOrigin } from './change-journal.js';
+
+/** External MCP clients that announced themselves recently (via ping heartbeats or tool calls). */
+export interface AgentPresence {
+  key: string;
+  client: string;
+  lastSeen: number;
+}
+const agentSchema = z
+  .object({
+    client: z.string().max(80).optional(),
+    pid: z.number().int().optional(),
+  })
+  .strip();
+/** Presence older than this is reported as disconnected. */
+export const AGENT_PRESENCE_TTL = 45_000;
 
 export class Application extends EventEmitter {
   service: ProjectService;
@@ -84,6 +100,36 @@ export class Application extends EventEmitter {
     media?: { quality: string; proxyCount: number; decodePixels: number };
   };
   private assetThumbnails = new Map<string, Promise<Buffer>>();
+  private agents = new Map<string, AgentPresence>();
+  /** Records an MCP client heartbeat. Returns the client name for attribution. */
+  noteAgent(raw: unknown): string | undefined {
+    const parsed = agentSchema.safeParse(raw);
+    if (!parsed.success) return undefined;
+    const client = parsed.data.client?.trim() || 'MCP',
+      key = `${client}:${parsed.data.pid ?? ''}`,
+      known = this.agents.has(key);
+    this.agents.set(key, { key, client, lastSeen: Date.now() });
+    if (!known) this.emit('agents', this.agentState());
+    return client;
+  }
+  /** Connection/hold state shown by the Studio top bar and change feed. */
+  agentState() {
+    const now = Date.now();
+    for (const [key, agent] of this.agents)
+      if (now - agent.lastSeen > AGENT_PRESENCE_TTL * 4) this.agents.delete(key);
+    return {
+      hold: this.service.holdingAgents,
+      clients: [...this.agents.values()].map((a) => ({
+        client: a.client,
+        lastSeen: a.lastSeen,
+        active: now - a.lastSeen <= AGENT_PRESENCE_TTL,
+      })),
+    };
+  }
+  /** Recent change journal entries (who changed what), newest last. */
+  changeLog(limit = 80) {
+    return this.service.journal.tail(limit);
+  }
   constructor(readonly root: string) {
     super();
     this.service = new ProjectService(root);
@@ -119,7 +165,9 @@ export class Application extends EventEmitter {
     this.renders = new RenderManager(root, () =>
       this.emit('render', Array.from(this.renders.jobs.values())),
     );
-    this.service.on('change', () => this.emit('change', this.service.state()));
+    this.service.on('change', () =>
+      this.emit('change', { ...this.service.state(), changeLog: this.changeLog() }),
+    );
   }
   private connection() {
     const dir = path.dirname(
@@ -409,15 +457,36 @@ export class Application extends EventEmitter {
           typeof input.ifHash === 'string' ? input.ifHash : undefined,
         );
       case 'ping':
+        // Optional `agent` lets an MCP server announce its client for the Studio's
+        // connection pill. Older callers send no params and get the same answer.
+        if (input.agent) this.noteAgent(input.agent);
         return {
           revision: this.service.snapshot.revision,
           formatVersion: this.service.snapshot.project.formatVersion,
           aiIntegration: false,
+          origins: true,
         };
+      case 'agentHold': {
+        // Studio-only toggle: pause/resume edits from external MCP clients.
+        const hold = z.object({ hold: z.boolean() }).strict().parse(params).hold;
+        this.service.setAgentHold(hold);
+        const state = this.agentState();
+        this.emit('agents', state);
+        return state;
+      }
+      case 'agentStatus':
+        return { ...this.agentState(), changeLog: this.changeLog() };
       case 'agentToolInvoke': {
         let request;
         try {
-          request = toolCallSchema.extend({ inline: z.boolean().default(true) }).parse(params);
+          request = toolCallSchema
+            .extend({
+              inline: z.boolean().default(true),
+              // Optional attribution from newer MCP servers (only sent when ping reports origins).
+              agent: agentSchema.optional(),
+              intent: z.string().max(240).optional(),
+            })
+            .parse(params);
         } catch (e) {
           if (e instanceof z.ZodError)
             throw new VmotionError(
@@ -427,16 +496,27 @@ export class Application extends EventEmitter {
             );
           throw e;
         }
-        return invokeTool(
-          findTool([...this.builtinTools, ...this.pluginDefinitions()], request.name),
-          request.arguments,
-          (method, args) => this.dispatch(method, args),
-          {
-            response: request.response,
-            inline: request.inline,
-            fields: request.fields,
-            media: request.media,
-          },
+        const client = request.agent ? this.noteAgent(request.agent) : undefined,
+          origin: ChangeOrigin = {
+            kind: 'mcp',
+            client: client ?? this.lastActiveClient(),
+            tool: request.name,
+            intent:
+              request.intent ??
+              (typeof request.arguments.intent === 'string' ? request.arguments.intent : undefined),
+          };
+        return withChangeOrigin(origin, () =>
+          invokeTool(
+            findTool([...this.builtinTools, ...this.pluginDefinitions()], request.name),
+            request.arguments,
+            (method, args) => this.dispatch(method, args),
+            {
+              response: request.response,
+              inline: request.inline,
+              fields: request.fields,
+              media: request.media,
+            },
+          ),
         );
       }
       case 'drawingStroke': {
@@ -479,8 +559,14 @@ export class Application extends EventEmitter {
         throw new VmotionError('METHOD_NOT_FOUND', `Unknown method: ${method}`);
     }
   }
+  private lastActiveClient() {
+    const active = this.agentState().clients.filter((c) => c.active);
+    return active.length === 1 ? active[0].client : undefined;
+  }
   applicationState() {
     return {
+      changeLog: this.changeLog(),
+      agents: this.agentState(),
       mediaEpoch: this.mediaEpoch,
       proxyJobs: [...this.proxies.jobs.values()].map((job) => ({ ...job })),
       ...this.service.state(),

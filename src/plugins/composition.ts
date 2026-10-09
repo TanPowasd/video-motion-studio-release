@@ -14,6 +14,7 @@ import {
   sceneResetSchema,
 } from '../service/shared-scenes.js';
 import { compositionStructure } from '../service/structure.js';
+import { inspectStills, planStill, stillInspectSchema, stillPlanSchema } from '../service/stills.js';
 import { builtinCandidate } from './candidate.js';
 import { defineRpcHandler, invokeRpcHandler } from './rpc-handler.js';
 import type { BuiltinPluginModule } from './types.js';
@@ -33,9 +34,41 @@ export const compositionPlugin: BuiltinPluginModule = {
     'compositionTransactBatch',
     'compositionStructure',
     'compositionStructureBatch',
+    'stillInspect',
+    'stillPlan',
   ]),
   tools(): ToolDefinition[] {
     return [
+      {
+        name: 'still_inspect',
+        description:
+          'List still-image artboards (posters/covers/thumbnails): size, background, dpi, bleed/trim/safe boxes, export variants and the still pixel budget. presets/templates=true return the full size presets (A4/A3 300dpi, 小红书, 公众号, video covers, square, vertical) and starter templates.',
+        method: 'stillInspect',
+        schema: stillInspectSchema.shape,
+        categories: ['composition', 'image'],
+        keywords: '图片 海报 封面 画板 预设 出血 安全区 still poster cover artboard preset',
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false,
+        },
+      },
+      {
+        name: 'still_plan',
+        description:
+          'Plan still-image artboards as one exact candidate: create (preset or size, starter template, dpi/bleed/safe area, variants), update/mark an existing scene as a 1-frame still, unmark back to animation, replace size variants, or align/distribute layers to selection/canvas/trim/safe box with keyframe-aware moves. Returns planId for project_preflight/project_apply (one undo).',
+        method: 'stillPlan',
+        schema: stillPlanSchema.shape,
+        categories: ['composition', 'image'],
+        keywords: '新建图片 海报 封面 对齐 分布 尺寸 变体 still poster cover align distribute variant',
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false,
+        },
+      },
       {
         name: 'scene_references',
         description:
@@ -263,6 +296,24 @@ export const compositionPlugin: BuiltinPluginModule = {
 };
 
 export const compositionRpcHandlers = {
+  stillInspect: defineRpcHandler(
+    z.object(stillInspectSchema.shape).extend({ inline: z.boolean().optional() }).passthrough(),
+    async (host, params) => {
+      const { inline: _inline, ...request } = params as Record<string, unknown>;
+      return inspectStills(host.snapshot, request);
+    },
+  ),
+  stillPlan: defineRpcHandler(
+    z.object(stillPlanSchema.shape).extend({ inline: z.boolean().optional() }).passthrough(),
+    async (host, params) => {
+      const { inline: _inline, ...request } = params as Record<string, unknown>;
+      return planStill(
+        { root: host.root, renderer: host.renderer, edit: host.edit },
+        structuredClone(host.snapshot),
+        request,
+      );
+    },
+  ),
   sceneReferences: defineRpcHandler(
     z.object({ sourceId: z.string() }).extend({ inline: z.boolean().optional() }).passthrough(),
     async (host, params) => {

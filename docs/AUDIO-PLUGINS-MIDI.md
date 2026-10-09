@@ -33,7 +33,7 @@ Windows 10/11 x64 版本支持 VST3 乐器和效果。插件在独立原生宿�
 - `audio_plugins action=scan` 只扫描显式位置/默认插件目录，上限 256 个包、每个独立进程 10 秒；`inspect` 返回参数与延迟信息。
 - `sound_inspect` 默认不发送 plugin state/controllerState，仅返回编码状态大小、前 16 个参数和 parameterCount/parametersMore。需要完整音色时显式 includeDocument=true 或读源文件；完整状态只出现在 document 一处。不要把参数摘要当作完整配置覆盖源文件。
 - `audio_live` 管理临时 open/query/parameters/editor/state/panic/close。`state` 是显式读取，不常驻 MCP 上下文；将返回状态并入 sound_plan，再检查与准确提交。实时 PCM endpoint 面向本地音乐监听，不通过 MCP 逐块传音频。
-- 默认 MCP 仍 10 个入口，140 项能力按需发现。音乐 15 项能力复用统一模块、候选与 undo。必要时只读取 `tool_schema paths`，复用 schemaHash/ifHash。
+- 默认 MCP 仍 10 个入口，147 项能力按需发现。音乐 15 项能力复用统一模块、候选与 undo。必要时只读取 `tool_schema paths`，复用 schemaHash/ifHash。
 - `pack` 保留工程里的插件路径/状态，不复制商业插件安装程序、二进制或许可证。迁移到另一台电脑需安装匹配的插件，并明确更新路径/指纹；状态不保证跨插件版本通用。
 
 ## 预算与当前边界

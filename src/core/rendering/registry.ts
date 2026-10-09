@@ -31,7 +31,7 @@ export interface RenderServices {
     decodeHeight: number;
     path: string;
   }>;
-  text(ctx: SKRSContext2D, node: Node, frame: number): void;
+  text(ctx: SKRSContext2D, node: Node, frame: number, snapshot?: Snapshot): void;
   chart(ctx: SKRSContext2D, node: Node): void;
   generatedNodes(snapshot: Snapshot, node: Node, frame: number): Promise<Node[]>;
   referencedScene(snapshot: Snapshot, node: Node): Scene;

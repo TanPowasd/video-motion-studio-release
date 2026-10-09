@@ -80,7 +80,7 @@ export async function inspectGraphics(renderer: Renderer, snapshot: Snapshot, ra
   const n = layer.evaluatedNode!;
   if (!['text', 'rect', 'ellipse', 'path'].includes(n.type))
     throw new VmotionError('GRAPHICS_TYPE', 'Expected text, rect, ellipse or path');
-  const text = n.type === 'text' ? renderer.textGeometry(n, layer.frame ?? p.frame) : undefined,
+  const text = n.type === 'text' ? renderer.textGeometry(n, layer.frame ?? p.frame, snapshot) : undefined,
     nativePath = text ? undefined : shapePath(n, renderer.geometry),
     svg = nativePath?.toSVGString(),
     items = text ? n.textAnimators : n.shapeOperators;

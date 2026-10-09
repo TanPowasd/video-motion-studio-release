@@ -249,3 +249,62 @@ export function plot(
     ...props,
   });
 }
+export {
+  stillPresets,
+  stillTemplates,
+  stillGuides,
+  stillTemplateNodes,
+  alignDeltas,
+  snapDelta,
+  snapTargets,
+  stillSchema,
+  stillVariantSchema,
+  STILL_MAX_SIDE,
+  STILL_MAX_PIXELS,
+} from '../core/still.js';
+export type {
+  StillPreset,
+  StillSettings,
+  StillVariant,
+  StillTemplateId,
+  AlignMode,
+} from '../core/still.js';
+/** Result of image_export / `vmotion image export` (one entry per artboard/variant). */
+export interface StillExportImage {
+  variant: string;
+  path: string;
+  format: 'png' | 'jpeg' | 'webp';
+  width: number;
+  height: number;
+  bytes: number;
+  dpi: number | null;
+  transparent: boolean;
+  pixelHash: string;
+}
+/* Radical-composed glyph sets (偏旁部件拼字): text without a font file. */
+export {
+  glyphSetSchema,
+  glyphComponentSchema,
+  glyphEntrySchema,
+  glyphAdjustSchema,
+  glyphFallbackSchema,
+  idsOperators,
+  glyphSetFile,
+} from '../core/glyphs/glyph-schema.js';
+export type {
+  GlyphSetDocument,
+  GlyphSetInput,
+  GlyphComponent,
+  GlyphEntry,
+  GlyphAdjust,
+  GlyphFallback,
+  GlyphStroke,
+  GlyphFill,
+  IdsOperator,
+} from '../core/glyphs/glyph-schema.js';
+export { parseIds, formatIds, idsLeaves } from '../core/glyphs/ids.js';
+export type { IdsNode } from '../core/glyphs/ids.js';
+export { GlyphComposer, isGlyphProblem } from '../core/glyphs/compose.js';
+export type { ComposedGlyph, GlyphProblem } from '../core/glyphs/compose.js';
+export { builtinGlyphSet, builtinGlyphSetIds } from '../core/glyphs/glyph-resources.js';
+export { drawComposedGlyph } from '../core/glyphs/glyph-draw.js';

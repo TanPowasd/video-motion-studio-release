@@ -92,6 +92,9 @@ it('serves independent Agent HTML/discovery and preserves Studio/Agent transacti
       expectedCandidateRevision: planned.result.candidateRevision,
     });
     expect((await rpc('/api/studio/rpc', 'state')).result.snapshot.project.name).toBe('agent edit');
+    // Agent-surface writes are attributed to an agent (AI), not to the person in the Studio.
+    const log = (await rpc('/api/studio/rpc', 'agentStatus')).result.changeLog;
+    expect(log.at(-1)).toMatchObject({ kind: 'mcp', client: 'agent-web', tool: 'projectApply' });
     await rpc('/api/studio/rpc', 'undo');
     expect(app.service.snapshot.revision).toBe(before);
     expect((await rpc('/api/rpc', 'projectContext')).result.revision).toBe(before);

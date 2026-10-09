@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import { Command, Option } from 'commander';
 import path from 'node:path';
+import { copyFile as fsCopyFile, mkdir as fsMkdir, readFile as fsReadFile } from 'node:fs/promises';
 import { Application } from '../service/application.js';
 import { initProject } from '../service/template.js';
+import { findStillPreset, stillPresetIds, stillPresets, stillTemplates } from '../core/still.js';
 import { existingService, rpc, servePipe } from '../service/ipc.js';
 import { serveHttp } from '../service/http.js';
 import { startMcp } from '../mcp/server.js';
@@ -77,12 +79,115 @@ async function withProject(root: string, method: string, params: unknown = {}) {
   root = path.resolve(root);
   if (await existingService(root)) return rpc(root, method, params);
   const app = await new Application(root).open(false);
+  app.service.defaultOrigin = { kind: 'cli', tool: method };
   try {
     return await app.dispatch(method, params);
   } finally {
     await app.close();
   }
 }
+async function withSession<T>(
+  root: string,
+  work: (call: (method: string, params?: unknown) => Promise<any>) => Promise<T>,
+) {
+  root = path.resolve(root);
+  if (await existingService(root)) return work((method, params = {}) => rpc(root, method, params));
+  const app = await new Application(root).open(false);
+  app.service.defaultOrigin = { kind: 'cli' };
+  try {
+    return await work((method, params = {}) => app.dispatch(method, params));
+  } finally {
+    await app.close();
+  }
+}
+const pluginCli = program
+  .command('plugin')
+  .description('Pack and install portable .vmplugin plugin bundles');
+pluginCli
+  .command('pack <id>')
+  .description(
+    'Pack a registered project plugin (with its project-plugin dependencies) into a deterministic .vmplugin',
+  )
+  .option('-p, --project <directory>', 'Project directory', '.')
+  .option('-o, --output <file>', 'Bundle path (default exports/plugins/<id>-<version>.vmplugin)')
+  .option('--no-deps', 'Do not bundle project-plugin dependencies')
+  .action(async (id: string, o) =>
+    output(
+      await withProject(o.project, 'pluginsPack', {
+        id,
+        includeDependencies: o.deps,
+        ...(o.output ? { output: path.resolve(o.output) } : {}),
+      }),
+    ),
+  );
+pluginCli
+  .command('install <source>')
+  .description(
+    'Install/upgrade from a folder, .vmplugin/.zip or (with --git) a Git URL; plans, preflights and applies one undoable candidate',
+  )
+  .option('-p, --project <directory>', 'Project directory', '.')
+  .option('--git', 'Treat <source> as a Git URL (uses the system git)')
+  .option('--ref <ref>', 'Git branch, tag or commit')
+  .option('--subdir <dir>', 'Plugin folder inside the Git repository')
+  .option('--manifest <file>', 'Manifest file name inside a folder source')
+  .option('--pin', 'Pin installed content hashes')
+  .option('--no-pin', 'Remove existing pins while upgrading')
+  .option('--no-deps', 'Do not install dependencies bundled in the package')
+  .option('--allow-downgrade', 'Allow installing an older version')
+  .option('--overwrite', 'Replace files owned by other plugins or the project')
+  .option('--disabled', 'Register the plugin disabled')
+  .option('--dry-run', 'Only print the candidate preview; do not apply')
+  .action(async (input: string, o) => {
+    const { stat } = await import('node:fs/promises');
+    const resolved = path.resolve(input);
+    const source = o.git
+      ? {
+          type: 'git',
+          url: input,
+          ...(o.ref ? { ref: o.ref } : {}),
+          ...(o.subdir ? { subdir: o.subdir } : {}),
+          ...(o.manifest ? { manifest: o.manifest } : {}),
+        }
+      : (await stat(resolved)).isDirectory()
+        ? { type: 'folder', path: resolved, ...(o.manifest ? { manifest: o.manifest } : {}) }
+        : { type: 'bundle', path: resolved };
+    const pinFlag = process.argv.includes('--no-pin')
+      ? false
+      : process.argv.includes('--pin')
+        ? true
+        : undefined;
+    output(
+      await withSession(o.project, async (call) => {
+        const state = await call('projectContext', { limit: 1 });
+        const planned = await call('pluginsInstall', {
+          revision: state.revision,
+          source,
+          enabled: !o.disabled,
+          ...(pinFlag !== undefined ? { pin: pinFlag } : {}),
+          dependencies: o.deps ? 'bundled' : 'none',
+          allowDowngrade: !!o.allowDowngrade,
+          overwrite: !!o.overwrite,
+        });
+        if (o.dryRun)
+          return { applied: false, install: planned.summary.install, candidate: planned.candidate };
+        const check = await call('projectPreflight', planned.candidate);
+        if (!check.valid) {
+          process.exitCode = 2;
+          return {
+            applied: false,
+            install: planned.summary.install,
+            diagnostics: check.diagnostics,
+          };
+        }
+        const applied = await call('projectApply', planned.apply);
+        return {
+          applied: true,
+          revision: applied.revision ?? applied.snapshot?.revision,
+          install: planned.summary.install,
+        };
+      }),
+    );
+  });
 projectCommand(
   'tracking-analyze',
   'Analyze motion with a background service, or wait in a headless standalone CLI',
@@ -219,6 +324,8 @@ for (const [name, method] of [
   ['plugins-inspect', 'pluginsInspect'],
   ['plugins-plan', 'pluginsPlan'],
   ['plugins-package', 'pluginsPackage'],
+  ['plugins-pack', 'pluginsPack'],
+  ['plugins-install', 'pluginsInstall'],
 ] as const)
   projectCommand(name, 'Inspect or edit visual content time mapping')
     .requiredOption('--request <file>', 'JSON scene/node/path/frame/clock request')
@@ -234,24 +341,212 @@ program
     const { readFile } = await import('node:fs/promises');
     output(describeRepeater(JSON.parse(await readFile(o.request, 'utf8'))));
   });
-projectCommand('init', 'Create a local blank or science project')
+projectCommand('init', 'Create a local blank/science video project or a still-image project')
   .option('--name <name>', 'Project name', '未命名项目')
   .option('--template <blank|science>', 'Project template', 'blank')
-  .option('--width <pixels>', 'Canvas width', '1920')
-  .option('--height <pixels>', 'Canvas height', '1080')
+  .option('--kind <video|still>', 'video (default) or still image project', 'video')
+  .option('--preset <id>', `Still size preset: ${stillPresetIds.join(', ')}`)
+  .option('--still-template <id>', 'Still starter: blank, poster, cover or card', 'poster')
+  .option('--width <pixels>', 'Canvas width')
+  .option('--height <pixels>', 'Canvas height')
   .option('--fps <number>', 'Integer frame rate', '30')
   .option('--duration <seconds>', 'Initial duration', '10')
-  .action(async (options) =>
+  .action(async (options) => {
+    const preset = findStillPreset(options.preset);
+    if (options.preset && !preset)
+      throw new VmotionError('PRESET', `Unknown preset; use ${stillPresetIds.join(', ')}`);
     output({
       project: await initProject(path.resolve(options.project), options.name, {
         template: options.template,
-        width: Number(options.width),
-        height: Number(options.height),
+        kind: options.kind,
+        ...(preset ? { preset: preset.id } : {}),
+        stillTemplate: options.stillTemplate,
+        width: Number(options.width ?? preset?.width ?? (options.kind === 'still' ? 1080 : 1920)),
+        height: Number(options.height ?? preset?.height ?? 1080),
         fps: { num: Number(options.fps), den: 1 },
         durationSeconds: Number(options.duration),
       }),
       path: path.resolve(options.project),
-    }),
+    });
+  });
+const imageCli = program
+  .command('image')
+  .description('Still images: posters, covers, thumbnails and social images');
+imageCli
+  .command('presets')
+  .description('List still size presets and starter templates (no project required)')
+  .action(() => output({ presets: stillPresets, templates: stillTemplates }));
+imageCli
+  .command('inspect')
+  .description('List still artboards, guides and variants in a project')
+  .option('-p, --project <directory>', 'Project directory', '.')
+  .option('--scene <id>', 'Still scene ID')
+  .action(async (o) =>
+    output(await withProject(o.project, 'stillInspect', o.scene ? { sceneId: o.scene } : {})),
+  );
+imageCli
+  .command('new')
+  .description('Add a still artboard to a project (plan, preflight and apply as one undo)')
+  .option('-p, --project <directory>', 'Project directory', '.')
+  .option('--name <name>', 'Artboard name', '图片 1')
+  .option('--id <sceneId>', 'Stable scene ID')
+  .option('--preset <id>', `Size preset: ${stillPresetIds.join(', ')}`)
+  .option('--width <pixels>')
+  .option('--height <pixels>')
+  .option('--template <id>', 'blank, poster, cover or card', 'blank')
+  .option('--background <color>')
+  .option('--dry-run', 'Plan and preflight without applying')
+  .action(async (o) =>
+    output(
+      await withSession(o.project, async (call) => {
+        const plan = await call('stillPlan', {
+          actions: [
+            {
+              action: 'create',
+              name: o.name,
+              template: o.template,
+              ...(o.id ? { sceneId: o.id } : {}),
+              ...(o.preset ? { preset: o.preset } : {}),
+              ...(o.width ? { width: Number(o.width) } : {}),
+              ...(o.height ? { height: Number(o.height) } : {}),
+              ...(o.background ? { background: o.background } : {}),
+            },
+          ],
+        });
+        const preflight = await call('projectPreflight', plan.candidate);
+        if (!preflight.valid || o.dryRun) {
+          if (!preflight.valid) process.exitCode = 2;
+          return { plan, preflight: { valid: preflight.valid, diagnostics: preflight.diagnostics } };
+        }
+        const applied = await call('projectApply', plan.apply);
+        return { summary: plan.summary, revision: applied.revision ?? applied.snapshot?.revision };
+      }),
+    ),
+  );
+imageCli
+  .command('export')
+  .description('Export a still artboard as PNG, JPEG or WebP (same native renderer as preview)')
+  .option('-p, --project <directory>', 'Project directory', '.')
+  .option('--scene <id>', 'Still scene ID (default: first still)')
+  .option('-o, --output <path>', 'File (single image) or directory (default exports/images)')
+  .option('--format <format>', 'png, jpeg or webp', 'png')
+  .option('--quality <1-100>', 'JPEG/WebP quality', '92')
+  .option('--scale <factor>', 'Pixel scale, e.g. 1, 2 or 3', '1')
+  .option('--transparent', 'Omit the background (PNG/WebP)')
+  .option('--opaque', 'Keep the background even if the artboard defaults to transparent')
+  .option('--trim', 'Crop off the bleed')
+  .option('--variants <ids>', "Also export size variants: 'all' or comma-separated IDs")
+  .option('--no-main', 'Skip the main artboard (variants only)')
+  .option('--dpi <number>', 'Override DPI metadata')
+  .option('--revision <hash>', 'Require the accepted project revision')
+  .action(async (o) => {
+    if (!['png', 'jpeg', 'jpg', 'webp'].includes(o.format))
+      throw new VmotionError('FORMAT', 'Expected png, jpeg or webp');
+    output(
+      await withProject(o.project, 'imageExport', {
+        ...(o.scene ? { sceneId: o.scene } : {}),
+        ...(o.output ? { output: path.resolve(o.output) } : {}),
+        format: o.format === 'jpg' ? 'jpeg' : o.format,
+        quality: Number(o.quality),
+        scale: Number(o.scale),
+        ...(o.transparent ? { transparent: true } : o.opaque ? { transparent: false } : {}),
+        trim: !!o.trim,
+        ...(o.variants
+          ? { variants: o.variants === 'all' ? 'all' : String(o.variants).split(',') }
+          : {}),
+        main: o.main,
+        ...(o.dpi ? { dpi: Number(o.dpi) } : {}),
+        ...(o.revision ? { revision: o.revision } : {}),
+      }),
+    );
+  });
+const glyphsCli = program
+  .command('glyphs')
+  .description('Radical-composed glyph sets (偏旁部件拼字): text without a font file');
+glyphsCli
+  .command('inspect')
+  .description('List glyph sets, components/glyphs, coverage for text or the whole project')
+  .option('-p, --project <directory>', 'Project directory', '.')
+  .option('--set <id>', 'Glyph set: project ID or builtin:<id>')
+  .option('--text <text>', 'Coverage report for this text')
+  .option('--coverage', 'Coverage of all text layers and captions that use glyph sets')
+  .option('--chars <chars>', 'Per-character composition details')
+  .option('--components', 'List components')
+  .option('--glyphs', 'List glyphs')
+  .option('--offset <n>', 'Page offset', '0')
+  .option('--limit <n>', 'Page length', '48')
+  .option('--request <file>', 'Full glyphs_inspect request JSON')
+  .action(async (o) =>
+    output(
+      await withProject(
+        o.project,
+        'glyphsInspect',
+        o.request
+          ? JSON.parse(await fsReadFile(path.resolve(o.request), 'utf8'))
+          : {
+              ...(o.set ? { set: o.set } : {}),
+              ...(o.text !== undefined ? { text: o.text } : {}),
+              ...(o.coverage ? { project: true } : {}),
+              ...(o.chars ? { chars: o.chars } : {}),
+              ...(o.components ? { components: true } : {}),
+              ...(o.glyphs ? { glyphs: true } : {}),
+              offset: Number(o.offset),
+              limit: Number(o.limit),
+            },
+      ),
+    ),
+  );
+glyphsCli
+  .command('preview')
+  .description('Render characters or an IDS expression to a PNG sheet (native renderer)')
+  .option('-p, --project <directory>', 'Project directory', '.')
+  .option('--set <id>', 'Glyph set: project ID or builtin:<id>', 'builtin:demo')
+  .option('--text <text>', 'Characters to render')
+  .option('--ids <expression>', 'IDS expression, e.g. ⿰氵⿱木口')
+  .option('--size <px>', 'Cell size', '96')
+  .option('-o, --output <file>', 'Copy the PNG here')
+  .action(async (o) => {
+    if (!o.text && !o.ids) throw new VmotionError('ARGUMENTS', 'Provide --text and/or --ids');
+    const result = (await withProject(o.project, 'glyphsInspect', {
+      set: o.set,
+      ...(o.text ? { preview: o.text } : {}),
+      ...(o.ids ? { expression: o.ids } : {}),
+      previewSize: Number(o.size),
+    })) as Record<string, unknown>;
+    if (o.output && typeof result.output === 'string') {
+      await fsMkdir(path.dirname(path.resolve(o.output)), { recursive: true });
+      await fsCopyFile(result.output, path.resolve(o.output));
+      result.output = path.resolve(o.output);
+    }
+    const { sets: _sets, ...rest } = result;
+    output(rest);
+  });
+glyphsCli
+  .command('plan')
+  .description('Plan glyph-set edits (create/style/components/glyphs/assign); apply with --apply')
+  .option('-p, --project <directory>', 'Project directory', '.')
+  .requiredOption('--request <file>', 'glyphs_plan request JSON ({set?, actions:[…]})')
+  .option('--apply', 'Preflight and apply the candidate (one undo)')
+  .action(async (o) =>
+    output(
+      await withSession(o.project, async (call) => {
+        const request = JSON.parse(await fsReadFile(path.resolve(o.request), 'utf8'));
+        const plan = await call('glyphsPlan', request);
+        if (plan.unchanged || !o.apply) return plan;
+        const preflight = await call('projectPreflight', plan.candidate);
+        if (!preflight.valid) {
+          process.exitCode = 2;
+          return { plan, preflight: { valid: false, diagnostics: preflight.diagnostics } };
+        }
+        const applied = await call('projectApply', plan.apply);
+        return {
+          summary: plan.summary,
+          file: plan.file,
+          output: plan.output,
+          revision: applied.revision ?? applied.snapshot?.revision,
+        };
+      }),
+    ),
   );
 projectCommand('inspect', 'Inspect source, nodes, tracks and diagnostics').action(async (options) =>
   output(await withProject(options.project, 'state')),

@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { captionsSchema, parseCaptions } from '../core/captions.js';
+import { glyphFallbackSchema, glyphSetRefSchema, glyphSetFile } from '../core/glyphs/glyph-schema.js';
 import {
   newNode,
   sceneSchema,
@@ -23,6 +24,10 @@ export const captionsImportSchema = z
     fontFamily: z.string().default('Microsoft YaHei'),
     color: z.string().default('#ffffff'),
     bottom: z.number().finite().min(0).max(2160).default(72),
+    glyphSet: glyphSetRefSchema
+      .optional()
+      .describe('Radical-composed glyph set for caption text (project ID or builtin:<id>)'),
+    glyphFallback: glyphFallbackSchema.default('font'),
     revision: z.string().optional(),
   })
   .strict()
@@ -50,7 +55,21 @@ export async function importCaptions(snapshot: Snapshot, raw: unknown) {
     sceneId = `captions-${id}`,
     trackId = randomUUID(),
     clipId = randomUUID();
-  const source = `import {defineComponent,rect,text,measureTextBlock}from '@vmotion/sdk';\nimport document from './captions-${id}.json';\nexport default defineComponent({name:${JSON.stringify(request.name)},parameters:{\nfontSize:{type:'number',default:${request.fontSize},min:8,max:200},fontFamily:{type:'string',default:${JSON.stringify(request.fontFamily)}},color:{type:'color',default:${JSON.stringify(request.color)}},bottom:{type:'number',default:${request.bottom},min:0,max:2160}\n},render(ctx,params){\nlet lo=0,hi=document.cues.length;while(lo<hi){const mid=(lo+hi)>>1;if(document.cues[mid].start<=ctx.frame)lo=mid+1;else hi=mid;}const cue=document.cues[lo-1];if(!cue||ctx.frame>=cue.end)return [];\nconst height=measureTextBlock(cue.text,{fontSize:params.fontSize,fontFamily:params.fontFamily,width:ctx.width*.8,lineHeight:1.35}).height,y=ctx.height-params.bottom-height;\nreturn [rect('plate-'+cue.id,{x:ctx.width*.08,y:y-12,width:ctx.width*.84,height:height+24,radius:12,fill:'#000000ba'}),text(cue.id,cue.text,{name:cue.text.slice(0,30),x:ctx.width*.1,y,width:ctx.width*.8,height,fontSize:params.fontSize,fontFamily:params.fontFamily,fill:params.color,align:'center',lineHeight:1.35})];\n}});\n`;
+  const glyphs = request.glyphSet,
+    projectGlyphs =
+      glyphs && !glyphs.startsWith('builtin:') && snapshot.files[glyphSetFile(glyphs)] !== undefined,
+    // Without glyphSet the generated source is byte-identical to earlier versions.
+    glyphImport = projectGlyphs ? `import glyphDocument from './glyphs/${glyphs}.vmglyph.json';\n` : '',
+    glyphParams = glyphs
+      ? `,glyphSet:{type:'string',default:${JSON.stringify(glyphs)}},glyphFallback:{type:'enum',options:['font','none','tofu'] as const,default:${JSON.stringify(request.glyphFallback)}}`
+      : '',
+    glyphProps = glyphs ? ',glyphSet:params.glyphSet||null,glyphFallback:params.glyphFallback' : '',
+    measureOptions = projectGlyphs
+      ? ',params.glyphSet===' + JSON.stringify(glyphs) + '?{glyphSet:glyphDocument}:{}'
+      : '';
+  const source = `import {defineComponent,rect,text,measureTextBlock}from '@vmotion/sdk';\nimport document from './captions-${id}.json';\n${glyphImport}export default defineComponent({name:${JSON.stringify(request.name)},parameters:{\nfontSize:{type:'number',default:${request.fontSize},min:8,max:200},fontFamily:{type:'string',default:${JSON.stringify(request.fontFamily)}},color:{type:'color',default:${JSON.stringify(request.color)}},bottom:{type:'number',default:${request.bottom},min:0,max:2160}${glyphParams}\n},render(ctx,params){\nlet lo=0,hi=document.cues.length;while(lo<hi){const mid=(lo+hi)>>1;if(document.cues[mid].start<=ctx.frame)lo=mid+1;else hi=mid;}const cue=document.cues[lo-1];if(!cue||ctx.frame>=cue.end)return [];\nconst height=measureTextBlock(cue.text,{fontSize:params.fontSize,fontFamily:params.fontFamily,width:ctx.width*.8,lineHeight:1.35${glyphProps}}${measureOptions}).height,y=ctx.height-params.bottom-height;\nreturn [rect('plate-'+cue.id,{x:ctx.width*.08,y:y-12,width:ctx.width*.84,height:height+24,radius:12,fill:'#000000ba'}),text(cue.id,cue.text,{name:cue.text.slice(0,30),x:ctx.width*.1,y,width:ctx.width*.8,height,fontSize:params.fontSize,fontFamily:params.fontFamily,fill:params.color,align:'center',lineHeight:1.35${glyphProps}})];\n}});\n`;
+  if (glyphs && !projectGlyphs && !glyphs.startsWith('builtin:') && glyphs !== 'demo')
+    throw new VmotionError('GLYPH_SET_MISSING', `Glyph set "${glyphs}" does not exist in this project`);
   const scene = sceneSchema.parse({
     id: sceneId,
     name: request.name,

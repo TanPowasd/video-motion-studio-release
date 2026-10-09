@@ -6,7 +6,14 @@ import {
   builtinPluginVersions,
   type PluginEntry,
 } from '../core/plugins.js';
-import { pluginPathSchema, pluginIdSchema, pluginManifestSchema } from '../core/plugin-schema.js';
+import {
+  pluginPathSchema,
+  pluginIdSchema,
+  pluginManifestSchema,
+  pluginCategorySchema,
+} from '../core/plugin-schema.js';
+import { pluginHealth } from './plugin-health.js';
+import { loadPluginPackage, planPluginInstall, pluginInstallSchema } from './plugin-bundles.js';
 import { resolveParameters, type ParameterDefinitions } from '../core/parameters.js';
 import { newNode, VmotionError, type Snapshot, type Operation } from '../core/model.js';
 import type { Renderer } from '../core/renderer.js';
@@ -29,6 +36,11 @@ export const pluginInspectSchema = z
     offset: z.number().int().nonnegative().default(0),
     limit: z.number().int().min(1).max(50).default(16),
     includeManifest: z.boolean().default(false),
+    origin: z.enum(['builtin', 'project']).optional(),
+    enabled: z.boolean().optional(),
+    category: pluginCategorySchema.optional(),
+    query: z.string().max(100).optional(),
+    includeParameters: z.boolean().default(false),
   })
   .strict();
 export const pluginPackageSchema = z
@@ -64,7 +76,13 @@ export const pluginPlanSchema = z
               pin: z.boolean().optional(),
             })
             .strict(),
-          z.object({ type: z.literal('remove'), id: pluginIdSchema }).strict(),
+          z
+            .object({
+              type: z.literal('remove'),
+              id: pluginIdSchema.optional(),
+              source: pluginPathSchema.optional(),
+            })
+            .strict(),
         ]),
       )
       .max(128)
@@ -103,64 +121,145 @@ const metadata = (e: PluginEntry) => ({
   contributions: e.manifest.contributions.length,
   dependencies: e.manifest.dependencies,
 });
+export type BuiltinPluginGroups = Record<
+  string,
+  {
+    name: string;
+    tools: string[];
+    categories?: string[];
+    details?: Array<{ name: string; description: string; parameters: string[]; readOnly: boolean }>;
+    migration?: {
+      runtime: string;
+      moduleTools: number;
+      hostTools: number;
+      dependencies: Record<string, string>;
+    };
+  }
+>;
 export function inspectPlugins(
   registry: PluginRegistry,
   snapshot: Snapshot,
   raw: unknown,
-  builtins: Record<
-    string,
-    {
-      name: string;
-      tools: string[];
-      migration?: {
-        runtime: string;
-        moduleTools: number;
-        hostTools: number;
-        dependencies: Record<string, string>;
-      };
-    }
-  >,
+  builtins: BuiltinPluginGroups,
 ) {
   const p = pluginInspectSchema.parse(raw),
-    entries = registry.resolve(snapshot),
-    project = entries.map((e) => ({ ...metadata(e), origin: 'project', runtime: 'worker' })),
+    health = pluginHealth(snapshot, registry);
+  let entries: PluginEntry[] = [];
+  try {
+    entries = registry.resolve(snapshot);
+  } catch {
+    // Broken registrations are still listed from the tolerant health report below.
+  }
+  const project = health.registrations.map((h) => {
+      const entry = entries.find((e) => e.source === h.source);
+      return {
+        ...(entry
+          ? metadata(entry)
+          : {
+              id: h.id ?? h.source,
+              name: h.manifest?.name ?? h.source,
+              version: h.manifest?.version ?? '?',
+              ...(h.contentHash ? { hash: h.contentHash, contentHash: h.contentHash } : {}),
+              ...(h.manifestHash ? { manifestHash: h.manifestHash } : {}),
+              files: h.files.length,
+              enabled: h.enabled,
+              source: h.source,
+              tools: h.manifest?.tools.length ?? 0,
+              contributions: h.manifest?.contributions.length ?? 0,
+              dependencies: h.manifest?.dependencies ?? {},
+            }),
+        origin: 'project' as const,
+        runtime: 'worker',
+        categories: [...new Set(h.manifest?.tools.flatMap((t) => t.categories) ?? [])],
+        status: h.status,
+        pinned: h.pinned,
+        ...(h.problems.length ? { problems: h.problems.length } : {}),
+      };
+    }),
     builtin = Object.entries(builtins).map(([id, v]) => ({
       id,
       name: v.name,
       version: builtinPluginVersions[id],
-      origin: 'builtin',
+      origin: 'builtin' as const,
       runtime: v.migration?.runtime ?? 'host',
       moduleTools: v.migration?.moduleTools ?? 0,
       hostTools: v.migration?.hostTools ?? v.tools.length,
       enabled: true,
       tools: v.tools.length,
+      categories: v.categories ?? [],
+      status: 'ok' as const,
     })),
-    items = [...builtin, ...project].filter((e) => !p.id || e.id === p.id);
+    needle = p.query?.trim().toLowerCase(),
+    items = [...builtin, ...project].filter(
+      (e) =>
+        (!p.id || e.id === p.id) &&
+        (!p.origin || e.origin === p.origin) &&
+        (p.enabled === undefined || e.enabled === p.enabled) &&
+        (!p.category || e.categories.includes(p.category)) &&
+        (!needle || `${e.id} ${e.name}`.toLowerCase().includes(needle)),
+    );
   if (p.id && !items.length)
     throw new VmotionError('PLUGIN_NOT_FOUND', 'Plugin is not registered', { id: p.id });
-  const selected = entries.find((e) => e.manifest.id === p.id);
+  const selected = p.id ? health.registrations.find((h) => h.id === p.id) : undefined,
+    manifest = selected?.manifest;
   return {
     revision: snapshot.revision,
     total: items.length,
     items: items.slice(p.offset, p.offset + p.limit),
     nextOffset: p.offset + p.limit < items.length ? p.offset + p.limit : undefined,
-    ...(selected
+    ...(health.problems.length && !p.id
       ? {
-          tools: selected.manifest.tools.map((t) => ({
+          problems: health.problems.map(({ fixes, ...problem }) => ({
+            ...problem,
+            fixes: fixes.length,
+          })),
+        }
+      : {}),
+    ...(selected && manifest
+      ? {
+          description: manifest.description,
+          tools: manifest.tools.map((t) => ({
             id: t.id,
-            name: pluginToolName(selected.manifest.id, t.id),
+            name: pluginToolName(manifest.id, t.id),
             description: t.description,
             mode: t.mode,
             categories: t.categories,
+            ...(p.includeParameters ? { parameters: t.parameters, reads: t.reads } : {}),
           })),
-          contributions: selected.manifest.contributions,
-          ...(p.includeManifest ? { manifest: selected.manifest } : {}),
+          contributions: manifest.contributions,
+          dependencyStatus: selected.dependencies,
+          dependents: health.registrations
+            .filter((h) => h.manifest && Object.hasOwn(h.manifest.dependencies, manifest.id))
+            .map((h) => ({
+              id: h.id,
+              range: h.manifest!.dependencies[manifest.id],
+              enabled: h.enabled,
+            })),
+          registration: {
+            source: selected.source,
+            enabled: selected.enabled,
+            pinned: selected.pinned,
+            ...(selected.pinMatches !== undefined ? { pinMatches: selected.pinMatches } : {}),
+            ...(selected.contentHash ? { contentHash: selected.contentHash } : {}),
+            ...(selected.manifestHash ? { manifestHash: selected.manifestHash } : {}),
+          },
+          files: selected.files.map((file) => ({
+            path: file,
+            ...(snapshot.files[file] === undefined
+              ? { missing: true }
+              : { bytes: Buffer.byteLength(snapshot.files[file]) }),
+          })),
+          problems: selected.problems,
+          ...(p.includeManifest ? { manifest } : {}),
         }
       : {}),
     ...(p.id && builtins[p.id]
       ? {
           capabilities: builtins[p.id].tools,
           dependencies: builtins[p.id].migration?.dependencies ?? {},
+          ...(p.includeParameters && builtins[p.id].details
+            ? { capabilityDetails: builtins[p.id].details }
+            : {}),
         }
       : {}),
     cache: registry.report(),
@@ -244,6 +343,7 @@ export async function planPlugins(
   registry: PluginRegistry,
   base: Snapshot,
   raw: unknown,
+  extraSummary: Record<string, unknown> = {},
 ) {
   const p = pluginPlanSchema.parse(raw);
   if (p.revision !== base.revision)
@@ -278,13 +378,22 @@ export async function planPlugins(
           : {}),
       });
     } else {
-      const index = registrations.findIndex(
-        (r) =>
-          pluginManifestSchema.parse(JSON.parse(base.files[r.source] ?? candidate.files[r.source]))
-            .id === action.id,
-      );
+      if (action.type === 'remove' && !!action.id === !!action.source)
+        throw new VmotionError('PLUGIN_ACTION', 'Remove needs exactly one of id or source');
+      const index = registrations.findIndex((r) => {
+        if (action.type === 'remove' && action.source) return r.source === action.source;
+        const text = base.files[r.source] ?? candidate.files[r.source];
+        try {
+          return pluginManifestSchema.parse(JSON.parse(text)).id === action.id;
+        } catch {
+          return false; // a broken neighbour must not block repairing/removing another plugin
+        }
+      });
       if (index < 0)
-        throw new VmotionError('PLUGIN_NOT_FOUND', 'Plugin is not registered', { id: action.id });
+        throw new VmotionError('PLUGIN_NOT_FOUND', 'Plugin is not registered', {
+          id: action.id,
+          ...(action.type === 'remove' && action.source ? { source: action.source } : {}),
+        });
       if (action.type === 'remove') registrations.splice(index, 1);
       else {
         const { hash, contentHash, ...old } = registrations[index];
@@ -365,6 +474,7 @@ export async function planPlugins(
         inferred: p.samples === undefined,
       },
       filesPreservedOnRemoval: true,
+      ...extraSummary,
     },
     p.delivery,
   );
@@ -495,5 +605,32 @@ export async function callPluginTool(
       width: 320,
     },
     plan.summary,
+  );
+}
+
+/** Install/upgrade from a folder, .vmplugin/.zip or Git checkout as one exact candidate. */
+export async function installPlugins(
+  root: string,
+  registry: PluginRegistry,
+  base: Snapshot,
+  raw: unknown,
+) {
+  const p = pluginInstallSchema.parse(raw);
+  if (p.revision !== base.revision)
+    throw new VmotionError('REVISION_CONFLICT', 'Project changed before plugin installation');
+  const pkg = await loadPluginPackage(root, p.source),
+    install = planPluginInstall(base, pkg, p);
+  return planPlugins(
+    root,
+    registry,
+    base,
+    {
+      revision: p.revision,
+      delivery: p.delivery,
+      ...(p.samples ? { samples: p.samples } : {}),
+      files: install.files,
+      actions: install.actions,
+    },
+    { install: install.summary },
   );
 }

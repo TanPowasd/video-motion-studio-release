@@ -49,6 +49,16 @@ export function subscribeWorkbench(store: WorkbenchStore, events: EventSource) {
       if (value.kind === 'change') {
         const state = mergeApplicationState(store.getSnapshot().project.state, value.state);
         store.dispatch({ type: 'patch', slice: 'project', patch: { state } });
+      } else if (value.kind === 'agents') {
+        const previous = store.getSnapshot().project.state;
+        if (previous && value.agents && typeof value.agents === 'object')
+          store.dispatch({
+            type: 'patch',
+            slice: 'project',
+            patch: {
+              state: { ...previous, agents: value.agents as ApplicationState['agents'] },
+            },
+          });
       } else if (Array.isArray(value.jobs))
         store.dispatch({
           type: 'patch',
@@ -69,4 +79,5 @@ const update = z.object({
   kind: z.string(),
   state: z.unknown().optional(),
   jobs: z.unknown().optional(),
+  agents: z.unknown().optional(),
 });

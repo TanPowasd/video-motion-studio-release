@@ -8,6 +8,8 @@ export const agentGuideSchema = z
         'animation',
         'effects',
         'editing',
+        'image',
+        'glyphs',
         'sound',
         'performance',
         '3d',
@@ -19,6 +21,35 @@ export const agentGuideSchema = z
   })
   .strict();
 const workflows = {
+  glyphs: {
+    tools: ['glyphs_inspect', 'glyphs_plan', 'project_preflight', 'project_apply', 'frame_capture', 'captions_import'],
+    steps: [
+      'Text can render without a font: a glyph set (components/glyphs/<id>.vmglyph.json or builtin:demo) composes characters from stroke-drawn components (偏旁部件) with IDS ⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻. Text layers set glyphSet + glyphFallback (font = missing chars use the font, none = skipped, tofu = box). Fonts stay fully supported.',
+      'glyphs_inspect: sets list; set+components/glyphs pages; text=… or project=true coverage (missing chars with counts and layer/caption locations); chars=… composition details; expression=IDS (+adjust {path:{ratio,inner,box,offset,scale}}) and preview=chars return a native PNG sheet as media.',
+      'glyphs_plan: create (extends builtin:demo to inherit, or copyFrom to copy everything), setStyle (strokeWidth/cap/join/roundness/slant/strokeScaling, metrics), setComponent (strokes: points or d centerlines in a 1000 box in stroke order; fills; prefer width/height; inner box for surrounds), setGlyph (IDS string, or {ids, adjust, advance, strokes, fills}), setOperator, setKerning, assign to text layers/caption components. Preflight the planId and apply unchanged (one undo). Built-in sets are read-only.',
+      'captions_import accepts glyphSet/glyphFallback. Wrapping, alignment, text animators, path text and hit-testing share the glyph-aware layout; preview and export use the same native renderer.',
+    ],
+    reference: 'docs/GLYPHS.md',
+  },
+  image: {
+    tools: [
+      'still_inspect',
+      'still_plan',
+      'project_preflight',
+      'project_apply',
+      'frame_capture',
+      'visual_audit',
+      'composition_edit_layers',
+      'image_export',
+    ],
+    steps: [
+      'still_inspect lists still artboards (scene.still: dpi/bleed/safeArea/transparent/variants, trim/safe boxes) and the budget (8192px side, 48MP). presets=true returns the 8 size presets (poster-a4/poster-a3 300dpi with 36px bleed, xiaohongshu, wechat-cover, video-cover-720/1080, square, vertical); templates=true returns blank/poster/cover/card.',
+      'still_plan actions create (preset or width/height, template, dpi/bleed/safeArea/transparent, variants), update/mark a scene as a 1-frame still, unmark back to animation, replace variants, or align/distribute nodeIds to selection/canvas/trim/safe (keyframe-aware). Pass candidate to project_preflight and apply unchanged for one undo.',
+      'Edit layers with the ordinary composition tools; inspect frame 0 with frame_capture/visual_audit (text clipping, overflow) before export.',
+      'image_export renders through the preview renderer: png/jpeg/webp, quality, scale 0.1-4 (re-rendered, not upscaled), transparent (PNG/WebP), trim bleed (main only), dpi metadata (PNG/JPEG = dpi*scale), variants all|ids with contain/cover/reflow, main=false for variants only. Pin revision, or planId to export an unapplied candidate. Results carry path/size/bytes/pixelHash without Base64; preview returns small thumbnails only. Over-budget sizes fail with RESOLUTION; lower scale/size instead of expecting a silent downscale.',
+    ],
+    reference: 'docs/STILL-IMAGES.md',
+  },
   plugins: {
     tools: [
       'project_references',
@@ -26,6 +57,8 @@ const workflows = {
       'assets_query',
       'drawing_query',
       'plugins_package',
+      'plugins_install',
+      'plugins_pack',
       'plugins_plan',
       'project_schema',
       'project_preflight',
@@ -34,11 +67,12 @@ const workflows = {
       'render_start',
     ],
     steps: [
-      'Inspect builtin/project plugin IDs, dependencies and contribution sources. plugins_plan registers/enables/disables/removes local JSON manifests and TypeScript tools, with exact stored candidates and one undo. plugins_package returns a paginated content-hash index; read selected source ranges only when needed. Full manifests are opt-in.',
+      'Inspect builtin/project plugin IDs, dependencies and contribution sources. plugins_plan registers/enables/disables/removes local JSON manifests and TypeScript tools, with exact stored candidates and one undo. plugins_package returns a paginated content-hash index; read selected source ranges only when needed. Full manifests are opt-in. plugins_inspect lists status/pinned per plugin plus problems with ready plugins_plan fix actions; id+includeParameters adds dependencyStatus, dependents, files and tool parameters.',
+      'plugins_pack writes a deterministic .vmplugin (ZIP: vmplugin.json with per-file sha256/content hashes/digest + files/<project path>), bundling project-plugin dependencies by default. plugins_install reads a folder, .vmplugin/.zip (path or base64) or explicit Git url/ref and returns one exact candidate: files under components/, registration, semver dependency resolution (bundled deps installed; missing/conflict reported), optional pin, summary.install version diff. Rejects vmotion.* IDs, future apiVersion/format, traversal, >32MiB archives, downgrades/foreign overwrites unless explicit. Uninstall = plugins_plan remove.',
       'Discover plugin.<id>.<tool> with tools_search pluginId; schema/call/load dynamically follows enabled manifests. Typed tool parameters must match definePluginTool exports. Query context is explicit and bounded; plan tools return deterministic operations/files, never directly commit creative edits.',
       'Preflight sampled native pictures and apply unchanged. Component/effect/motion/theme/sound/template resource contributions keep ordinary editable project formats. Disabling/removing a library does not delete its sources or break independent references.',
       'Local TypeScript runs as user-trusted code in bounded workers, not a security sandbox. Native/UI/audio ABI hooks remain future work. See docs/PLUGINS.md.',
-      'Eighteen builtin modules dispatch all 140 capabilities through one registry, including core transactions/recovery/cache/review. plugins_inspect reports moduleTools/hostTools. Shared service/task managers stay host-owned; project plugins receive only bounded query context and candidate interfaces. Package probes reuse a bounded cache; pin=false releases both manifest/content protection in the exact candidate.',
+      'Eighteen builtin modules dispatch all 147 capabilities through one registry, including core transactions/recovery/cache/review. plugins_inspect reports moduleTools/hostTools. Shared service/task managers stay host-owned; project plugins receive only bounded query context and candidate interfaces. Package probes reuse a bounded cache; pin=false releases both manifest/content protection in the exact candidate.',
       'Use assets_query for 24-item filtered registered metadata, then media_status/inspect for actual source evidence. drawing_query pages layer/stroke IDs and only the requested point ranges; drawing_get is full, drawing_frame is native pixel evidence. Query errors never mutate history. Edit/publish/import/place through their original shared commands.',
     ],
     reference: 'docs/PLUGINS.md',
@@ -312,7 +346,7 @@ export function agentGuide(raw: unknown = {}) {
     },
     discovery: {
       initialTools: 10,
-      availableCapabilities: 140,
+      availableCapabilities: 147,
       search:
         'tools_search returns paginated capability summaries; tool_schema returns one exact interface.',
       invoke:
@@ -327,7 +361,7 @@ export function agentGuide(raw: unknown = {}) {
             tools: workflow.tools,
           })),
           start:
-            'Use project_context for the current project, then agent_guide for the topic (3d for matrix scenes). Find tools with tools_search, read individual schemas with tool_schema, and invoke with tool_call. Load direct tools only when useful.',
+            'Use project_context for the current project, then agent_guide for the topic (3d for matrix scenes, image for posters/covers/thumbnails, glyphs for font-free composed text). Find tools with tools_search, read individual schemas with tool_schema, and invoke with tool_call. Load direct tools only when useful.',
         }
       : { workflow: workflows[topic] }),
   };

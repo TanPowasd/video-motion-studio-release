@@ -5,6 +5,7 @@ import { layoutTextLines } from './text-layout.js';
 import { GeometryCache } from './geometry-cache.js';
 import { prepareCurvePath, sampleCurvePath } from './curve-path.js';
 import type { TextSelector } from './typography-schema.js';
+import { MixedTextMeasurer, glyphSourceFor, glyphSourceKey, noGlyphs, type GlyphTextSource } from './glyphs/glyph-text.js';
 
 const graphemes = new Intl.Segmenter('zh', { granularity: 'grapheme' });
 const words = new Intl.Segmenter('zh', { granularity: 'word' });
@@ -69,7 +70,7 @@ export class TypographyLayout {
     this.cache.clear();
     this.lineCache.clear();
   }
-  lines(ctx: SKRSContext2D, n: Node) {
+  lines(ctx: SKRSContext2D, n: Node, glyphs: GlyphTextSource = noGlyphs) {
     ctx.font = nativeTextFont(n.fontWeight, n.fontSize, n.fontFamily);
     ctx.textAlign = n.align;
     ctx.textBaseline = 'top';
@@ -81,10 +82,11 @@ export class TypographyLayout {
         n.fontWeight,
         n.fontSize,
         n.reveal,
+        glyphSourceKey(glyphs),
       ]),
       hit = this.lineCache.get(key);
     if (hit) return [...hit];
-    const lines = layoutTextLines(ctx, n);
+    const lines = layoutTextLines(ctx, n, new MixedTextMeasurer(ctx, glyphs, n.fontSize));
     if (this.lineCache.budgetBytes)
       this.lineCache.put(
         key,
@@ -93,7 +95,7 @@ export class TypographyLayout {
       );
     return lines;
   }
-  layout(ctx: SKRSContext2D, n: Node, frame = 0) {
+  layout(ctx: SKRSContext2D, n: Node, frame = 0, glyphs: GlyphTextSource = noGlyphs) {
     if (n.text.length > 65536)
       throw new VmotionError(
         'TEXT_BUDGET',
@@ -125,10 +127,12 @@ export class TypographyLayout {
         n.align,
         !!path,
         granularity,
+        glyphSourceKey(glyphs),
       ]);
     ctx.font = nativeTextFont(n.fontWeight, n.fontSize, n.fontFamily);
     ctx.textAlign = 'left';
     ctx.textBaseline = baseline;
+    const measure = new MixedTextMeasurer(ctx, glyphs, n.fontSize);
     let prepared = this.cache.get(key);
     if (!prepared) {
       const chars = Array.from(graphemes.segment(n.text), (s) => s.segment);
@@ -137,14 +141,16 @@ export class TypographyLayout {
           'TEXT_BUDGET',
           'Advanced typography allows at most 4096 graphemes per layer',
         );
-      const lines = path ? [n.text.replace(/\n/g, ' ')] : this.lines(ctx, { ...n, reveal: 1 });
+      const lines = path
+        ? [n.text.replace(/\n/g, ' ')]
+        : this.lines(ctx, { ...n, reveal: 1 }, glyphs);
       ctx.textAlign = 'left';
       ctx.textBaseline = baseline;
       const units: Unit[] = [],
         counts = { grapheme: 0, word: 0, line: lines.length };
       let advance = 0;
       for (const [lineIndex, line] of lines.entries()) {
-        const lineWidth = ctx.measureText(line).width,
+        const lineWidth = measure.width(line),
           origin = path
             ? 0
             : n.align === 'center'
@@ -165,15 +171,15 @@ export class TypographyLayout {
           index: t.isWordLike ? counts.word++ : -1,
         }));
         for (const segment of segments) {
-          const m = ctx.measureText(segment.segment),
-            width = m.width,
+          const width = measure.width(segment.segment),
+            box = measure.box(segment.segment, baseline),
             count = Array.from(graphemes.segment(segment.segment)).length,
             wordIndex =
               wordRanges.find((r) => segment.index >= r.start && segment.index < r.end)?.index ??
               -1;
           units.push({
             text: segment.segment,
-            x: origin + ctx.measureText(line.slice(0, segment.index)).width,
+            x: origin + measure.offset(line, segment.index),
             y: lineIndex * n.fontSize * n.lineHeight,
             index: counts.grapheme,
             wordIndex,
@@ -182,12 +188,7 @@ export class TypographyLayout {
             baseline,
             start: counts.grapheme,
             count,
-            box: {
-              x: -m.actualBoundingBoxLeft,
-              y: -m.actualBoundingBoxAscent,
-              width: Math.max(width, m.actualBoundingBoxRight) + m.actualBoundingBoxLeft,
-              height: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent,
-            },
+            box,
           });
           counts.grapheme += count;
         }
@@ -318,14 +319,8 @@ export class TypographyLayout {
         run.text = Array.from(graphemes.segment(unit.text), (s) => s.segment)
           .slice(0, visible - unit.start)
           .join('');
-        const m = ctx.measureText(run.text);
-        run.width = m.width;
-        run.box = {
-          x: -m.actualBoundingBoxLeft,
-          y: -m.actualBoundingBoxAscent,
-          width: Math.max(m.width, m.actualBoundingBoxRight) + m.actualBoundingBoxLeft,
-          height: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent,
-        };
+        run.width = measure.width(run.text);
+        run.box = measure.box(run.text, baseline);
       }
       runs.push(run);
     }
@@ -352,5 +347,5 @@ export class TypographyLayout {
 }
 const sdkTypography = new TypographyLayout();
 export function layoutAnimatedText(ctx: SKRSContext2D, node: Node, frame = 0) {
-  return sdkTypography.layout(ctx, node, frame);
+  return sdkTypography.layout(ctx, node, frame, glyphSourceFor(node));
 }

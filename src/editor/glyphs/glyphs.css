@@ -1,0 +1,368 @@
+/* 字形 (radical-composed glyph sets). Theme tokens only. */
+
+/* ── text inspector controls ─────────────────────────────────────── */
+.glyph-text-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vm-space-3);
+  margin-top: var(--vm-space-3);
+}
+.glyph-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--vm-space-3);
+  font-size: var(--vm-fs-xs);
+  color: var(--vm-text-3);
+}
+.glyph-row select,
+.glyph-panel select,
+.glyph-panel input:not([type='range']):not([type='radio']) {
+  height: var(--vm-control-h-sm);
+  min-width: 0;
+  background: var(--vm-bg-3);
+  color: var(--vm-text-1);
+  border: 1px solid var(--vm-line-2);
+  border-radius: var(--vm-radius-sm);
+  padding: 0 var(--vm-space-3);
+  font: inherit;
+  font-size: var(--vm-fs-sm);
+}
+.glyph-open,
+.glyph-panel button {
+  height: var(--vm-control-h-sm);
+  padding: 0 var(--vm-space-4);
+  background: var(--vm-bg-3);
+  color: var(--vm-text-2);
+  border: 1px solid var(--vm-line-2);
+  border-radius: var(--vm-radius-sm);
+  font: inherit;
+  font-size: var(--vm-fs-sm);
+  cursor: pointer;
+}
+.glyph-open:hover,
+.glyph-panel button:hover:not(:disabled) {
+  background: var(--vm-bg-4);
+  border-color: var(--vm-line-3);
+  color: var(--vm-text-1);
+}
+.glyph-panel button:disabled {
+  color: var(--vm-text-4);
+  cursor: default;
+}
+.glyph-panel button.primary {
+  background: var(--vm-accent);
+  border-color: var(--vm-accent);
+  color: var(--vm-accent-on);
+}
+.glyph-panel button.primary:hover:not(:disabled) {
+  background: var(--vm-accent-hover);
+}
+.glyph-panel button.primary:disabled {
+  background: var(--vm-bg-5);
+  border-color: var(--vm-line-2);
+  color: var(--vm-text-4);
+}
+.glyph-error {
+  margin: 0;
+  color: var(--vm-danger);
+  font-size: var(--vm-fs-xs);
+  white-space: pre-wrap;
+}
+.glyph-notice {
+  margin: 0;
+  color: var(--vm-success);
+  font-size: var(--vm-fs-xs);
+}
+.glyph-hint,
+.glyph-empty {
+  margin: 0;
+  color: var(--vm-text-4);
+  font-size: var(--vm-fs-xs);
+}
+
+/* ── panel ──────────────────────────────────────────────────────── */
+.glyph-backdrop {
+  z-index: 60;
+}
+.glyph-panel {
+  width: min(980px, calc(100vw - 48px));
+  height: min(700px, calc(100vh - 48px));
+  display: flex;
+  flex-direction: column;
+  background: var(--vm-bg-2);
+  color: var(--vm-text-1);
+  border: 1px solid var(--vm-line-2);
+  border-radius: var(--vm-radius-lg);
+  outline: none;
+  overflow: hidden;
+}
+.glyph-panel-head {
+  display: flex;
+  align-items: center;
+  gap: var(--vm-space-5);
+  padding: var(--vm-space-5) var(--vm-space-6);
+  border-bottom: 1px solid var(--vm-line-1);
+}
+.glyph-panel-head h2 {
+  margin: 0;
+  font-size: var(--vm-fs-lg);
+  font-weight: var(--vm-fw-semibold);
+}
+.glyph-eyebrow {
+  display: block;
+  color: var(--vm-accent-text);
+  font-size: var(--vm-fs-2xs);
+  letter-spacing: 2px;
+}
+.glyph-meta {
+  color: var(--vm-text-3);
+  font-size: var(--vm-fs-xs);
+}
+.glyph-panel .glyph-close {
+  margin-left: auto;
+  width: var(--vm-icon-btn);
+  padding: 0;
+  font-size: var(--vm-fs-lg);
+  background: transparent;
+  border-color: transparent;
+}
+.glyph-tabs {
+  display: flex;
+  gap: var(--vm-space-1);
+  padding: 0 var(--vm-space-6);
+  border-bottom: 1px solid var(--vm-line-1);
+}
+.glyph-panel .glyph-tabs button {
+  height: var(--vm-panel-header-h);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--vm-text-3);
+}
+.glyph-panel .glyph-tabs button.active {
+  color: var(--vm-text-1);
+  border-bottom-color: var(--vm-accent);
+}
+.glyph-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--vm-space-6);
+}
+.glyph-foot {
+  padding: var(--vm-space-4) var(--vm-space-6);
+  border-top: 1px solid var(--vm-line-1);
+  min-height: 32px;
+}
+.glyph-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--vm-space-5);
+  margin-bottom: var(--vm-space-5);
+  font-size: var(--vm-fs-sm);
+  color: var(--vm-text-2);
+}
+.glyph-toolbar span {
+  margin-left: auto;
+  color: var(--vm-text-3);
+  font-size: var(--vm-fs-xs);
+}
+.glyph-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vm-space-2);
+  font-size: var(--vm-fs-xs);
+  color: var(--vm-text-3);
+}
+.glyph-field em {
+  font-style: normal;
+  color: var(--vm-text-1);
+  font-variant-numeric: tabular-nums;
+}
+.glyph-field input[type='range'],
+.glyph-inner input[type='range'] {
+  accent-color: var(--vm-accent);
+}
+.glyph-link {
+  align-self: flex-start;
+}
+.glyph-panel .glyph-link {
+  background: transparent;
+  border-color: transparent;
+  color: var(--vm-accent-text);
+  padding: 0;
+}
+
+/* coverage */
+.glyph-report {
+  border: 1px solid var(--vm-line-1);
+  border-radius: var(--vm-radius-md);
+  padding: var(--vm-space-5);
+  margin-bottom: var(--vm-space-5);
+  background: var(--vm-bg-1);
+}
+.glyph-report header {
+  display: flex;
+  align-items: center;
+  gap: var(--vm-space-5);
+  font-size: var(--vm-fs-sm);
+  color: var(--vm-text-2);
+}
+.glyph-report meter {
+  width: 160px;
+}
+.glyph-bad {
+  color: var(--vm-danger);
+}
+.glyph-ok {
+  margin: var(--vm-space-4) 0 0;
+  color: var(--vm-success);
+  font-size: var(--vm-fs-xs);
+}
+.glyph-missing,
+.glyph-items {
+  list-style: none;
+  margin: var(--vm-space-4) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: var(--vm-space-2);
+}
+.glyph-items {
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+}
+.glyph-panel .glyph-missing button,
+.glyph-panel .glyph-items button {
+  width: 100%;
+  height: auto;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--vm-space-1);
+  padding: var(--vm-space-2);
+}
+.glyph-missing b,
+.glyph-items b {
+  font-size: var(--vm-fs-xl);
+  font-weight: var(--vm-fw-regular);
+  color: var(--vm-text-1);
+}
+.glyph-missing button {
+  border-color: var(--vm-danger-bg);
+}
+.glyph-missing small,
+.glyph-items small {
+  color: var(--vm-text-3);
+  font-size: var(--vm-fs-2xs);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.glyph-sample {
+  margin: 0 0 var(--vm-space-5);
+}
+.glyph-sample figcaption,
+.glyph-live figcaption {
+  font-size: var(--vm-fs-xs);
+  color: var(--vm-text-3);
+  margin-bottom: var(--vm-space-2);
+}
+.glyph-sample img,
+.glyph-sheet {
+  max-width: 100%;
+  border-radius: var(--vm-radius-sm);
+  border: 1px solid var(--vm-line-1);
+}
+
+/* compose / style */
+.glyph-compose,
+.glyph-style {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--vm-space-7);
+  align-items: start;
+}
+.glyph-compose-form,
+.glyph-style-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vm-space-5);
+}
+.glyph-compose-form input[aria-label='IDS 拼字式'] {
+  height: var(--vm-control-h);
+  font-size: var(--vm-fs-lg);
+  letter-spacing: 2px;
+}
+.glyph-operators {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--vm-space-2);
+}
+.glyph-panel .glyph-operators button {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--vm-space-2);
+}
+.glyph-operators span {
+  font-size: var(--vm-fs-xl);
+  line-height: 1.1;
+}
+.glyph-operators small {
+  font-size: var(--vm-fs-2xs);
+  color: var(--vm-text-3);
+}
+.glyph-inner {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--vm-space-3) var(--vm-space-5);
+  font-size: var(--vm-fs-xs);
+  color: var(--vm-text-3);
+}
+.glyph-inner > span {
+  grid-column: 1 / -1;
+}
+.glyph-inner label {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--vm-space-3);
+}
+.glyph-save {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--vm-space-4);
+}
+.glyph-save .glyph-field {
+  width: 120px;
+}
+.glyph-live {
+  margin: 0;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--vm-space-3);
+}
+.glyph-live img {
+  width: 100%;
+  border-radius: var(--vm-radius-md);
+  border: 1px solid var(--vm-line-2);
+  background: var(--vm-bg-0);
+}
+
+@media (max-width: 760px) {
+  .glyph-compose,
+  .glyph-style {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .glyph-operators {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

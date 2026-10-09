@@ -4,6 +4,7 @@ import os from 'node:os';
 import { hash } from './project.js';
 import type { Application } from './application.js';
 import { VmotionError } from '../core/model.js';
+import { withChangeOrigin } from './change-journal.js';
 export function pipeName(root: string) {
   const normalized = path.resolve(root);
   const key = hash(process.platform === 'win32' ? normalized.toLowerCase() : normalized).slice(
@@ -83,7 +84,13 @@ export async function servePipe(app: Application) {
         void (async () => {
           try {
             const { method, params } = JSON.parse(line);
-            const result = await app.dispatch(method, params);
+            if (method === 'agentHold')
+              throw new VmotionError('SURFACE_METHOD', 'This control belongs to the Studio UI');
+            // Pipe callers are local automation (CLI, MCP bridge). agentToolInvoke sets its
+            // own MCP origin; everything else is attributed to the CLI.
+            const result = await withChangeOrigin({ kind: 'cli', tool: String(method) }, () =>
+              app.dispatch(method, params),
+            );
             socket.write(JSON.stringify({ result }) + '\n');
           } catch (e) {
             socket.write(

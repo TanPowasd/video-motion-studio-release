@@ -4,6 +4,7 @@ import { Icon } from './Icons.js';
 import { McpConnectionButton } from './McpConnection.js';
 import { projectCreationSchema, type ProjectHome as HomeData } from '../core/project-creation.js';
 import './project-home.css';
+import { NewImageDialog } from './still/NewImageDialog.js';
 
 export function NewProjectForm({
   onCancel,
@@ -306,9 +307,40 @@ export function ProjectActions({
   );
 }
 
+export function NewImageProject({ onCancel }: { onCancel: () => void }) {
+  const [directory, setDirectory] = useState('');
+  useEffect(() => {
+    window.vmotionDesktop
+      ?.projectHome()
+      .then((data) => setDirectory(data.directory))
+      .catch(() => {});
+  }, []);
+  return (
+    <NewImageDialog
+      mode="project"
+      initialDirectory={directory}
+      onCancel={onCancel}
+      pickDirectory={(current) => window.vmotionDesktop!.pickProjectDirectory(current)}
+      onSubmit={async (settings) => {
+        if (!window.vmotionDesktop) throw new Error('请在桌面版新建图片项目');
+        await window.vmotionDesktop.createProject({
+          name: settings.name,
+          directory: settings.directory!,
+          kind: 'still',
+          ...(settings.preset ? { preset: settings.preset } : {}),
+          stillTemplate: settings.template,
+          width: settings.width,
+          height: settings.height,
+        });
+      }}
+    />
+  );
+}
+
 export function ProjectHome() {
   const [home, setHome] = useState<HomeData>(),
-    [creating, setCreating] = useState(false);
+    [creating, setCreating] = useState(false),
+    [creatingImage, setCreatingImage] = useState(false);
   const [error, setError] = useState(''),
     [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -330,8 +362,14 @@ export function ProjectHome() {
   }, []);
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
-      if (busy || creating || !(event.ctrlKey || event.metaKey) || event.shiftKey || event.altKey)
+      if (busy || creating || creatingImage || !(event.ctrlKey || event.metaKey) || event.altKey)
         return;
+      if (event.key.toLowerCase() === 'n' && event.shiftKey) {
+        event.preventDefault();
+        setCreatingImage(true);
+        return;
+      }
+      if (event.shiftKey) return;
       if (event.key.toLowerCase() === 'n') {
         event.preventDefault();
         setCreating(true);
@@ -343,15 +381,13 @@ export function ProjectHome() {
     };
     window.addEventListener('keydown', listener);
     return () => window.removeEventListener('keydown', listener);
-  }, [open, busy, creating]);
+  }, [open, busy, creating, creatingImage]);
   return (
     <main className="project-home">
       <header>
         <div className="brand">
           <div className="brand-mark">V</div>
-          <span>
-            vmotion<span className="brand-dot">.</span>
-          </span>
+          <span className="brand-name">Vmotion</span>
         </div>
         <span>本地创作工作站</span>
         <McpConnectionButton />
@@ -360,7 +396,7 @@ export function ProjectHome() {
         <section className="project-home-intro">
           <div className="project-home-eyebrow">PROJECTS / 项目</div>
           <h1>从一个新项目开始</h1>
-          <p>动画、剪辑、音乐与绘画，共用一个可编辑工程。</p>
+          <p>动画、剪辑、音乐、绘画与平面图片，共用一个可编辑工程。</p>
           <div className="project-home-buttons">
             <button
               className="primary"
@@ -369,6 +405,15 @@ export function ProjectHome() {
             >
               <Icon name="plus" />
               新建项目 <kbd>Ctrl N</kbd>
+            </button>
+            <button
+              className="secondary"
+              disabled={busy || !window.vmotionDesktop}
+              onClick={() => setCreatingImage(true)}
+              title="海报、封面、缩略图与社交图片"
+            >
+              <Icon name="image" />
+              新建图片 <kbd>Ctrl Shift N</kbd>
             </button>
             <button
               className="secondary"
@@ -426,6 +471,11 @@ export function ProjectHome() {
       {creating && (
         <div className="project-modal" role="dialog" aria-modal="true" aria-label="新建项目">
           <NewProjectForm onCancel={() => setCreating(false)} />
+        </div>
+      )}
+      {creatingImage && (
+        <div className="project-modal" role="dialog" aria-modal="true" aria-label="新建图片">
+          <NewImageProject onCancel={() => setCreatingImage(false)} />
         </div>
       )}
     </main>

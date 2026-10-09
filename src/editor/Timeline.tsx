@@ -30,6 +30,11 @@ interface TimelineProps {
     revision?: string,
   ) => Promise<unknown>;
   audioMonitor?: React.ComponentProps<typeof AudioMonitor>;
+  /** Studio shell: layers / clips changed by external AI (mint marks + ruler strips). */
+  aiMarks?: {
+    nodes: Map<string, { created: boolean }>;
+    clips: Map<string, { created: boolean }>;
+  };
 }
 type Drag = {
   kind: 'move' | 'left' | 'right';
@@ -66,6 +71,7 @@ export function Timeline({
   onAssetDrop,
   onAnimationEdit,
   audioMonitor,
+  aiMarks,
 }: TimelineProps) {
   const [zoom, setZoom] = useState(1),
     [snap, setSnap] = useState(true),
@@ -73,7 +79,10 @@ export function Timeline({
     [dragging, setDragging] = useState<Drag | undefined>(),
     scroll = useRef<HTMLDivElement>(null),
     dragRef = useRef<Drag | undefined>(undefined),
-    [scrollLeft, setScrollLeft] = useState(0);
+    [scrollLeft, setScrollLeft] = useState(0),
+    scrubbing = useRef(false),
+    [hoverFrame, setHoverFrame] = useState<number>(),
+    zoomAnchor = useRef<{ frame: number; offset: number } | undefined>(undefined);
   type SelectedKey = { nodeId: string; property: string; frame: number };
   const [selectedKeys, setSelectedKeys] = useState<SelectedKey[]>([]),
     [keyDelta, setKeyDelta] = useState<number>(),
@@ -189,13 +198,48 @@ export function Timeline({
     labelWidth = 218,
     contentWidth = Math.max(300, width - labelWidth - 20) * zoom,
     pxPerFrame = contentWidth / duration,
+    pxPerFrameRef = useRef(pxPerFrame),
     seconds = duration / fps,
     selectedNode = scene.nodes.find((n) => n.id === selected);
+  pxPerFrameRef.current = pxPerFrame;
   useEffect(() => {
     const observer = new ResizeObserver((entries) => setWidth(entries[0].contentRect.width));
     observer.observe(scroll.current!);
     return () => observer.disconnect();
   }, []);
+  // Ctrl/⌘ + wheel zooms around the pointer; plain wheel keeps native scrolling.
+  useEffect(() => {
+    const element = scroll.current!;
+    const wheel = (event: WheelEvent) => {
+      if (!(event.ctrlKey || event.metaKey)) return;
+      event.preventDefault();
+      const box = element.getBoundingClientRect(),
+        offset = Math.max(0, event.clientX - box.left - labelWidth),
+        frameAt = (element.scrollLeft + offset) / pxPerFrameRef.current;
+      zoomAnchor.current = { frame: frameAt, offset };
+      setZoom((z) => Math.max(1, Math.min(64, z * (event.deltaY > 0 ? 1 / 1.2 : 1.2))));
+    };
+    element.addEventListener('wheel', wheel, { passive: false });
+    return () => element.removeEventListener('wheel', wheel);
+  }, []);
+  useEffect(() => {
+    const anchor = zoomAnchor.current;
+    if (!anchor) return;
+    zoomAnchor.current = undefined;
+    scroll.current!.scrollLeft = Math.max(0, anchor.frame * pxPerFrame - anchor.offset);
+  }, [zoom]);
+  // Keep the selected layer/clip row visible when selection changes elsewhere (canvas, layer list).
+  useEffect(() => {
+    const box = scroll.current,
+      row = box?.querySelector<HTMLElement>('.tl-row.selected');
+    if (!box || !row) return;
+    // Scroll only the timeline itself (scrollIntoView would also move overflow:hidden ancestors).
+    const r = row.getBoundingClientRect(),
+      b = box.getBoundingClientRect(),
+      ruler = box.querySelector<HTMLElement>('.tl-ruler-row')?.offsetHeight ?? 0;
+    if (r.top < b.top + ruler) box.scrollTop -= b.top + ruler - r.top;
+    else if (r.bottom > b.bottom) box.scrollTop += r.bottom - b.bottom;
+  }, [selected]);
   useEffect(() => {
     if (!playing) return;
     const box = scroll.current!,
@@ -394,6 +438,33 @@ export function Timeline({
       { length: Math.max(0, Math.ceil((lastTick - firstTick) / step)) },
       (_, i) => firstTick + i * step,
     );
+  // Visual feedback for snapping: show a guide where the dragged edge landed on a target.
+  const snapGuide = (() => {
+    if (!dragging || !snap) return undefined;
+    const { start, duration: length } = dragging.patch,
+      edges =
+        dragging.kind === 'left'
+          ? [start]
+          : dragging.kind === 'right'
+            ? [start + length]
+            : [start, start + length],
+      targets = new Set([
+        0,
+        duration,
+        frame,
+        ...(sequenceMode ? sequence.markers.map((m) => m.frame) : []),
+        ...(sequenceMode
+          ? sequence.tracks.flatMap((t) =>
+              t.clips
+                .filter((c) => c.id !== dragging.id && !dragging.clipIds?.includes(c.id))
+                .flatMap((c) => [c.start, c.start + c.duration]),
+            )
+          : scene.nodes
+              .filter((n) => n.id !== dragging.id)
+              .flatMap((n) => [n.start, n.end ?? duration])),
+      ]);
+    return edges.find((edge) => targets.has(edge));
+  })();
   const title = sequenceMode ? sequence.name : scene.name;
   const draft = (id: string, start: number, length: number) =>
     dragging?.id === id
@@ -551,26 +622,50 @@ export function Timeline({
         </div>
         <div className="transport">
           <button
-            title="回到第一帧"
+            className="icon-button"
+            title="回到第一帧 · Home"
+            aria-label="回到第一帧"
             onClick={() => {
               onPlaying(false);
               onFrame(0);
             }}
           >
-            ⏮
-          </button>
-          <button title="上一帧" onClick={() => onFrame(Math.max(0, frame - 1))}>
-            ‹
+            <Icon name="skipBack" size={14} />
           </button>
           <button
-            className="play-button"
+            className="icon-button"
+            title="上一帧 · ←"
+            aria-label="上一帧"
+            onClick={() => onFrame(Math.max(0, frame - 1))}
+          >
+            <Icon name="stepBack" size={15} />
+          </button>
+          <button
+            className={`play-button ${playing ? 'playing' : ''}`}
             aria-label={playing ? '暂停' : '播放'}
+            title={`${playing ? '暂停' : '播放'} · Space`}
             onClick={() => onPlaying(!playing)}
           >
             <Icon name={playing ? 'pause' : 'play'} size={15} />
           </button>
-          <button title="下一帧" onClick={() => onFrame(Math.min(duration - 1, frame + 1))}>
-            ›
+          <button
+            className="icon-button"
+            title="下一帧 · →"
+            aria-label="下一帧"
+            onClick={() => onFrame(Math.min(duration - 1, frame + 1))}
+          >
+            <Icon name="stepForward" size={15} />
+          </button>
+          <button
+            className="icon-button"
+            title="跳到最后一帧 · End"
+            aria-label="跳到最后一帧"
+            onClick={() => {
+              onPlaying(false);
+              onFrame(Math.max(0, duration - 1));
+            }}
+          >
+            <Icon name="skipForward" size={14} />
           </button>
           <input
             className="timecode-input"
@@ -588,15 +683,35 @@ export function Timeline({
           <span className="duration">/ {time(duration)}</span>
         </div>
         <div className="timeline-actions">
+          {aiMarks && (
+            <span className="tl-legend" aria-label="图例">
+              <span className="me">
+                <i />
+                我的改动
+              </span>
+              <span className="ai">
+                <i />
+                AI 的改动
+              </span>
+            </span>
+          )}
           {audioMonitor && <AudioMonitor {...audioMonitor} />}
           <button
-            className={snap ? 'pressed' : ''}
+            className={`snap-toggle ${snap ? 'pressed' : ''}`}
+            aria-pressed={snap}
             title="吸附到边界、标记和播放头"
             onClick={() => setSnap(!snap)}
           >
+            <Icon name="magnet" size={14} />
             吸附
           </button>
-          <button title="时间轴缩小" onClick={() => setZoom((z) => Math.max(1, z / 1.5))}>
+          <span className="timeline-actions-divider" />
+          <button
+            className="icon-button"
+            title="时间轴缩小 · Ctrl+滚轮"
+            aria-label="时间轴缩小"
+            onClick={() => setZoom((z) => Math.max(1, z / 1.5))}
+          >
             <Icon name="minus" size={14} />
           </button>
           <input
@@ -608,7 +723,12 @@ export function Timeline({
             value={Math.log2(zoom)}
             onChange={(e) => setZoom(2 ** Number(e.target.value))}
           />
-          <button title="时间轴放大" onClick={() => setZoom((z) => Math.min(64, z * 1.5))}>
+          <button
+            className="icon-button"
+            title="时间轴放大 · Ctrl+滚轮"
+            aria-label="时间轴放大"
+            onClick={() => setZoom((z) => Math.min(64, z * 1.5))}
+          >
             <Icon name="plus" size={14} />
           </button>
           <button
@@ -687,10 +807,19 @@ export function Timeline({
               <span className="tl-small">{fps.toFixed(fps % 1 ? 2 : 0)} FPS</span>
             </div>
             <div
-              className="tl-ruler"
-              style={{ width: contentWidth }}
+              className={`tl-ruler ${scrubbing.current ? 'scrubbing' : ''}`}
+              style={
+                {
+                  width: contentWidth,
+                  '--tl-minor': `${Math.max(4, (step * fps * pxPerFrame) / 5)}px`,
+                  '--tl-major': `${step * fps * pxPerFrame}px`,
+                } as React.CSSProperties
+              }
               onPointerDown={(e) => {
+                if (e.button !== 0) return;
                 const box = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.setPointerCapture(e.pointerId);
+                scrubbing.current = true;
                 onFrame(
                   Math.max(
                     0,
@@ -699,6 +828,27 @@ export function Timeline({
                 );
                 onPlaying(false);
               }}
+              onPointerMove={(e) => {
+                const box = e.currentTarget.getBoundingClientRect(),
+                  at = Math.max(
+                    0,
+                    Math.min(duration - 1, Math.round((e.clientX - box.left) / pxPerFrame)),
+                  );
+                if (!scrubbing.current) {
+                  setHoverFrame(at);
+                  return;
+                }
+                e.stopPropagation();
+                setHoverFrame(undefined);
+                onFrame(at);
+              }}
+              onPointerLeave={() => setHoverFrame(undefined)}
+              onPointerUp={(e) => {
+                if (!scrubbing.current) return;
+                e.stopPropagation();
+                scrubbing.current = false;
+              }}
+              onLostPointerCapture={() => (scrubbing.current = false)}
             >
               {ticks.map((t) => (
                 <span key={t} style={{ left: t * fps * pxPerFrame }}>
@@ -707,6 +857,23 @@ export function Timeline({
                     : `${Math.floor(t / 60)}:${String(Math.round(t % 60)).padStart(2, '0')}`}
                 </span>
               ))}
+              {aiMarks &&
+                (sequenceMode
+                  ? sequence.tracks.flatMap((t) =>
+                      t.clips
+                        .filter((c) => aiMarks.clips.has(c.id))
+                        .map((c) => ({ id: c.id, start: c.start, end: c.start + c.duration })),
+                    )
+                  : scene.nodes
+                      .filter((n) => aiMarks.nodes.has(n.id))
+                      .map((n) => ({ id: n.id, start: n.start, end: n.end ?? scene.duration }))
+                ).map((r) => (
+                  <i
+                    key={r.id}
+                    className="tl-ai-strip"
+                    style={{ left: r.start * pxPerFrame, width: Math.max(4, (r.end - r.start) * pxPerFrame) }}
+                  />
+                ))}
               {sequenceMode && sequence.workArea && (
                 <div
                   className="tl-work-area"
@@ -782,7 +949,7 @@ export function Timeline({
                       const value = draft(clip.id, clip.start, clip.duration);
                       return (
                         <div
-                          className={`tl-clip ${clipSelection.includes(clip.id) ? 'selected' : ''} ${track.locked ? 'locked' : ''}`}
+                          className={`tl-clip ${clipSelection.includes(clip.id) ? 'selected' : ''} ${track.locked ? 'locked' : ''} ${aiMarks?.clips.get(clip.id)?.created ? 'ai-created' : aiMarks?.clips.has(clip.id) ? 'ai-changed' : ''}`}
                           key={clip.id}
                           style={{
                             left: value.start * pxPerFrame,
@@ -920,7 +1087,7 @@ export function Timeline({
                         </div>
                         <div className="tl-lane" style={{ width: contentWidth }}>
                           <div
-                            className={`tl-clip layer ${selection.includes(node.id) ? 'selected' : ''}`}
+                            className={`tl-clip layer ${selection.includes(node.id) ? 'selected' : ''} ${aiMarks?.nodes.get(node.id)?.created ? 'ai-created' : aiMarks?.nodes.has(node.id) ? 'ai-changed' : ''}`}
                             style={{
                               left: value.start * pxPerFrame,
                               width: Math.max(4, value.duration * pxPerFrame),
@@ -984,7 +1151,18 @@ export function Timeline({
                     </React.Fragment>
                   );
                 })}
-          <div className="tl-playhead" style={{ left: labelWidth + frame * pxPerFrame }}>
+          {hoverFrame !== undefined && hoverFrame !== frame && (
+            <div className="tl-hover-line" style={{ left: labelWidth + hoverFrame * pxPerFrame }}>
+              <span>{hoverFrame}</span>
+            </div>
+          )}
+          {snapGuide !== undefined && (
+            <div className="tl-snap-guide" style={{ left: labelWidth + snapGuide * pxPerFrame }} />
+          )}
+          <div
+            className={`tl-playhead ${playing ? 'playing' : ''}`}
+            style={{ left: labelWidth + frame * pxPerFrame }}
+          >
             <span />
             <i />
           </div>

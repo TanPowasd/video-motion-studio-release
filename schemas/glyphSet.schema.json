@@ -1,0 +1,464 @@
+{
+  "$ref": "#/definitions/glyphSet",
+  "definitions": {
+    "glyphSet": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "glyph-set"
+        },
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "extends": {
+          "type": "string",
+          "pattern": "^(builtin:)?[a-z0-9][a-z0-9-]{0,62}$"
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "em": {
+              "type": "number",
+              "minimum": 16,
+              "maximum": 4096,
+              "default": 1000
+            },
+            "ascent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4096,
+              "default": 880
+            },
+            "descent": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4096,
+              "default": 120
+            },
+            "advance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4096,
+              "default": 1000
+            },
+            "space": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 4096,
+              "default": 320
+            },
+            "margin": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000,
+              "default": 70
+            },
+            "gap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 400,
+              "default": 36
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "style": {
+          "type": "object",
+          "properties": {
+            "strokeWidth": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 400,
+              "default": 72
+            },
+            "cap": {
+              "type": "string",
+              "enum": [
+                "round",
+                "butt",
+                "square"
+              ],
+              "default": "round"
+            },
+            "join": {
+              "type": "string",
+              "enum": [
+                "round",
+                "miter",
+                "bevel"
+              ],
+              "default": "round"
+            },
+            "roundness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.35
+            },
+            "slant": {
+              "type": "number",
+              "minimum": -30,
+              "maximum": 30,
+              "default": 0
+            },
+            "strokeScaling": {
+              "$ref": "#/definitions/glyphSet/properties/style/properties/roundness",
+              "default": 0.3
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "operators": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "ratio": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0.05,
+                    "maximum": 0.95
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/glyphSet/properties/operators/additionalProperties/properties/ratio/anyOf/0"
+                    },
+                    "minItems": 2,
+                    "maxItems": 3
+                  }
+                ]
+              },
+              "inner": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": [
+                  {
+                    "$ref": "#/definitions/glyphSet/properties/style/properties/roundness"
+                  },
+                  {
+                    "$ref": "#/definitions/glyphSet/properties/style/properties/roundness"
+                  },
+                  {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 1
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "propertyNames": {
+            "enum": [
+              "⿰",
+              "⿱",
+              "⿲",
+              "⿳",
+              "⿴",
+              "⿵",
+              "⿶",
+              "⿷",
+              "⿸",
+              "⿹",
+              "⿺",
+              "⿻"
+            ]
+          },
+          "default": {}
+        },
+        "components": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "ids": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              },
+              "strokes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "points": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "$ref": "#/definitions/glyphSet/properties/components/additionalProperties/properties/strokes/items/properties/points/items/items/0"
+                          }
+                        ]
+                      },
+                      "minItems": 2,
+                      "maxItems": 256
+                    },
+                    "d": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 16384
+                    },
+                    "width": {
+                      "type": "number",
+                      "minimum": 0.1,
+                      "maximum": 4
+                    },
+                    "closed": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "maxItems": 64,
+                "default": []
+              },
+              "fills": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "d": {
+                      "$ref": "#/definitions/glyphSet/properties/components/additionalProperties/properties/strokes/items/properties/d"
+                    },
+                    "rule": {
+                      "type": "string",
+                      "enum": [
+                        "nonzero",
+                        "evenodd"
+                      ],
+                      "default": "nonzero"
+                    }
+                  },
+                  "required": [
+                    "d"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 64,
+                "default": []
+              },
+              "prefer": {
+                "type": "object",
+                "properties": {
+                  "width": {
+                    "$ref": "#/definitions/glyphSet/properties/operators/additionalProperties/properties/ratio/anyOf/0"
+                  },
+                  "height": {
+                    "$ref": "#/definitions/glyphSet/properties/operators/additionalProperties/properties/ratio/anyOf/0"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "inset": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": [
+                  {
+                    "$ref": "#/definitions/glyphSet/properties/style/properties/roundness"
+                  },
+                  {
+                    "$ref": "#/definitions/glyphSet/properties/style/properties/roundness"
+                  },
+                  {
+                    "$ref": "#/definitions/glyphSet/properties/style/properties/roundness"
+                  },
+                  {
+                    "$ref": "#/definitions/glyphSet/properties/style/properties/roundness"
+                  }
+                ]
+              },
+              "inner": {
+                "$ref": "#/definitions/glyphSet/properties/operators/additionalProperties/properties/inner"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 40
+                },
+                "maxItems": 8
+              }
+            },
+            "additionalProperties": false
+          },
+          "propertyNames": {
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "default": {}
+        },
+        "glyphs": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 400
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 400
+                  },
+                  "strokes": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/glyphSet/properties/components/additionalProperties/properties/strokes/items"
+                    },
+                    "maxItems": 128
+                  },
+                  "fills": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/glyphSet/properties/components/additionalProperties/properties/fills/items"
+                    },
+                    "maxItems": 128
+                  },
+                  "advance": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 4000
+                  },
+                  "adjust": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "ratio": {
+                          "anyOf": [
+                            {
+                              "$ref": "#/definitions/glyphSet/properties/operators/additionalProperties/properties/ratio/anyOf/0"
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/definitions/glyphSet/properties/operators/additionalProperties/properties/ratio/anyOf/0"
+                              },
+                              "minItems": 2,
+                              "maxItems": 3
+                            }
+                          ]
+                        },
+                        "inner": {
+                          "$ref": "#/definitions/glyphSet/properties/operators/additionalProperties/properties/inner"
+                        },
+                        "box": {
+                          "$ref": "#/definitions/glyphSet/properties/operators/additionalProperties/properties/inner"
+                        },
+                        "offset": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "items": [
+                            {
+                              "type": "number",
+                              "minimum": -1,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number",
+                              "minimum": -1,
+                              "maximum": 1
+                            }
+                          ]
+                        },
+                        "scale": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "items": [
+                            {
+                              "type": "number",
+                              "minimum": 0.1,
+                              "maximum": 3
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0.1,
+                              "maximum": 3
+                            }
+                          ]
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "propertyNames": {
+                      "pattern": "^$|^\\d(\\.\\d)*$"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          },
+          "propertyNames": {
+            "minLength": 1,
+            "maxLength": 16
+          },
+          "default": {}
+        },
+        "kerning": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": -2000,
+            "maximum": 2000
+          },
+          "propertyNames": {
+            "minLength": 2,
+            "maxLength": 16
+          },
+          "default": {}
+        }
+      },
+      "required": [
+        "kind",
+        "version",
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

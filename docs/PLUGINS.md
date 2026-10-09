@@ -1,6 +1,6 @@
 # 插件与创作包
 
-插件支持本地注册、语义版本/依赖、资源贡献、独立worker工具、动态MCP目录及桌面管理。软件仍不接入模型。`src/plugins/index.ts`统一注册十八个模块、137项能力，所有公开内置工具均由模块处理；既有工具名与工程格式保持兼容。review 模块包含颜色示波器、候选画面对比和图层临时隐藏取证，共七项工具。
+插件支持本地注册、语义版本/依赖、资源贡献、独立worker工具、动态MCP目录及桌面管理。软件仍不接入模型。`src/plugins/index.ts`统一注册十八个模块、147项能力，所有公开内置工具均由模块处理；既有工具名与工程格式保持兼容。review 模块包含颜色示波器、候选画面对比和图层临时隐藏取证，共七项工具。
 
 可视化创作工具调用现有内置模块，图层编辑新增mode=plan候选而保留默认直接提交；节点/动作/3D/粒子/分镜/混音均走相同预检/覆盖/历史。MCP的短搜索与Schema有detail完整入口；项目插件Schema默认仍保留身份和hash，fields/media交付选项走同一严格invoke，不改变插件模式与读权限。详见VISUAL-WORKSTATION.md与AGENT-DISCOVERY.md。
 
@@ -16,14 +16,14 @@
 | vmotion.media | 12 | 0 | module |
 | vmotion.audio | 12 | 0 | module |
 | vmotion.editing | 7 | 0 | module |
-| vmotion.render | 7 | 0 | module |
+| vmotion.render | 8 | 0 | module |
 | vmotion.3d | 5 | 0 | module |
-| vmotion.vector | 6 | 0 | module |
+| vmotion.vector | 8 | 0 | module |
 | vmotion.animation | 14 | 0 | module |
 | vmotion.drawing | 8 | 0 | module |
-| vmotion.composition | 10 | 0 | module |
+| vmotion.composition | 12 | 0 | module |
 | vmotion.tracking | 4 | 0 | module |
-| vmotion.core | 15 | 0 | module |
+| vmotion.core | 17 | 0 | module |
 | vmotion.recovery | 3 | 0 | module |
 | vmotion.cache | 3 | 0 | module |
 | vmotion.review | 7 | 0 | module |
@@ -51,11 +51,56 @@ effects除查询外已接effect/graph/visual/motion候选、粒子查询/创建�
 
 工程可选 `plugins` 数组记录 `{source,enabled,hash?,contentHash?}`；无此字段的旧工程正常打开。清单及代码/资源放在 components 下，进入固定工程快照、文件同步、事务与历史。清单 kind=vmotion-plugin、apiVersion=1，声明稳定 id/name/version、语义版本 dependencies、TypeScript entry、tools、contributions 与可选 `files:[{path,hash}]`。版本与 range 使用标准 semver；缺失/禁用/不兼容依赖、环、重复 ID、未来 API、错误路径、资源缺失或声明文件哈希不匹配会阻止候选。`vmotion.*` 内置 ID 保留。
 
-`plugins_plan` 支持 hash 检查的 files、register/toggle/remove actions 和 component placements。pin=true 固定直接内容闭包的 `contentHash`；旧 `hash` 仍兼容只固定清单的工程。内容闭包包含清单、entry、贡献 source 和显式 `files`，复杂 TypeScript import 应将依赖列入 files。更新时可在 toggle 中明确重新 pin 或解除 pin。默认源码允许修改，工具调用和导出使用工程固定版本。无网络下载/依赖安装；项目已有第三方包遵循现有组件编译规则。
+`plugins_plan` 支持 hash 检查的 files、register/toggle/remove actions 和 component placements。pin=true 固定直接内容闭包的 `contentHash`；旧 `hash` 仍兼容只固定清单的工程。内容闭包包含清单、entry、贡献 source 和显式 `files`，复杂 TypeScript import 应将依赖列入 files。更新时可在 toggle 中明确重新 pin 或解除 pin。默认源码允许修改，工具调用和导出使用工程固定版本。默认不联网；可移植安装见下文“打包与安装”，Git 来源须显式指定。项目已有第三方 npm 包遵循现有组件编译规则，不随插件包下载。
 
 pin=false同时移除旧manifest hash和contentHash，pin未指定则保留二者；源码修改与解除pin可以在同一候选完成，一次撤销同时恢复文件和固定版本。不会因普通启用/禁用动作意外解除版本保护。
 
 contributions 支持 component/effectGraph/motion/theme/sound/sceneTemplate，分别使用原有 TS 或 JSON 格式。组件可以由 plugins_plan 直接放置，其他贡献通过其匹配的现有工具编辑/应用，查询返回确切 source。普通组件与资源引用独立于库开关，禁用只撤下工具/可发现库；移除注册保留文件，不丢弃已创作的画面。删除文件需要明确 files delete，并走正常引用与可用性检查。
+
+## 打包与安装（.vmplugin）
+
+`.vmplugin` 是确定性的 ZIP（同时接受 .zip 扩展名），内容固定为：
+
+| 成员 | 说明 |
+| --- | --- |
+| `vmplugin.json` | `kind=vmotion-plugin-bundle`、`formatVersion=1`、`root`（根插件 ID）、`plugins[]`（id/name/version/source/contentHash/dependencies/files[{path,sha256,bytes}]）与 `digest`（全部条目的 sha256 摘要） |
+| `files/<工程路径>` | 每个插件内容闭包（清单、entry、贡献 source、显式 files）中的文件，保留 `components/...` 原路径，插件之间的 TypeScript import 不需改写 |
+
+打包按路径排序、固定 DOS 时间戳与压缩级别，同一内容在任意机器/时区得到逐字节相同的包（测试比较两次输出的 sha256）。
+
+`plugins_pack {id, includeDependencies=true, output?, base64=false}` 只读取已注册且有效的项目插件，默认把它依赖的项目插件一起打包（内置 `vmotion.*` 依赖只记录在 externalDependencies），写到 `exports/plugins/<id>-<version>.vmplugin` 或指定 .vmplugin/.zip 路径；工程本身不变，返回路径、字节数、文件 sha256、digest 与每个插件的 contentHash。base64=true 仅供界面下载。
+
+`plugins_install {revision, source, enabled=true, pin?, dependencies='bundled'|'none', allowDowngrade=false, overwrite=false}` 返回一个普通 plugins 候选，仍须 `project_preflight` → `project_apply`，整次安装（文件、注册、固定、依赖）一次撤销即可完全恢复。source 三种：
+
+- `{type:'bundle', path}` 或 `{type:'bundle', base64, name?}`：.vmplugin/.zip。
+- `{type:'folder', path, manifest?}`：解压后的 .vmplugin（含 vmplugin.json）、镜像工程路径的仓库根目录，或只含 `plugin.json` 与相对文件的插件目录（文件按清单引用的公共目录安装到 `components/...`；无引用时为 `components/plugins/<id>`）。
+- `{type:'git', url, ref?, subdir?, manifest?}`：显式调用本机 git（https/ssh/file 或绝对路径；`GIT_TERMINAL_PROMPT=0`、浅克隆、禁用符号链接、120 秒超时），summary 记录实际 commit。不会自动更新。
+
+安装检查：成员路径必须是 `files/components/...` 的 .json/.ts/.tsx，拒绝 `..`、绝对路径、未声明成员和文件夹中解析到外部的符号链接；归档 ≤32MiB、展开 ≤64MiB、单文件 ≤8MiB、≤2048 项，在解压前按头部大小拒绝；逐文件 sha256、内容闭包与 contentHash、bundle digest 全部重新计算；`vmotion.*` 保留 ID、未来 apiVersion/formatVersion 明确报错（PLUGIN_ID / PLUGIN_API_VERSION）；安装路径与其他插件或工程文件冲突时报 PLUGIN_INSTALL_CONFLICT，除非 overwrite。
+
+依赖按 semver 解析：内置模块按其版本判断；工程已安装且满足范围的保留（禁用的会在候选中启用）；否则使用包内附带且满足范围的版本（新装或升级，若会降级须 allowDowngrade）；仍不满足则以 PLUGIN_DEPENDENCY 一次列出全部缺失/冲突项（details.dependencies 含 status=missing/conflict、当前版本与包内版本）。
+
+升级同一 ID 时 `summary.install.plugins[]` 给出 change（install/upgrade/downgrade/reinstall/unchanged）、from→to、文件新增/修改/不变计数、不再属于新版本的旧文件（保留不删）、工具/资源增减和依赖范围变化；`dependencies[]` 列出每条依赖的处理（builtin/installed/enable/bundled/upgrade）。pin 省略时沿用原固定状态并对新内容重新固定，pin=false 解除，pin=true 固定。降级默认拒绝（PLUGIN_DOWNGRADE）。卸载仍是 `plugins_plan` 的 remove（文件保留）；remove 现在也可用 `{type:'remove', source}` 移除清单已损坏的注册。
+
+CLI：
+
+```text
+vmotion plugin pack example.creative --project . -o dist/example.creative.vmplugin [--no-deps]
+vmotion plugin install ./example.creative-1.2.0.vmplugin --project . [--pin] [--dry-run]
+vmotion plugin install ./plugins/creative --project .            # 文件夹
+vmotion plugin install https://example.com/creative.git --git --ref v1.2.0 --subdir plugin --project .
+vmotion plugins-pack|plugins-install --project . --request req.json   # 原始请求形式
+```
+
+`plugin install` 依次生成候选、预检并应用（--dry-run 只输出 summary.install 与候选）；桌面已打开时通过同一服务与撤销历史。
+
+## 插件管理器（桌面）
+
+“插件管理器”是左右分栏对话框：左侧按“项目插件 / 内置模块”分组列表，可搜索名称/ID，按来源、启用状态（含“有问题”）和分类筛选，键盘 ↑/↓/Home/End 选择、`/` 聚焦搜索、Esc 关闭；状态点区分正常/警告/错误/禁用，锁形图标表示已固定。右侧详情显示 ID、版本、描述、依赖（要求范围、当前版本、满足/禁用/缺失/不兼容）、被依赖项、贡献资源、工具及其参数（类型、默认值、范围、读取上下文）、固定状态与内容/清单 hash、文件清单；内置模块显示能力与参数名。操作：启用/禁用、固定/解除固定、打包（下载 .vmplugin 并写入 exports/plugins）、打开清单/源文件（跳到代码工作区）、移除注册（内联确认，文件保留）、撤销。
+
+`plugins_inspect` 为此提供容错健康报告：即使某个注册已损坏（清单缺失/无效、文件缺失、hash 或固定不符、依赖缺失/禁用/不兼容、重复 ID），列表仍可读取，每个问题带可直接提交的修复（plugins_plan 动作，如“启用依赖”“禁用此插件”“固定当前内容/解除固定”“移除注册”）或“安装依赖”“打开文件”。新增可选筛选 origin/enabled/category/query 与 includeParameters；列表项新增 status/pinned/problems/categories，详情新增 dependencyStatus/dependents/registration/files/problems。默认响应仍保持精简。
+
+“安装插件…”页支持插件包文件（选择文件或本机路径）、文件夹、Git 仓库和工程内已有清单注册；先“生成候选预览”展示来源/commit、包摘要、每个插件的版本差异、文件计数、工具/资源/依赖变化和依赖处理表，再“预检并应用”。所有动作都经过 plugins_plan/plugins_install → project_preflight → project_apply，与 Agent 共用撤销。
 
 ## 工具 SDK
 
@@ -101,8 +146,8 @@ vmotion tool-schema --project . --name plugin.example.creative.compose --paths t
 vmotion tool-call --project . --name plugin.example.creative.compose --request arguments.json
 ```
 
-不指定 --project 的 tools-search/tool-schema 仍查询内置接口。桌面“插件”面板按需加载，支持本地路径注册、贡献来源、启用/禁用/移除和共享撤销。核心/工具 Schema、SDK 声明及新工程 AGENTS.md 同步。
+不指定 --project 的 tools-search/tool-schema 仍查询内置接口。桌面“插件管理器”见下文；Ctrl+K 命令面板提供“打开插件管理器”和“安装插件…”。核心/工具 Schema、SDK 声明及新工程 AGENTS.md 同步。
 
 `examples/plugin-lab` 包含实际组件、主题、效果图和两个工具；6秒720p30示例由插件生成，保持可编辑参数和普通关键帧。作者脚本必须显式 --rebuild，--render-only 保留编辑；便携包包含源码资源。`check-plugins.mjs --packaged` 使用真实外部 stdio MCP，覆盖注册、短目录/候选、图片、类型/旧hash/上下文拒绝、升级、禁用后像素保持、撤销、60帧MP4和连接当前服务的CLI。
 
-尚未交付原生像素/声音处理 ABI、自定义 UI 运行时、插件市场/安装和依赖自动打包。当前插件协议可扩展代码组件、资源与 Agent 工作流；后续在同一注册/版本/候选模型上继续扩展。
+尚未交付原生像素/声音处理 ABI、自定义 UI 运行时、在线插件市场/签名与远程版本索引。当前插件协议可扩展代码组件、资源与 Agent 工作流；后续在同一注册/版本/候选模型上继续扩展。

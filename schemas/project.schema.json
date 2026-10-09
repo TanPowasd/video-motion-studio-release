@@ -17,15 +17,22 @@
           "type": "string",
           "minLength": 1
         },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "video",
+            "still"
+          ]
+        },
         "width": {
           "type": "integer",
           "minimum": 16,
-          "maximum": 3840
+          "maximum": 8192
         },
         "height": {
           "type": "integer",
           "minimum": 16,
-          "maximum": 2160
+          "maximum": 8192
         },
         "fps": {
           "type": "object",

@@ -13,15 +13,19 @@
 
 外部 agent 可先查询摘要与源码片段，再对候选代码/JSON 预检类型、运行错误和画面，最后原子提交；错误文件仍保留最后有效预览。详见 [agent 代码创作流程](AGENT-WORKFLOW.md)。
 
-MCP 默认以 10 个入口提供按需发现：tools_search 搜索能力，tool_schema 读取一个接口，tool_call 调用全部 140 项内置能力及启用的项目插件，tools_load 按任务加载直接工具。写操作返回精简版本/诊断，完整源码与传统目录可显式请求。详见 [按需工具发现](AGENT-DISCOVERY.md)。
+MCP 默认以 10 个入口提供按需发现：tools_search 搜索能力，tool_schema 读取一个接口，tool_call 调用全部 147 项内置能力及启用的项目插件，tools_load 按任务加载直接工具。写操作返回精简版本/诊断，完整源码与传统目录可显式请求。详见 [按需工具发现](AGENT-DISCOVERY.md)。
 
 本地插件声明语义版本/依赖、组件/效果图/动作/主题/声音/模板贡献和类型化 Agent 工具。plugins_inspect/plan 管理注册与准确候选，MCP目录/Schema随升级、禁用和撤销动态刷新；工具在有界worker中复用工程快照与共享预检/提交。主题与版本模板已抽出为首个内置模块，其他内置功能继续迁移。详见 [插件系统](PLUGINS.md)，可编辑示例为 examples/plugin-lab。
 
-十八个内置模块统一注册与分发全部140项能力，覆盖动画、合成、三维、绘画、剪辑、声音、工程恢复、缓存和画面检查。素材/画稿/组件参数、音频时间线、渲染任务与工程诊断提供按需分页查询，控制Agent上下文大小。
+十八个内置模块统一注册与分发全部147项能力，覆盖动画、合成、三维、绘画、剪辑、声音、工程恢复、缓存和画面检查。素材/画稿/组件参数、音频时间线、渲染任务与工程诊断提供按需分页查询，控制Agent上下文大小。
 
 工作站重构后，“创作工具”提供八类专用可视化页面：节点图、动作/动画层、三维、粒子、分镜/转场、混音、画面检查和性能。属性检查器可新建表达式/布局/路径，普通关键帧支持外插；草稿使用同一固定候选与一次撤销。详见 [可视化工作站](VISUAL-WORKSTATION.md)。
 
 MCP 搜索/Schema 默认省略重复说明，`detail:true` 显式读取完整元数据；`tool_call fields` 按结果路径选择字段并保留版本/有效性，`media:false` 关闭内联媒体传输。默认十入口保持，完整结果仍可显式请求。
+
+偏旁部件拼字：文字可以不依赖字体文件。字形库 `components/glyphs/<id>.vmglyph.json` 用笔画中线/轮廓绘制部件（偏旁），用 IDS（⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻，可嵌套、可调比例）拼出汉字，全局笔画粗细/笔端/圆润/倾斜统一控制；内置演示库 `builtin:demo` 含约 117 个部件、约 400 个拼字。文字图层与字幕设置 `glyphSet` + `glyphFallback`（font/none/tofu），缺字回退到原字体；换行、对齐、逐字动画、路径文字与点选都使用同一套混排排版，预览与导出像素一致。glyphs_inspect/glyphs_plan（发现分类 glyphs）、`vmotion glyphs inspect|preview|plan`，文字检查器中有「字形库」选择和「字形面板」。详见 [偏旁部件拼字](GLYPHS.md)。
+
+静态图片：同一工程可制作海报、视频封面、小红书/公众号配图、方图和竖屏图。`scene.still` 画板记录 DPI/出血/安全区/透明/尺寸变体，提供 8 个尺寸预设（A4/A3 300dpi 含 36px 出血）和 4 个起始模板，画板最大 8192px/48MP。still_inspect/still_plan/image_export（发现分类 image）与 `vmotion init --kind still`、`vmotion image presets|inspect|new|export` 共用同一渲染器：PNG/JPEG/WebP、质量、0.1–4 倍重渲染、透明、裁切出血、DPI 元数据、contain/cover/reflow 变体、revision/planId 固定，超预算返回 RESOLUTION 而不降分辨率。编辑器提供「新建图片」（Ctrl+Shift+N）、无时间线的画板工作区、对齐/分布/吸附和「导出图片」对话框。详见 [静态图片](STILL-IMAGES.md)。
 
 原生颜色示波器、准确候选画面对比与图层临时隐藏影响分析提供有界像素证据，默认短摘要与原生图片，分布数组按需读取。检查不修改源码/历史，区分画面差异与艺术判断。详见 [像素检查](PIXEL-REVIEW.md)。
 
@@ -113,9 +117,11 @@ node dist/cli/index.mjs render --project D:/Projects/MyVideo --output video.mp4
 node dist/cli/index.mjs render --project D:/Projects/MyVideo --format png --output frames
 node dist/cli/index.mjs render --project D:/Projects/MyVideo --format wav --output audio.wav
 node dist/cli/index.mjs pack --project D:/Projects/MyVideo --output D:/Portable/MyVideo
+node dist/cli/index.mjs init --project D:/Posters/Autumn --kind still --preset poster-a4 --still-template poster
+node dist/cli/index.mjs image export --project D:/Posters/Autumn --format png --scale 2 --trim
 ```
 
-`init` 默认创建空白工程。`--template science` 创建波形示例；上述设置与桌面版使用同一验证和工程创建逻辑，每个工程均附带 agent 使用说明。已有非空文件夹不会被覆盖。
+`init` 默认创建空白工程。`--template science` 创建波形示例；`--kind still --preset <id>` 创建图片工程，`image presets|inspect|new|export` 管理画板与导出（见 [静态图片](STILL-IMAGES.md)）；上述设置与桌面版使用同一验证和工程创建逻辑，每个工程均附带 agent 使用说明。已有非空文件夹不会被覆盖。
 
 `render` 支持帧范围、分辨率、编码器和检查点续渲染。可用编码器来自本地 FFmpeg；可以使用 `--encoder` 显式指定。格式/检查失败、渲染失败使用不同的非零退出码。CLI 默认输出 JSON，MCP 模式 stdout 仅输出协议消息。
 

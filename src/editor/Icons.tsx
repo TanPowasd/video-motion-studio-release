@@ -117,6 +117,62 @@ export function Icon({ name, size = 17 }: { name: string; size?: number }) {
       <path d="m9 15 6-6M8 14l-2 2a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0m2 5 2-2a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0" />
     ),
     check: <path d="m5 12 4 4L19 6" />,
+    skipBack: <path d="M6 5v14M19 5 9 12l10 7Z" />,
+    skipForward: <path d="M18 5v14M5 5l10 7-10 7Z" />,
+    stepBack: <path d="m15 6-6 6 6 6" />,
+    stepForward: <path d="m9 6 6 6-6 6" />,
+    command: (
+      <path d="M9 6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3Z" />
+    ),
+    keyboard: (
+      <>
+        <rect x="2" y="6" width="20" height="13" rx="2" />
+        <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 15h10" />
+      </>
+    ),
+    sidebarLeft: (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M9 4v16" />
+      </>
+    ),
+    sidebarRight: (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M15 4v16" />
+      </>
+    ),
+    panelBottom: (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M3 14h18" />
+      </>
+    ),
+    plug: <path d="M9 2v6m6-6v6M6 8h12v3a6 6 0 0 1-12 0Zm6 9v5" />,
+    magnet: <path d="M5 4h4v8a3 3 0 0 0 6 0V4h4v8a7 7 0 0 1-14 0Zm0 4h4m6 0h4" />,
+    reset: <path d="M4 4v6h6M4.5 15a8 8 0 1 0 1.9-8.3L4 10" />,
+    home: <path d="m3 11 9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z" />,
+    alignLeft: <path d="M4 3v18M8 7h10v4H8Zm0 6h6v4H8Z" />,
+    alignHCenter: <path d="M12 3v18M6 7h12v4H6Zm3 6h6v4H9Z" />,
+    alignRight: <path d="M20 3v18M6 7h10v4H6Zm4 6h6v4h-6Z" />,
+    alignTop: <path d="M3 4h18M7 8h4v10H7Zm6 0h4v6h-4Z" />,
+    alignVCenter: <path d="M3 12h18M7 6h4v12H7Zm6 3h4v6h-4Z" />,
+    alignBottom: <path d="M3 20h18M7 6h4v10H7Zm6 4h4v6h-4Z" />,
+    distributeH: <path d="M3 4v16m18-16v16M8 8h3v8H8Zm5 2h3v4h-3Z" />,
+    distributeV: <path d="M4 3h16M4 21h16M8 8h8v3H8Zm2 5h4v3h-4Z" />,
+    ruler: <path d="M3 17 17 3l4 4L7 21Zm4-4 2 2m1-5 2 2m1-5 2 2" />,
+    artboard: (
+      <>
+        <rect x="6" y="6" width="12" height="12" />
+        <path d="M6 2v3m12-3v3M6 19v3m12-3v3M2 6h3m-3 12h3M19 6h3m-3 12h3" />
+      </>
+    ),
+    bleed: (
+      <>
+        <rect x="3" y="3" width="18" height="18" rx="1" strokeDasharray="2 2" />
+        <rect x="7" y="7" width="10" height="10" />
+      </>
+    ),
     image: (
       <>
         <rect x="3" y="3" width="18" height="18" rx="2" />

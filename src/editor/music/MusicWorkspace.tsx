@@ -34,7 +34,7 @@ import { MidiPerformance } from './MidiPerformance.js';
 import '../studio-shell.css';
 import './music.css';
 
-export default function MusicWorkspace() {
+export default function MusicWorkspace({ embedded = false }: { embedded?: boolean } = {}) {
   const m = useMusic(),
     { doc, draft, application } = m;
   const [tab, setTab] = useState('playlist'),
@@ -178,11 +178,14 @@ export default function MusicWorkspace() {
     )!;
   const clock = musicTime(doc, m.start);
   return (
-    <div className="music-app">
+    <div className={`music-app ${embedded ? 'embedded' : ''}`}>
       <header className="music-header">
+        {!embedded && (
         <a className="music-brand" href="#/project">
           <span>V</span>Vmotion
         </a>
+        )}
+        {!embedded && (
         <ProjectActions
           onError={(error) =>
             void m.task('工程', async () => {
@@ -191,12 +194,13 @@ export default function MusicWorkspace() {
           }
           onPause={() => m.audioRef.current?.pause()}
         />
+        )}
         <span className="music-project">
           {application.snapshot.project.name}
           <small>音乐工作区</small>
         </span>
         <div className="music-spacer" />
-        <McpConnectionButton />
+        {!embedded && <McpConnectionButton />}
         <span className="music-save-state">
           {busy ? m.busy + '…' : m.dirty ? '● 草稿未保存' : '● 已保存'}
         </span>
@@ -218,9 +222,11 @@ export default function MusicWorkspace() {
         <button disabled={busy || !!validation} onClick={m.save} className="music-primary">
           保存到素材库
         </button>
+        {!embedded && (
         <a className="music-button" href="#/project">
           返回视频剪辑 <Icon name="film" />
         </a>
+        )}
       </header>
       <nav className="music-transport">
         <div className="music-section-mark">

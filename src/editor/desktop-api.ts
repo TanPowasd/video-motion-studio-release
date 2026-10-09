@@ -3,6 +3,7 @@ declare global {
   interface Window {
     vmotionDesktop?: {
       pickAsset: () => Promise<string | undefined>;
+      pickPluginSource?: (kind: 'file' | 'folder') => Promise<string | undefined>;
       pickProjectDirectory: (directory?: string) => Promise<string | undefined>;
       projectHome: () => Promise<ProjectHome>;
       openProject: (root?: string) => Promise<void>;

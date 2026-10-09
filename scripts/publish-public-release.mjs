@@ -14,6 +14,18 @@ const manifest = JSON.parse(await readFile(path.join(source, 'SOURCE-MANIFEST.js
 const version = JSON.parse(await readFile(path.join(source, 'package.json'), 'utf8')).version;
 const tag = 'v' + version;
 if (!/^v\d+\.\d+\.\d+$/.test(tag)) throw Error('Release version must use semver');
+const notes = await readFile(path.join(source, 'docs/releases', tag + '.md'), 'utf8').catch(
+  (error) => {
+    if (error.code === 'ENOENT') return undefined;
+    throw error;
+  },
+);
+const notesHeading = notes?.match(/^# ([^\r\n]+)\r?\n/);
+if (notes && !notesHeading) throw Error('Version release notes need a Markdown title');
+const releaseTitle = notesHeading?.[1] ?? `Vmotion ${version} · 统一创作与 Agent`;
+const releaseSummary = notesHeading
+  ? notes.slice(notesHeading[0].length).trim()
+  : `Vmotion ${version} 开源预览版。\n\n- 人通过动画、剪辑、音乐、绘画和代码界面直接编辑。\n- AI 在外部通过文件或 MCP 修改同一工程，顶部“连接 MCP”复制配置。\n- Windows 10/11 x64 便携包内置运行时、VST3 宿主和 MIDI 接口。\n- 外部 AI 通过文件/CLI/MCP 操作；程序不调用模型。\n- Apache-2.0，第三方许可与 FFmpeg 对应源码保留。`;
 const packageManifest = JSON.parse(
   await readFile('release/Vmotion/portable-manifest.json', 'utf8'),
 );
@@ -134,11 +146,11 @@ if (info.status !== 201) {
   }
 }
 git(['add', '.']);
-git(['commit', '-m', `Publish Vmotion ${version}: integrated visual and Agent workflows`]);
+git(['commit', '-m', `Publish ${releaseTitle}`]);
 git(['push', '-u', 'origin', 'main']);
 git(['tag', tag]);
 git(['push', 'origin', tag]);
-const body = `Vmotion ${version} 开源预览版。\n\n- 人通过动画、剪辑、音乐、绘画和代码界面直接编辑。\n- AI 在外部通过文件或 MCP 修改同一工程，顶部“连接 MCP”复制配置。\n- Windows 10/11 x64 便携包内置运行时、VST3 宿主和 MIDI 接口。\n- 外部 AI 通过文件/CLI/MCP 操作；程序不调用模型。\n- Apache-2.0，第三方许可与 FFmpeg 对应源码保留。\n\n源码与便携包基准：${manifest.sourceCommit}。\n\n双击 Vmotion.exe 使用普通创作界面；无需 Agent 工作台或第二窗口。\n\n已通过全量回归、构建、真实 MCP、文件热更新与直接 UI 编辑及便携验收。AU/macOS 尚未实机验收。\n\nSHA256: ${sha}\n`;
+const body = `${releaseSummary}\n\n源码与便携包基准：${manifest.sourceCommit}。\n\nSHA256: ${sha}\n`;
 let release = await api('/repos/' + repo + '/releases/tags/' + tag);
 if (release.status === 404)
   release = await api('/repos/' + repo + '/releases', {
@@ -146,7 +158,7 @@ if (release.status === 404)
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       tag_name: tag,
-      name: `Vmotion ${version} · 统一创作与 Agent`,
+      name: releaseTitle,
       body,
       draft: false,
       prerelease: true,

@@ -21,11 +21,14 @@ import {
   selectTools,
 } from './discovery.js';
 import { invokeTool, toolError, toolCallSchema } from './invoke.js';
+import { withChangeOrigin } from '../service/change-journal.js';
 import { projectPluginTools, type PluginCatalog } from './plugin-tools.js';
 
 export async function startMcp(root: string, options: { tools?: 'compact' | 'all' } = {}) {
   const remote = await existingService(root),
     app = remote ? undefined : await new Application(root).open(),
+    // Attribution for the Studio change feed: the MCP client name from the handshake.
+    agent = { client: undefined as string | undefined, pid: process.pid, origins: false },
     pipe = app ? await servePipe(app) : undefined,
     call = (method: string, params?: unknown) =>
       app ? app.dispatch(method, params) : rpc(root, method, params),
@@ -49,7 +52,10 @@ export async function startMcp(root: string, options: { tools?: 'compact' | 'all
     response: 'compact' | 'full',
     delivery: { fields?: string[]; media?: boolean } = {},
   ) => {
-    if (app) return invokeTool(tool, args, call, { response, ...delivery });
+    if (app)
+      return withChangeOrigin({ kind: 'mcp', client: agent.client, tool: tool.name }, () =>
+        invokeTool(tool, args, call, { response, ...delivery }),
+      );
     try {
       return await rpc(root, 'agentToolInvoke', {
         name: tool.name,
@@ -57,6 +63,8 @@ export async function startMcp(root: string, options: { tools?: 'compact' | 'all
         response,
         inline: true,
         ...delivery,
+        // Only editors that advertise origin support accept the extra field.
+        ...(agent.origins ? { agent: { client: agent.client, pid: agent.pid } } : {}),
       });
     } catch (e) {
       // Older open editors can still serve their existing capabilities through the bridge.
@@ -327,8 +335,28 @@ export async function startMcp(root: string, options: { tools?: 'compact' | 'all
   transport.onclose = () => {
     void close();
   };
+  // Presence heartbeat so an open Studio can show "<client> 已连接 · MCP". Older editors
+  // ignore ping params; failures are silent because presence is cosmetic.
+  const announce = async () => {
+    agent.client ??= server.server.getClientVersion()?.name;
+    if (app) {
+      app.noteAgent({ client: agent.client, pid: agent.pid });
+      return;
+    }
+    try {
+      const pong = await rpc(root, 'ping', { agent: { client: agent.client, pid: agent.pid } });
+      agent.origins = pong?.origins === true;
+    } catch {
+      /* editor closed or older */
+    }
+  };
+  if (app) app.service.defaultOrigin = { kind: 'mcp' };
+  server.server.oninitialized = () => void announce();
+  const heartbeat = setInterval(() => void announce(), 15_000);
+  heartbeat.unref();
   await server.connect(transport);
   process.stdin.on('end', () => {
+    clearInterval(heartbeat);
     void server.close();
     void close();
   });

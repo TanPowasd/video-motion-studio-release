@@ -63,7 +63,7 @@ try {
   for (const [id, count, runtime] of [
     ['vmotion.effects', 14, 'module'],
     ['vmotion.editing', 7, 'module'],
-    ['vmotion.render', 7, 'module'],
+    ['vmotion.render', 8, 'module'],
   ]) {
     const plugin = (await call('plugins_inspect', { id })).value.items[0];
     assert.equal(plugin.moduleTools, count);

@@ -131,7 +131,14 @@ export function createWorkbenchState(initialRoute: CompositionRoute): WorkbenchS
       waveforms: {},
     },
     panels: {
-      layout: { left: 250, right: 304, timeline: 260, showLeft: true, showRight: true },
+      layout: {
+        left: 260,
+        right: 316,
+        timeline: 260,
+        showLeft: true,
+        showRight: true,
+        showTimeline: true,
+      },
       inspectorTab: 'properties',
       filter: '',
       modal: undefined,

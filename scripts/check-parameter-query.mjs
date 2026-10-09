@@ -76,7 +76,7 @@ try {
   const modules = {};
   for (const [id, count, runtime] of [
     ['vmotion.3d', 5, 'module'],
-    ['vmotion.vector', 6, 'module'],
+    ['vmotion.vector', 8, 'module'],
     ['vmotion.animation', 14, 'module'],
   ]) {
     const item = (await call('plugins_inspect', { id })).value.items[0];

@@ -64,7 +64,18 @@ export interface HostRpcMethodMap {
   };
   ping: {
     input: EmptyRequest;
-    output: { revision: string; formatVersion: number; aiIntegration: false };
+    output: { revision: string; formatVersion: number; aiIntegration: false; origins?: true };
+  };
+  /** Studio-only: pause or resume edits coming from external MCP clients. */
+  agentHold: {
+    input: { hold: boolean };
+    output: ReturnType<Application['agentState']>;
+  };
+  agentStatus: {
+    input: EmptyRequest;
+    output: ReturnType<Application['agentState']> & {
+      changeLog: ReturnType<Application['changeLog']>;
+    };
   };
 }
 export type RpcMethodMap = BuiltinRpcMethodMap & HostRpcMethodMap;

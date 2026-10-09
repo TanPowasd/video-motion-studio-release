@@ -25,6 +25,12 @@ import {
 } from './project.js';
 import { HISTORY_FILE, HistoryStore, boundedHistory } from './history.js';
 import { applyOperations } from './operations.js';
+import {
+  ChangeJournal,
+  currentChangeOrigin,
+  type ChangeAction,
+  type ChangeOrigin,
+} from './change-journal.js';
 
 export class ProjectService extends EventEmitter {
   snapshot!: Snapshot;
@@ -40,15 +46,55 @@ export class ProjectService extends EventEmitter {
   private queue: Promise<unknown> = Promise.resolve();
   private timer?: NodeJS.Timeout;
   private historyStore: HistoryStore;
+  /** Who changed what: advisory metadata next to the undo history (never project data). */
+  readonly journal: ChangeJournal;
+  /** Origin used when a change runs outside any withChangeOrigin() context. */
+  defaultOrigin: ChangeOrigin = { kind: 'ui' };
+  /**
+   * When true, transactions attributed to an MCP client are refused (AGENT_ON_HOLD) and
+   * watcher-triggered reloads of external files are deferred until released. Human UI
+   * edits keep working; a UI edit still ingests pending file changes first.
+   */
+  private agentHold = false;
+  private heldReload = false;
   constructor(public root: string) {
     super();
     this.root = path.resolve(root);
     this.historyStore = new HistoryStore(this.root);
+    this.journal = new ChangeJournal(this.root);
+  }
+  get holdingAgents() {
+    return this.agentHold;
+  }
+  setAgentHold(hold: boolean) {
+    this.agentHold = hold;
+    if (!hold && this.heldReload) {
+      this.heldReload = false;
+      void this.exclusive(() => this.reload()).catch((e) => this.report(e));
+    }
+  }
+  private origin(): ChangeOrigin {
+    return currentChangeOrigin() ?? this.defaultOrigin;
+  }
+  private assertNotHeld(origin: ChangeOrigin) {
+    if (this.agentHold && origin.kind === 'mcp')
+      throw new VmotionError(
+        'AGENT_ON_HOLD',
+        'The person using Vmotion paused external AI edits. Read-only tools still work; retry after they resume.',
+      );
+  }
+  private record(origin: ChangeOrigin, action: ChangeAction, before: Snapshot, after: Snapshot) {
+    try {
+      this.journal.record(origin, action, before, after);
+    } catch {
+      /* Journal is advisory; never fail an edit because of it. */
+    }
   }
   async open(watch = true) {
     this.snapshot = await loadProject(this.root);
     this.diskFiles = { ...this.snapshot.files };
     this.diagnostics = await this.validate(this.snapshot);
+    await this.journal.open();
     try {
       const history = await this.historyStore.open(this.snapshot);
       this.undoStack = history.undo;
@@ -72,6 +118,10 @@ export class ProjectService extends EventEmitter {
       });
       this.watcher.on('all', () => {
         clearTimeout(this.timer);
+        if (this.agentHold) {
+          this.heldReload = true;
+          return;
+        }
         this.timer = setTimeout(
           () => void this.exclusive(() => this.reload()).catch((e) => this.report(e)),
           120,
@@ -197,8 +247,11 @@ export class ProjectService extends EventEmitter {
       this.emit('change');
       return;
     }
+    const before = this.snapshot,
+      foreign = await this.journal.foreignOrigin(incoming.revision);
     this.remember(this.snapshot);
     this.snapshot = candidate;
+    this.record(foreign ?? { kind: 'file' }, 'external', before, candidate);
     this.pendingFiles = undefined;
     this.diskFiles = incoming.files;
     this.conflicts = conflicts;
@@ -213,7 +266,9 @@ export class ProjectService extends EventEmitter {
     save = true,
     beforeCommit?: (candidate: Snapshot) => Promise<void>,
   ) {
+    const origin = this.origin();
     return this.exclusive(async () => {
+      this.assertNotHeld(origin);
       if (!operations.length || operations.length > 1000)
         throw new VmotionError('OPERATIONS', 'Expected 1–1000 operations');
       operations = operations.map((op) => operationSchema.parse(op)) as Operation[];
@@ -280,6 +335,7 @@ export class ProjectService extends EventEmitter {
         this.redoStack = bounded.redo;
       }
       this.snapshot = checked;
+      this.record(origin, 'edit', previous, checked);
       this.pendingFiles = undefined;
       this.diagnostics = diagnostics;
       this.emit('change');
@@ -357,7 +413,9 @@ export class ProjectService extends EventEmitter {
     return this.history('redo');
   }
   private history(direction: 'undo' | 'redo') {
+    const origin = this.origin();
     return this.exclusive(async () => {
+      this.assertNotHeld(origin);
       await this.reload();
       if (this.conflicts.length)
         throw new VmotionError('UNRESOLVED_CONFLICTS', 'Resolve conflicts before undo/redo');
@@ -379,6 +437,7 @@ export class ProjectService extends EventEmitter {
       const undo = direction === 'undo' ? from.slice(0, -1) : [...to, this.snapshot],
         redo = direction === 'redo' ? from.slice(0, -1) : [...to, this.snapshot];
       await this.saveWithHistory(value, this.diskFiles, undo, redo);
+      this.record(origin, direction, this.snapshot, value);
       this.snapshot = value;
       this.diskFiles = { ...value.files };
       this.diagnostics = diagnostics;
@@ -422,5 +481,6 @@ export class ProjectService extends EventEmitter {
     clearTimeout(this.timer);
     await this.watcher?.close();
     await this.queue;
+    await this.journal.flush();
   }
 }

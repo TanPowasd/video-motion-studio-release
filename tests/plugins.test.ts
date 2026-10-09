@@ -116,7 +116,7 @@ it('checks semantic versions, disabled/missing dependencies, duplicate IDs and c
   });
   expect((await app.dispatch('pluginsInspect', { id: 'vmotion.render' })).items[0]).toMatchObject({
     runtime: 'module',
-    moduleTools: 7,
+    moduleTools: 8,
     hostTools: 0,
   });
   expect((await app.dispatch('pluginsInspect', { id: 'vmotion.3d' })).items[0]).toMatchObject({
@@ -126,7 +126,7 @@ it('checks semantic versions, disabled/missing dependencies, duplicate IDs and c
   });
   expect((await app.dispatch('pluginsInspect', { id: 'vmotion.vector' })).items[0]).toMatchObject({
     runtime: 'module',
-    moduleTools: 6,
+    moduleTools: 8,
     hostTools: 0,
   });
   expect(pluginVersionMatches('1.5.2', '^1.2.0')).toBe(true);

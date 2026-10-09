@@ -1,6 +1,6 @@
 # Agent 按需工具发现
 
-默认 `vmotion mcp --project ...` 使用 compact 模式，只暴露 10 个常用入口：agent_guide、project_context、project_file_read、project_preflight、project_apply、frame_capture，以及 tools_search、tool_schema、tool_call、tools_load。140 项内置创作能力全部仍可使用；启用的项目插件增加 namespaced 能力，不增加默认入口。完整模式 `--tools all` 返回 144 个内置直接工具/发现入口及启用的插件工具，兼容原有直接调用与结果形状。
+默认 `vmotion mcp --project ...` 使用 compact 模式，只暴露 10 个常用入口：agent_guide、project_context、project_file_read、project_preflight、project_apply、frame_capture，以及 tools_search、tool_schema、tool_call、tools_load。147 项内置创作能力全部仍可使用；启用的项目插件增加 namespaced 能力，不增加默认入口。完整模式 `--tools all` 返回 151 个内置直接工具/发现入口及启用的插件工具，兼容原有直接调用与结果形状。
 
 本轮上下文优化：默认 tools/list 用简短描述，`tools_search` 返回最多160字摘要（截断有标志），省略重复参数名/分类统计和完整插件元数据；`detail:true` 恢复这些字段。查询索引按不可变目录复用，插件变化生成新目录。`tool_schema` 默认给接口/分类/注解，`detail:true` 补说明/调用示例/插件信息；项目插件的身份/版本/hash仍保留，便于拒绝旧接口。detail不改变输入接口hash，`format:expanded` 仍只控制引用展开。
 
@@ -10,7 +10,11 @@ CLI对应 `tools-search --detail`、`tool-schema --detail`、`tool-call --fields
 
 `plugins_inspect/plan` 管理项目本地插件和资源贡献；`plugins_package` 只返回分页内容指纹和文件大小。`tools_search pluginId` 查询一个插件的能力，Schema/call/load/list 按清单与源码内容条件hash刷新，支持升级/禁用/撤销和外部文件更新。插件参数接口与导出一致、上下文显式、编辑仍准确候选/一次撤销。CLI工具查询可选 --project，详见 PLUGINS.md。
 
-十八个内置模块140项能力使用统一注册表，唯一名称/处理器/版本/依赖在启动时校验；工程控制、历史恢复、缓存、画面检查及所有创作模块均通过同一注册表分发。assets_query默认24素材摘要、drawing_query默认24图层/16笔迹且点数组按需分页，component_query默认短参数/32通道，audio_timeline默认24片段、render_query默认20任务，project_diagnostics默认20条诊断/冲突定位/待修复文件。color_scopes默认省略分布数组，frame_compare/layer_impact返回短像素指标，原生图片不重复Base64。完整源码/metadata/错误/压感点显式读取，旧完整接口保持兼容。
+十八个内置模块147项能力使用统一注册表，唯一名称/处理器/版本/依赖在启动时校验；工程控制、历史恢复、缓存、画面检查及所有创作模块均通过同一注册表分发。assets_query默认24素材摘要、drawing_query默认24图层/16笔迹且点数组按需分页，component_query默认短参数/32通道，audio_timeline默认24片段、render_query默认20任务，project_diagnostics默认20条诊断/冲突定位/待修复文件。color_scopes默认省略分布数组，frame_compare/layer_impact返回短像素指标，原生图片不重复Base64。完整源码/metadata/错误/压感点显式读取，旧完整接口保持兼容。
+
+静态图片能力归入发现分类 `image`：`still_inspect`、`still_plan`（同时属 composition）与 `image_export`（同时属 render）。默认入口不变；`tools_search {"query":"海报","category":"image"}` 或 `tools_load {"categories":["image"]}` 按需取得，`agent_guide topic=image` 返回对应工作流。still_inspect 默认只给预设/模板 ID，presets/templates=true 才返回完整表；image_export 只返回路径/尺寸/字节/pixelHash，不含 Base64，preview 缩略图为显式选项。详见 [静态图片](STILL-IMAGES.md)。
+
+偏旁部件拼字能力归入发现分类 `glyphs`（同时属 vector）：`glyphs_inspect` 与 `glyphs_plan`。`tools_search {"query":"偏旁 部件 拼字","category":"glyphs"}` 按需取得，`agent_guide topic=glyphs` 返回工作流。预览图只作为原生 media block 传送，JSON 不含 Base64；覆盖率与列表默认分页。实测 glyphs_plan 接口 8084 字节，inspect 默认结果 640 字节，预览结果 1439 字节，计划结果 1035 字节。详见 [偏旁部件拼字](GLYPHS.md)。
 
 `project_schema` 的名称来自权威资源注册表，包含声音、混音、插件、分镜与纹理等格式。默认入口数量保持不变；按需读取一个资源或operationType，避免加载全部Schema。
 
@@ -41,7 +45,7 @@ vmotion.organization的project_references/reference_sample/reference_plan/sequen
 }}
 ```
 
-tools_search 返回名称、摘要、类别、参数字段和读写提示，不返回完整输入 Schema。搜索支持英文名称/描述和中文词，offset/limit 分页；明确工具名称匹配优先，专用词优先于大类标签。可用类别为 core、animation、effects、composition、vector、drawing、media、editing、audio、3d、math、render、recovery，类别允许交叉。
+tools_search 返回名称、摘要、类别、参数字段和读写提示，不返回完整输入 Schema。搜索支持英文名称/描述和中文词，offset/limit 分页；明确工具名称匹配优先，专用词优先于大类标签。可用类别为 core、animation、effects、composition、vector、drawing、media、editing、audio、3d、math、render、recovery、image、glyphs，类别允许交叉。
 
 tool_schema 返回选定能力的完整 inputSchema、语义与调用方式。tool_call 验证同一输入 Schema，调用相同工程服务与历史记录；可调用未出现在 tools/list 的能力。返回 structuredContent 与兼容文本，画面/声音作为原生 MCP media blocks 返回，不把 base64 混进结构化诊断。
 

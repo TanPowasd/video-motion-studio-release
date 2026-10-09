@@ -20,6 +20,7 @@ import { DesignInspector } from '../DesignInspector.js';
 import { EffectInspector } from '../EffectInspector.js';
 import { FilmToolbar } from '../FilmToolbar.js';
 import { GraphicsInspector } from '../GraphicsInspector.js';
+import { GlyphTextControls } from '../glyphs/GlyphTextControls.js';
 import { Icon } from '../Icons.js';
 import { MatrixInspector } from '../MatrixInspector.js';
 import { MediaManager } from '../MediaManager.js';
@@ -35,8 +36,8 @@ import { Splitter } from '../panelLayout.js';
 import { rpc } from '../state/rpc-client.js';
 import { useWorkbenchController } from '../state/workbench-controller.js';
 import { mergeApplicationState } from '../state/workbench-effects.js';
-import '../studio-shell.css';
 import '../workbench.css';
+import '../studio-shell.css';
 const StudioWorkspace = lazy(() =>
   import('../studio/StudioWorkspace.js').then((m) => ({ default: m.StudioWorkspace })),
 );
@@ -96,6 +97,8 @@ export const InspectorPanel = React.memo(function InspectorPanel({
   setSceneFrames,
   editAnimation,
   jobs,
+  stillMode,
+  artboard,
 }: PanelProps<
   | 'inspectorTab'
   | 'workspace'
@@ -137,9 +140,9 @@ export const InspectorPanel = React.memo(function InspectorPanel({
   | 'setSceneFrames'
   | 'editAnimation'
   | 'jobs'
->) {
+> & { stillMode?: boolean; artboard?: React.ReactNode }) {
   return (
-    <aside className={`inspector tab-${inspectorTab}`}>
+    <aside className={`inspector tab-${stillMode && inspectorTab === 'animation' ? 'properties' : inspectorTab}${stillMode ? ' still-mode' : ''}`}>
       <div className="inspector-heading">
         <span>{workspace === 'editing' ? '片段属性' : '图层检查器'}</span>
         <Icon name="settings" size={16} />
@@ -152,7 +155,8 @@ export const InspectorPanel = React.memo(function InspectorPanel({
         ].map(([id, label]) => (
           <button
             key={id}
-            className={inspectorTab === id ? 'active' : ''}
+            data-tab={id}
+            className={(stillMode && inspectorTab === 'animation' ? 'properties' : inspectorTab) === id ? 'active' : ''}
             onClick={() => setInspectorTab(id as typeof inspectorTab)}
           >
             {label}
@@ -522,6 +526,12 @@ export const InspectorPanel = React.memo(function InspectorPanel({
                       </button>
                     ))}
                   </div>
+                  <GlyphTextControls
+                    node={node}
+                    revision={snapshot!.revision}
+                    update={update}
+                    onApplied={() => run('state')}
+                  />
                 </>
               )}
             </Section>
@@ -620,6 +630,8 @@ export const InspectorPanel = React.memo(function InspectorPanel({
             />
           </Section>
         </>
+      ) : artboard ? (
+        artboard
       ) : (
         <div className="empty inspector-empty">
           <Icon name="layers" size={32} />

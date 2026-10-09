@@ -58,16 +58,18 @@ export function McpConnection() {
         style={{
           maxWidth: 760,
           width: '90%',
-          background: '#18212d',
+          background: 'var(--vm-bg-2)',
+          border: '1px solid var(--vm-line-3)',
+          boxShadow: 'var(--vm-shadow-3)',
           padding: 24,
-          borderRadius: 8,
+          borderRadius: 10,
           display: 'grid',
           gap: 12,
         }}
       >
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2>连接外部 AI / MCP</h2>
-          <button aria-label="关闭 MCP 连接" onClick={() => setOpen(false)}>
+          <button className="secondary" aria-label="关闭 MCP 连接" onClick={() => setOpen(false)}>
             关闭
           </button>
         </header>
@@ -83,13 +85,16 @@ export function McpConnection() {
                 overflow: 'auto',
                 maxHeight: '50vh',
                 whiteSpace: 'pre-wrap',
-                background: '#101721',
+                background: 'var(--vm-bg-1)',
+                border: '1px solid var(--vm-line-2)',
+                borderRadius: 6,
                 padding: 16,
               }}
             >
               {config}
             </pre>
             <button
+              className="primary"
               onClick={() =>
                 void navigator.clipboard
                   .writeText(config)

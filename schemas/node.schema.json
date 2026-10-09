@@ -3792,6 +3792,25 @@
           "maximum": 900,
           "default": 400
         },
+        "glyphSet": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^(builtin:)?[a-z0-9][a-z0-9-]{0,62}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "glyphFallback": {
+          "type": "string",
+          "enum": [
+            "font",
+            "none",
+            "tofu"
+          ]
+        },
         "align": {
           "type": "string",
           "enum": [
@@ -4576,6 +4595,19 @@
                 "minimum": 100,
                 "maximum": 900
               },
+              "glyphSet": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/node/properties/glyphSet/anyOf/0"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "glyphFallback": {
+                "$ref": "#/definitions/node/properties/glyphFallback"
+              },
               "align": {
                 "type": "string",
                 "enum": [
@@ -5327,6 +5359,12 @@
                   },
                   "fontWeight": {
                     "$ref": "#/definitions/node/properties/fontWeight"
+                  },
+                  "glyphSet": {
+                    "$ref": "#/definitions/node/properties/glyphSet"
+                  },
+                  "glyphFallback": {
+                    "$ref": "#/definitions/node/properties/glyphFallback"
                   },
                   "align": {
                     "$ref": "#/definitions/node/properties/align"

@@ -214,7 +214,7 @@ async function runStudio(window, root, url, options) {
   await set('乐曲名称', '保留草稿');
   await wait(300);
   await ev(`location.hash='#/project'`);
-  await until(`!!document.querySelector('.project-title')`, 'Video workspace did not mount');
+  await until(`!!document.querySelector('.st-project')`, 'Video workspace did not mount');
   await ev(`location.hash=${JSON.stringify('#/music/')}+${JSON.stringify(asset.id)}`);
   await until(
     `document.querySelector('[aria-label="乐曲名称"]')?.value==='保留草稿'`,

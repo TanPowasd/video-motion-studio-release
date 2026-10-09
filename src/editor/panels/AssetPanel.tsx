@@ -35,8 +35,8 @@ import { Splitter } from '../panelLayout.js';
 import { rpc } from '../state/rpc-client.js';
 import { useWorkbenchController } from '../state/workbench-controller.js';
 import { mergeApplicationState } from '../state/workbench-effects.js';
-import '../studio-shell.css';
 import '../workbench.css';
+import '../studio-shell.css';
 const StudioWorkspace = lazy(() =>
   import('../studio/StudioWorkspace.js').then((m) => ({ default: m.StudioWorkspace })),
 );
@@ -90,6 +90,9 @@ export const AssetPanel = React.memo(function AssetPanel({
   setCodePath,
   setCodeDirty,
   setPlaying,
+  stillMode,
+  hideScenes,
+  aiNodes,
 }: PanelProps<
   | 'assetTab'
   | 'setAssetTab'
@@ -126,12 +129,18 @@ export const AssetPanel = React.memo(function AssetPanel({
   | 'setCodePath'
   | 'setCodeDirty'
   | 'setPlaying'
->) {
+> & {
+  stillMode?: boolean;
+  /** Studio shell shows scenes in its own strip. */
+  hideScenes?: boolean;
+  /** Layers changed by AI and not yet reviewed (mint marker). */
+  aiNodes?: Map<string, unknown>;
+}) {
   return (
-    <aside className="left-panel">
+    <aside className={`left-panel${stillMode ? ' still-mode' : ''}`}>
       <div className="panel-tabs">
         <button className={!assetTab ? 'active' : ''} onClick={() => setAssetTab(false)}>
-          工程
+          {hideScenes ? '图层' : '工程'}
         </button>
         <button className={assetTab ? 'active' : ''} onClick={() => setAssetTab(true)}>
           素材 <span>{project.assets.length}</span>
@@ -243,6 +252,7 @@ export const AssetPanel = React.memo(function AssetPanel({
         </>
       ) : (
         <>
+          {!hideScenes && (<>
           <div className="section-title">
             场景
             <button
@@ -272,7 +282,7 @@ export const AssetPanel = React.memo(function AssetPanel({
             .filter((s) => s.name.toLowerCase().includes(filter.toLowerCase()))
             .map((s, i) => (
               <button
-                className={`scene-row ${sceneId === s.id ? 'selected' : ''}`}
+                className={`scene-row ${sceneId === s.id ? 'selected' : ''} ${stillMode ? 'compact' : ''}`}
                 key={s.id}
                 onClick={() => {
                   enterScene(s.id);
@@ -282,18 +292,28 @@ export const AssetPanel = React.memo(function AssetPanel({
                   <span>{String(i + 1).padStart(2, '0')}</span>
                   <img
                     loading="lazy"
-                    src={`/api/frame?frame=90&width=240&height=${Math.round((240 * project.height) / project.width)}&scene=${s.id}&revision=${snapshot!.revision}`}
+                    src={
+                      s.still
+                        ? `/api/frame?frame=0&width=${Math.max(16, Math.round((136 * (s.width ?? project.width)) / Math.max(s.width ?? project.width, s.height ?? project.height)))}&height=${Math.max(16, Math.round((136 * (s.height ?? project.height)) / Math.max(s.width ?? project.width, s.height ?? project.height)))}&scene=${s.id}&revision=${snapshot!.revision}`
+                        : `/api/frame?frame=90&width=240&height=${Math.round((240 * project.height) / project.width)}&scene=${s.id}&revision=${snapshot!.revision}`
+                    }
                     alt=""
                   />
                 </div>
                 <div>
-                  <strong>{s.name}</strong>
+                  <strong>
+                    {s.name}
+                    {s.still && <span className="still-tag">图片</span>}
+                  </strong>
                   <small>
-                    {(s.duration / fps).toFixed(1)}s · {s.nodes.length} 图层
+                    {s.still
+                      ? `${s.width ?? project.width}×${s.height ?? project.height} · ${s.nodes.length} 图层`
+                      : `${(s.duration / fps).toFixed(1)}s · ${s.nodes.length} 图层`}
                   </small>
                 </div>
               </button>
             ))}
+          </>)}
           <div className="section-title layers-title">
             图层<span>{scene.nodes.length}</span>
           </div>
@@ -333,6 +353,7 @@ export const AssetPanel = React.memo(function AssetPanel({
                       size={15}
                     />
                     <span>{n.name}</span>
+                    {aiNodes?.has(n.id) && <span className="ai-dot" title="AI 改动，待你查看" />}
                     {n.animations.length > 0 && <span className="key-dot">◆</span>}
                   </button>
                   <button
@@ -363,9 +384,9 @@ export const AssetPanel = React.memo(function AssetPanel({
                 </div>
               ))}
           </div>
-          <div className="section-title">组件</div>
+          {!stillMode && <div className="section-title">组件</div>}
           {Object.keys(snapshot!.files)
-            .filter((f) => f.endsWith('.ts'))
+            .filter((f) => !stillMode && f.endsWith('.ts'))
             .map((file) => (
               <button
                 className="component-row"

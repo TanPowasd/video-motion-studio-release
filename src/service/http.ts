@@ -8,6 +8,7 @@ import { VmotionError } from '../core/model.js';
 import { safePath } from './project.js';
 import { runtimeFile } from '../core/bundled-runtime.js';
 import { assertSurfaceMethod, surfaceManifest } from './surfaces.js';
+import { withChangeOrigin } from './change-journal.js';
 
 async function serveClient(url: URL, res: http.ServerResponse, clientDirectory: string) {
   let file = path.resolve(clientDirectory, '.' + decodeURIComponent(url.pathname));
@@ -232,7 +233,23 @@ export async function serveHttp(
               : 'legacy',
           method,
         );
-        send({ result: await app.dispatch(method, params) });
+        // The agent surface is automation, not the person in the Studio: attribute its direct
+        // (non-tool) writes to an agent so the change feed shows AI, and AI hold applies.
+        // agentToolInvoke sets its own, more specific MCP origin inside this one.
+        const agentClient = req.headers['x-vmotion-agent'];
+        send({
+          result:
+            url.pathname === '/api/agent/rpc'
+              ? await withChangeOrigin(
+                  {
+                    kind: 'mcp',
+                    client: typeof agentClient === 'string' && agentClient ? agentClient : 'agent-web',
+                    tool: String(method),
+                  },
+                  () => app.dispatch(method, params),
+                )
+              : await app.dispatch(method, params),
+        });
         return;
       }
       if (req.method === 'POST' && url.pathname.startsWith('/api/music-live/')) {
@@ -395,18 +412,24 @@ export async function serveHttp(
           'Cache-Control': 'no-cache',
           Connection: 'keep-alive',
         });
-        res.write(`data: ${JSON.stringify({ kind: 'change', state: app.service.state() })}\n\n`);
+        res.write(
+          `data: ${JSON.stringify({ kind: 'change', state: { ...app.service.state(), changeLog: app.changeLog(), agents: app.agentState() } })}\n\n`,
+        );
         const change = (state: unknown) =>
             res.write(`data: ${JSON.stringify({ kind: 'change', state })}\n\n`),
           render = (jobs: unknown) =>
-            res.write(`data: ${JSON.stringify({ kind: 'render', jobs })}\n\n`);
+            res.write(`data: ${JSON.stringify({ kind: 'render', jobs })}\n\n`),
+          agents = (state: unknown) =>
+            res.write(`data: ${JSON.stringify({ kind: 'agents', agents: state })}\n\n`);
         app.on('change', change);
         app.on('render', render);
+        app.on('agents', agents);
         const heartbeat = setInterval(() => res.write(': keepalive\n\n'), 15000);
         req.on('close', () => {
           clearInterval(heartbeat);
           app.off('change', change);
           app.off('render', render);
+          app.off('agents', agents);
         });
         return;
       }

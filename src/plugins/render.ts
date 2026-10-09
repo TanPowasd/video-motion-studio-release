@@ -5,6 +5,7 @@ import type { ToolDefinition } from '../mcp/catalog.js';
 import type { RenderJob, RenderOptions } from '../media/export.js';
 import { compareRendering, renderCompareSchema } from '../service/render-compare.js';
 import { profileRendering, renderProfileSchema } from '../service/render-profile.js';
+import { exportStill, imageExportSchema } from '../service/stills.js';
 import { defineRpcHandler, invokeRpcHandler } from './rpc-handler.js';
 import type { BuiltinPluginModule } from './types.js';
 
@@ -78,6 +79,7 @@ export const renderPlugin: BuiltinPluginModule = {
     'job',
     'cancel',
     'renderQuery',
+    'imageExport',
   ]),
   tools(): ToolDefinition[] {
     return [
@@ -124,6 +126,21 @@ export const renderPlugin: BuiltinPluginModule = {
         categories: ['effects', 'composition', 'render'],
         annotations: {
           readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false,
+        },
+      },
+      {
+        name: 'image_export',
+        description:
+          'Export a still artboard (and optional size variants) as PNG/JPEG/WebP through the same native renderer as preview. scale 1–4 re-renders vectors/text at full resolution; transparent omits the background (PNG/WebP); trim removes bleed; PNG/JPEG carry DPI metadata (dpi×scale). revision/planId pin the exact project or candidate. Over-budget sizes fail with RESOLUTION, never silently downscaled.',
+        method: 'imageExport',
+        schema: imageExportSchema.shape,
+        categories: ['render', 'image'],
+        keywords: '导出图片 海报 封面 缩略图 PNG JPEG WebP 透明 倍率 出血 DPI export image still poster thumbnail',
+        annotations: {
+          readOnlyHint: false,
           destructiveHint: false,
           idempotentHint: true,
           openWorldHint: false,
@@ -209,6 +226,26 @@ export const renderPlugin: BuiltinPluginModule = {
 };
 
 export const renderRpcHandlers = {
+  imageExport: defineRpcHandler(
+    z.object(imageExportSchema.shape).extend({ inline: z.boolean().optional() }).passthrough(),
+    async (host, params) => {
+      const { inline: _inline, ...request } = params as Record<string, unknown>;
+      if (!request.preview && !request.planId) {
+        const { pendingFiles, diagnostics } = host.exportState();
+        if (pendingFiles || diagnostics.some((d) => d.severity === 'error'))
+          throw new VmotionError(
+            'VALIDATION_FAILED',
+            'Fix project diagnostics before exporting; the last valid preview is preserved',
+            diagnostics,
+          );
+      }
+      const snapshot = await host.candidateSnapshot({
+        planId: request.planId as string | undefined,
+        revision: request.revision as string | undefined,
+      });
+      return host.withMediaTask(() => exportStill(host, snapshot, request));
+    },
+  ),
   renderCompare: defineRpcHandler(
     z.object(renderCompareSchema.shape).extend({ inline: z.boolean().optional() }).passthrough(),
     async (host, params) => {

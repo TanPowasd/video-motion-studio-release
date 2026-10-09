@@ -1,0 +1,109 @@
+{
+  "$ref": "#/definitions/pluginBundle",
+  "definitions": {
+    "pluginBundle": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "vmotion-plugin-bundle"
+        },
+        "formatVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "root": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9][a-z0-9-]*)*$"
+        },
+        "plugins": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/definitions/pluginBundle/properties/root"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "version": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "source": {
+                "type": "string",
+                "maxLength": 400,
+                "pattern": "^components\\/[\\p{L}\\p{N}_./-]+\\.(?:json|ts|tsx)$"
+              },
+              "contentHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "dependencies": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "$ref": "#/definitions/pluginBundle/properties/plugins/items/properties/source"
+                    },
+                    "sha256": {
+                      "$ref": "#/definitions/pluginBundle/properties/plugins/items/properties/contentHash"
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "path",
+                    "sha256",
+                    "bytes"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 1024
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "version",
+              "source",
+              "contentHash",
+              "files"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "digest": {
+          "$ref": "#/definitions/pluginBundle/properties/plugins/items/properties/contentHash"
+        }
+      },
+      "required": [
+        "kind",
+        "formatVersion",
+        "root",
+        "plugins",
+        "digest"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

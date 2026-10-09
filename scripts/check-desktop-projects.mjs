@@ -171,8 +171,18 @@ const check = (name, value) => {
 };
 const click = (label) =>
   desktop.evaluate(
-    `Array.from(document.querySelectorAll('button')).find(button=>button.textContent.trim().startsWith(${JSON.stringify(label)})).click()`,
+    `(()=>{const button=Array.from(document.querySelectorAll('button')).find(button=>button.getClientRects().length>0&&button.textContent.trim().startsWith(${JSON.stringify(label)}));if(!button)throw Error('Visible button missing: '+${JSON.stringify(label)});button.click();})()`,
   );
+const topbarMenu = async (label) => {
+  await desktop.evaluate(`document.querySelector('.topbar [aria-label="更多"]').click()`);
+  await until(
+    () => desktop.evaluate(`!!document.querySelector('.topbar [role="menu"]')`),
+    'Top bar menu did not open',
+  );
+  await desktop.evaluate(
+    `Array.from(document.querySelectorAll('.topbar [role="menu"] button')).find(button=>button.querySelector('span')?.textContent===${JSON.stringify(label)}).click()`,
+  );
+};
 const capture = () =>
   until(
     () => desktop.evaluate('window.vmotionDesktop.captureTestWindow()'),
@@ -246,9 +256,7 @@ try {
   await click('创建并打开');
   await until(
     () =>
-      desktop.evaluate(
-        "document.querySelector('.project-title')?.textContent.includes('空白动画')",
-      ),
+      desktop.evaluate("document.querySelector('.st-project')?.textContent.includes('空白动画')"),
     'Blank creation did not open editor',
   );
   const manifest = JSON.parse(
@@ -284,6 +292,14 @@ try {
     state.result.snapshot.scenes[0].nodes.length === 0 && state.result.diagnostics.length === 0,
   );
   const revision = state.result.snapshot.revision;
+  check(
+    'Studio exposes six creation modes on the shared project',
+    JSON.stringify(
+      await desktop.evaluate(
+        `Array.from(document.querySelectorAll('[aria-label="创作模式"] [role="tab"]')).map(button=>button.dataset.mode)`,
+      ),
+    ) === JSON.stringify(['edit', 'motion', 'effects', 'music', 'still', 'type']),
+  );
   const fail = await desktop.evaluate(
     `window.vmotionDesktop.openProject(${JSON.stringify(path.join(root, 'missing'))}).then(()=>null,error=>error.message)`,
   );
@@ -324,9 +340,7 @@ try {
   await click('创建并打开');
   await until(
     () =>
-      desktop.evaluate(
-        "document.querySelector('.project-title')?.textContent.includes('科普动画')",
-      ),
+      desktop.evaluate("document.querySelector('.st-project')?.textContent.includes('科普动画')"),
     'Science creation failed',
   );
   check(
@@ -359,9 +373,7 @@ try {
   );
   await until(
     () =>
-      desktop.evaluate(
-        "document.querySelector('.project-title')?.textContent.includes('空白动画')",
-      ),
+      desktop.evaluate("document.querySelector('.st-project')?.textContent.includes('空白动画')"),
     'Recent reopen failed',
   );
   check('reopens chosen project after restart', true);
@@ -396,60 +408,45 @@ try {
       ],
     });
     await desktop.evaluate(`document.querySelector('[aria-label="插件管理"]').click()`);
+    const row = (id) =>
+      `Array.from(document.querySelectorAll('.vm-plg-row')).find(a=>a.textContent.includes(${JSON.stringify(id)}))`;
     await until(
-      () => desktop.evaluate(`!!document.querySelector('.plugin-list article')`),
+      () => desktop.evaluate(`!!document.querySelector('.vm-plg-row')`),
       'Plugin manager did not load on demand',
     );
     check('loads builtin plugin registry in the desktop manager', true);
-    await desktop.evaluate(
-      `Array.from(document.querySelectorAll('.plugin-list article')).find(a=>a.textContent.includes('vmotion.audio')).querySelector('button').click()`,
-    );
+    await desktop.evaluate(`${row('vmotion.audio')}.click()`);
     await until(
       () =>
         desktop.evaluate(
-          `document.querySelector('.plugin-detail')?.innerText.includes('已接入插件：15 / 15')`,
+          `document.querySelector('.vm-plg-detail')?.innerText.includes('已接入插件：15 / 15')`,
         ),
       'Complete audio module migration was not shown',
     );
     check('shows actual complete audio module migration', true);
     for (const [id, count] of [
       ['vmotion.editing', 7],
-      ['vmotion.render', 7],
+      ['vmotion.render', 8],
       ['vmotion.3d', 5],
-      ['vmotion.vector', 6],
+      ['vmotion.vector', 8],
       ['vmotion.drawing', 8],
-      ['vmotion.composition', 10],
+      ['vmotion.composition', 12],
       ['vmotion.tracking', 4],
       ['vmotion.animation', 14],
       ['vmotion.effects', 14],
       ['vmotion.media', 12],
-      ['vmotion.core', 15],
+      ['vmotion.core', 17],
       ['vmotion.recovery', 3],
       ['vmotion.cache', 3],
       ['vmotion.review', 7],
       ['vmotion.organization', 4],
     ]) {
-      if (
-        !(await desktop.evaluate(
-          `Array.from(document.querySelectorAll('.plugin-list article')).some(a=>a.textContent.includes(${JSON.stringify(id)}))`,
-        ))
-      ) {
-        await click('下一页');
-        await until(
-          () =>
-            desktop.evaluate(
-              `Array.from(document.querySelectorAll('.plugin-list article')).some(a=>a.textContent.includes(${JSON.stringify(id)}))`,
-            ),
-          'Paged builtin module was not shown: ' + id,
-        );
-      }
-      await desktop.evaluate(
-        `Array.from(document.querySelectorAll('.plugin-list article')).find(a=>a.textContent.includes(${JSON.stringify(id)})).querySelector('button').click()`,
-      );
+      await until(() => desktop.evaluate(`!!${row(id)}`), 'Builtin module was not listed: ' + id);
+      await desktop.evaluate(`${row(id)}.click()`);
       await until(
         () =>
           desktop.evaluate(
-            `document.querySelector('.plugin-detail')?.innerText.includes(${JSON.stringify('已接入插件：' + count + ' / ' + count)})`,
+            `document.querySelector('.vm-plg-detail')?.innerText.includes(${JSON.stringify('已接入插件：' + count + ' / ' + count)})`,
           ),
         'Workflow module migration was not shown: ' + id,
       );
@@ -458,10 +455,17 @@ try {
     check('shows actual complete 3D and graphics module migration', true);
     check('shows actual complete drawing composition and tracking module migration', true);
     check('shows complete core recovery cache review animation effects and media modules', true);
+    await click('安装插件');
+    await click('工程内清单');
     await desktop.evaluate(
       `(()=>{const input=document.querySelector('[aria-label="插件清单路径"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,${JSON.stringify(source)});input.dispatchEvent(new Event('input',{bubbles:true}));})()`,
     );
-    await click('注册本地插件');
+    await click('生成候选预览');
+    await until(
+      () => desktop.evaluate(`!!document.querySelector('.vm-plg-preview')`),
+      'Plugin registration preview was not shown',
+    );
+    await click('预检并应用');
     const manifest = path.join(projects, '空白动画/project.vmotion.json'),
       project = async () => JSON.parse(await readFile(manifest, 'utf8'));
     await until(
@@ -470,39 +474,30 @@ try {
     );
     await until(
       () =>
-        desktop.evaluate(`document.querySelector('.plugin-list')?.innerText.includes('UI创作包')`),
+        desktop.evaluate(`document.querySelector('.vm-plg-list')?.innerText.includes('UI创作包')`),
       'Registered plugin is missing from manager',
     );
     check('registers project plugin through exact preflight/apply', true);
-    await desktop.evaluate(
-      `Array.from(document.querySelectorAll('.plugin-list article')).find(a=>a.textContent.includes('example.ui')).querySelector('button').click()`,
-    );
+    await desktop.evaluate(`${row('example.ui')}.click()`);
     await until(
       () =>
         desktop.evaluate(
-          `document.querySelector('.plugin-detail')?.innerText.includes('components/plugins/ui/card.ts')`,
+          `document.querySelector('.vm-plg-detail')?.innerText.includes('components/plugins/ui/card.ts')`,
         ),
       'Contribution sources are missing',
     );
     const picture = await capture();
     await writeFile(path.join(root, 'plugin-manager.png'), Buffer.from(picture, 'base64'));
     await desktop.evaluate(
-      `Array.from(document.querySelectorAll('.plugin-list article')).find(a=>a.textContent.includes('example.ui')).querySelectorAll('button')[1].click()`,
+      `Array.from(document.querySelectorAll('.vm-plg-actions button')).find(b=>b.textContent.trim()==='禁用').click()`,
     );
     await until(
       async () => (await project()).plugins[0].enabled === false,
       'Desktop plugin disable did not save',
     );
-    await until(
-      () =>
-        desktop.evaluate(
-          `!document.querySelector('.plugin-manager footer button:last-child').disabled`,
-        ),
-      'Plugin disable remained busy',
-    );
-    await desktop.evaluate(
-      `document.querySelector('.plugin-manager footer button:last-child').click()`,
-    );
+    const undoButton = `Array.from(document.querySelectorAll('.vm-plg-header-actions button')).find(b=>b.textContent.includes('撤销'))`;
+    await until(() => desktop.evaluate(`!${undoButton}.disabled`), 'Plugin disable remained busy');
+    await desktop.evaluate(`${undoButton}.click()`);
     await until(
       async () => (await project()).plugins[0].enabled === true,
       'Plugin undo did not restore enabled state',
@@ -512,9 +507,9 @@ try {
       'plugin operations preserve author source',
       (await readFile(path.join(projects, '空白动画', code), 'utf8')).includes('defineComponent'),
     );
-    await desktop.evaluate(`document.querySelector('.plugin-manager header button').click()`);
+    await desktop.evaluate(`document.querySelector('.vm-plg-header [aria-label="关闭"]').click()`);
     await until(
-      () => desktop.evaluate(`!document.querySelector('.plugin-manager')`),
+      () => desktop.evaluate(`!document.querySelector('.vm-plg')`),
       'Plugin manager did not close',
     );
   }
@@ -1107,7 +1102,7 @@ try {
     );
     await desktop.evaluate('location.hash="#/project"');
     await until(
-      () => desktop.evaluate('!!document.querySelector(".project-title")'),
+      () => desktop.evaluate('!!document.querySelector(".st-project")'),
       'Video workbench missing',
     );
   }
@@ -1211,7 +1206,8 @@ try {
     await click('返回创作工作站');
   }
   if (process.argv.includes('--visual')) {
-    await click('动画');
+    await click('动效');
+    await click('属性');
     await desktop.evaluate(`document.querySelector('[aria-label="Shape"]').click()`);
     await until(
       () =>
@@ -1265,7 +1261,7 @@ try {
         渲染性能: '渲染与性能',
       };
       if (!(await desktop.evaluate(`!!document.querySelector('.studio-workspace')`)))
-        await desktop.evaluate(`document.querySelector('[aria-label="创作工具"]').click()`);
+        await topbarMenu('创作工具');
       await until(
         () => desktop.evaluate(`!!document.querySelector('.studio-workspace')`),
         'Studio did not mount',
@@ -1308,7 +1304,8 @@ try {
       desktop.evaluate(
         `fetch('/api/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:'state'})}).then(r=>r.json()).then(r=>r.result)`,
       );
-    await click('动画');
+    await click('动效');
+    await click('属性');
     await desktop.evaluate(`document.querySelector('[aria-label="Shape"]').click()`);
     await until(async () => {
       const s = await readState();
@@ -1369,7 +1366,7 @@ try {
       (await readState()).snapshot.scenes[0].nodes.some((n) => n.type === 'scene3d'),
     );
     await desktop.evaluate(
-      `Array.from(document.querySelectorAll('.panel-tabs button')).find(b=>b.textContent.trim()==='工程').click()`,
+      `Array.from(document.querySelectorAll('.panel-tabs button')).find(b=>b.textContent.trim()==='图层').click()`,
     );
     await until(
       () =>
@@ -1562,7 +1559,7 @@ try {
       `fetch('/api/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:'assetPlace',params:{assetId:${JSON.stringify(asset.id)},sceneId:'intro'}})}).then(r=>r.json())`,
     );
     await click('素材');
-    await desktop.evaluate(`document.querySelector('[aria-label="媒体与缓存"]').click()`);
+    await topbarMenu('媒体与缓存');
     await until(
       () =>
         desktop.evaluate(

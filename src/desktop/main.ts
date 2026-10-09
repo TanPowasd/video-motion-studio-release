@@ -175,6 +175,15 @@ app
       });
       return result.canceled ? undefined : result.filePaths[0];
     });
+    ipcMain.handle('plugin:pick', async (_event, kind: unknown) => {
+      const result = await dialog.showOpenDialog(window, {
+        properties: [kind === 'folder' ? 'openDirectory' : 'openFile'],
+        ...(kind === 'folder'
+          ? {}
+          : { filters: [{ name: 'Vmotion 插件包', extensions: ['vmplugin', 'zip'] }] }),
+      });
+      return result.canceled ? undefined : result.filePaths[0];
+    });
     ipcMain.handle('project:list', async () => ({
       directory: path.join(app.getPath('documents'), 'Vmotion'),
       recent: await availableRecent(recentFile()),

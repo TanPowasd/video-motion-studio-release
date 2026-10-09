@@ -129,7 +129,7 @@
   position: fixed;
   inset: 0;
   z-index: 250;
-  background: #0009;
+  background: color-mix(in srgb, var(--vm-bg-0) 60%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -137,14 +137,14 @@
 }
 .new-project-form {
   background: var(--panel);
-  border: 1px solid #46536a;
+  border: 1px solid var(--vm-line-3);
   border-radius: 10px;
   width: 560px;
   max-width: 100%;
   max-height: 100%;
   overflow: auto;
   padding: 24px;
-  box-shadow: 0 24px 80px #0008;
+  box-shadow: 0 24px 80px color-mix(in srgb, var(--vm-bg-0) 53%, transparent);
 }
 .project-form-heading {
   display: flex;
@@ -198,9 +198,9 @@
   margin: 0 0 18px;
 }
 .project-form-error {
-  color: #ffb4ad;
-  background: #6d29292b;
-  border: 1px solid #794343;
+  color: var(--vm-danger);
+  background: color-mix(in srgb, var(--vm-danger) 17%, transparent);
+  border: 1px solid var(--vm-danger);
   border-radius: 5px;
   padding: 12px;
   overflow-wrap: anywhere;
@@ -214,4 +214,45 @@
 }
 .project-form-actions button {
   padding: 10px 18px;
+}
+
+/* ── Design-system alignment ─────────────────────────────────────────── */
+.project-home {
+  background:
+    radial-gradient(1200px 500px at 50% -10%, color-mix(in srgb, var(--vm-accent) 9%, transparent), transparent 70%),
+    var(--vm-bg-1);
+}
+.project-home > header {
+  height: var(--vm-header-h);
+  padding: 0 var(--vm-space-6);
+  background: color-mix(in srgb, var(--vm-bg-2) 80%, transparent);
+  border-bottom-color: var(--vm-line-2);
+  font-size: var(--vm-fs-xs);
+}
+.project-home h1 {
+  color: var(--vm-text-1);
+  letter-spacing: -0.02em;
+}
+.project-home-buttons button {
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: var(--vm-radius-md);
+}
+.project-home kbd {
+  margin-left: var(--vm-space-5);
+  opacity: 0.85;
+  background: rgb(0 0 0 / 0.18);
+  border-color: rgb(255 255 255 / 0.18);
+  color: inherit;
+}
+.recent-projects {
+  border-color: var(--vm-line-2);
+  border-radius: var(--vm-radius-lg);
+  background: var(--vm-bg-2);
+}
+.recent-projects > button {
+  border-bottom-color: var(--vm-line-1);
+}
+.recent-projects > button:hover {
+  background: var(--vm-bg-3);
 }

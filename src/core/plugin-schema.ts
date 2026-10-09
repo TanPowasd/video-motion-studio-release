@@ -118,3 +118,42 @@ export const pluginManifestSchema = z
   });
 export type PluginManifest = z.output<typeof pluginManifestSchema>;
 export type PluginTool = z.output<typeof pluginToolSchema>;
+/** vmplugin.json inside a portable .vmplugin bundle (format 1). */
+export const PLUGIN_BUNDLE_FORMAT = 1;
+const sha256 = z.string().regex(/^[a-f0-9]{64}$/);
+export const pluginBundleManifestSchema = z
+  .object({
+    kind: z.literal('vmotion-plugin-bundle'),
+    formatVersion: z.literal(PLUGIN_BUNDLE_FORMAT),
+    root: pluginIdSchema,
+    plugins: z
+      .array(
+        z
+          .object({
+            id: pluginIdSchema,
+            name: z.string().min(1).max(200),
+            version: pluginVersionSchema,
+            source: pluginPathSchema,
+            contentHash: sha256,
+            dependencies: z.record(z.string()).default({}),
+            files: z
+              .array(
+                z
+                  .object({
+                    path: pluginPathSchema,
+                    sha256,
+                    bytes: z.number().int().nonnegative(),
+                  })
+                  .strict(),
+              )
+              .min(1)
+              .max(1024),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(64),
+    digest: sha256,
+  })
+  .strict();
+export type PluginBundleManifest = z.output<typeof pluginBundleManifestSchema>;

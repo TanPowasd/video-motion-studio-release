@@ -3,6 +3,7 @@ export function Section({ title, children }: { title: string; children: React.Re
   return (
     <section
       className="inspector-section"
+      data-title={title}
       data-category={
         ['效果栈', '遮罩与羽化'].includes(title)
           ? 'effects'

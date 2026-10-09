@@ -13,12 +13,15 @@ import {
 import { checkAssets } from '../service/media-evidence.js';
 import {
   inspectPlugins,
+  installPlugins,
   packagePlugin,
   planPlugins,
   pluginInspectSchema,
   pluginPackageSchema,
   pluginPlanSchema,
+  type BuiltinPluginGroups,
 } from '../service/plugins.js';
+import { packPlugins, pluginInstallSchema, pluginPackSchema } from '../service/plugin-bundles.js';
 import { preflight, preflightSchema } from '../service/preflight.js';
 import {
   projectDiagnosticsSchema,
@@ -46,6 +49,8 @@ export const corePlugin: BuiltinPluginModule = {
     'pluginsInspect',
     'pluginsPlan',
     'pluginsPackage',
+    'pluginsPack',
+    'pluginsInstall',
     'agentGuide',
     'projectSchema',
     'projectContext',
@@ -107,6 +112,37 @@ export const corePlugin: BuiltinPluginModule = {
           destructiveHint: false,
           idempotentHint: true,
           openWorldHint: false,
+        },
+      },
+      {
+        name: 'plugins_pack',
+        description:
+          'Pack a registered project plugin (default with its project-plugin dependencies) into a deterministic portable .vmplugin ZIP: vmplugin.json lists per-file sha256, content hashes and a bundle digest. Writes only the bundle file (default exports/plugins/<id>-<version>.vmplugin); the project is unchanged. Source is not echoed; base64 is opt-in.',
+        method: 'pluginsPack',
+        schema: pluginPackSchema.shape,
+        categories: ['core'],
+        keywords: '插件 打包 导出 分发 bundle pack vmplugin zip share',
+        annotations: {
+          readOnlyHint: false,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false,
+        },
+      },
+      {
+        name: 'plugins_install',
+        description:
+          'Install or upgrade a plugin from a local folder, .vmplugin/.zip bundle (path or base64) or an explicit Git URL/ref, as one exact plugins candidate: files are copied under components/, hashes verified, semver dependencies resolved (bundled deps installed, missing/conflicting versions reported), optional pin. Reserved vmotion.* IDs, future apiVersion, path traversal, oversized archives, downgrades and foreign-file overwrites are rejected unless explicitly allowed. summary.install shows the version diff. Commit with project_preflight/project_apply; uninstall is plugins_plan remove.',
+        method: 'pluginsInstall',
+        schema: pluginInstallSchema.shape,
+        categories: ['core', 'composition'],
+        keywords:
+          '插件 安装 升级 更新 导入 依赖 git 文件夹 install upgrade bundle vmplugin dependency',
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: true,
         },
       },
       {
@@ -318,14 +354,28 @@ export const coreRpcHandlers = {
     async (host, params) => {
       const method = 'pluginsInspect';
       const service = host.coreService;
-      const groups: Record<
-        string,
-        { name: string; tools: string[]; migration?: ReturnType<typeof host.registry.status> }
-      > = {};
+      const groups: BuiltinPluginGroups = {};
       for (const tool of host.registry.tools) {
         const id = tool.plugin!.id;
-        const group = (groups[id] ??= { name: builtinPluginNames[id] ?? id, tools: [] });
+        const group = (groups[id] ??= {
+          name: builtinPluginNames[id] ?? id,
+          tools: [],
+          categories: [],
+          details: [],
+        });
         group.tools.push(tool.name);
+        for (const category of tool.categories ?? [])
+          if (!group.categories!.includes(category)) group.categories!.push(category);
+        if (params.includeParameters && params.id === id)
+          group.details!.push({
+            name: tool.name,
+            description:
+              tool.description.length > 160
+                ? tool.description.slice(0, 159) + '…'
+                : tool.description,
+            parameters: Object.keys(tool.schema ?? {}),
+            readOnly: !!tool.annotations?.readOnlyHint,
+          });
       }
       for (const [id, group] of Object.entries(groups))
         group.migration = host.registry.status(id, group.tools);
@@ -339,6 +389,16 @@ export const coreRpcHandlers = {
       const service = host.coreService;
       return planPlugins(host.root, host.plugins, structuredClone(service.snapshot), params);
     },
+  ),
+  pluginsPack: defineRpcHandler(
+    z.object(pluginPackSchema.shape).extend({ inline: z.boolean().optional() }).passthrough(),
+    async (host, { inline, ...params }) =>
+      packPlugins(host.root, host.plugins, host.coreService.snapshot, params),
+  ),
+  pluginsInstall: defineRpcHandler(
+    z.object(pluginInstallSchema.shape).extend({ inline: z.boolean().optional() }).passthrough(),
+    async (host, { inline, ...params }) =>
+      installPlugins(host.root, host.plugins, structuredClone(host.coreService.snapshot), params),
   ),
   pluginsPackage: defineRpcHandler(
     z.object(pluginPackageSchema.shape).extend({ inline: z.boolean().optional() }).passthrough(),

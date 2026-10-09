@@ -8,14 +8,26 @@ export function CanvasViewport({
   onStageRef,
   onBackground,
   tip = '直接拖动 · Ctrl 多选 · 空白拖框 · Alt 平移',
+  header,
+  decorations,
+  fitRequest,
+  footerStart,
 }: {
   width: number;
   height: number;
   name: string;
+  /** Optional content for the viewer header (e.g. composition breadcrumb) replacing the name. `null` hides the header row. */
+  header?: React.ReactNode;
+  /** Studio shell: content at the start of the floating footer (object/command search). */
+  footerStart?: React.ReactNode;
   children: React.ReactNode;
   onStageRef: (element: HTMLDivElement | null) => void;
   onBackground?: () => void;
   tip?: string;
+  /** Extra overlays drawn in the canvas box (guides, rulers); receives the current display scale. */
+  decorations?: (scale: number) => React.ReactNode;
+  /** Changing this value resets the view to zoom-to-fit (e.g. after switching artboards). */
+  fitRequest?: unknown;
 }) {
   const viewport = useRef<HTMLDivElement>(null),
     [bounds, setBounds] = useState({ width: 800, height: 450 }),
@@ -26,6 +38,10 @@ export function CanvasViewport({
     panStart = useRef<{ x: number; y: number; origin: { x: number; y: number } } | undefined>(
       undefined,
     );
+  useEffect(() => {
+    setZoom('fit');
+    setPan({ x: 0, y: 0 });
+  }, [fitRequest]);
   useEffect(() => {
     const element = viewport.current!;
     const resize = new ResizeObserver((entries) => {
@@ -49,16 +65,20 @@ export function CanvasViewport({
     setPan({ x: 0, y: 0 });
   };
   return (
-    <div className="viewport-panel">
-      <div className="viewer-tab">
-        <span>
-          <Icon name="layers" size={14} />
-          {name}
-        </span>
+    <div className={`viewport-panel ${footerStart ? 'studio-viewport' : ''}`}>
+      {header !== null && (
+      <div className={`viewer-tab ${header ? 'with-header' : ''}`}>
+        {header ?? (
+          <span>
+            <Icon name="layers" size={14} />
+            {name}
+          </span>
+        )}
         <span className="viewer-dimensions">
           {width} × {height}
         </span>
       </div>
+      )}
       <div
         ref={viewport}
         className={`viewer-space ${checker ? 'checker' : ''}`}
@@ -92,6 +112,7 @@ export function CanvasViewport({
           ref={onStageRef}
         >
           {children}
+          {decorations?.(scale)}
           {safe && (
             <div className="safe-guides">
               <i />
@@ -100,57 +121,117 @@ export function CanvasViewport({
           )}
         </div>
       </div>
-      <div className="viewer-controls">
-        <div className="viewer-control-group">
-          <button title="缩小画布" onClick={() => changeZoom((scale * 100) / 1.2)}>
-            <Icon name="minus" size={14} />
-          </button>
-          <select
-            aria-label="画布缩放"
-            value={zoom}
-            onChange={(e) => {
-              setZoom(e.target.value === 'fit' ? 'fit' : Number(e.target.value));
-              setPan({ x: 0, y: 0 });
-            }}
-          >
-            <option value="fit">适应画布 · {Math.round(fit * 100)}%</option>
-            {[25, 50, 75, 100, 150, 200, 300, 400].map((v) => (
-              <option key={v} value={v}>
-                {v}%
-              </option>
-            ))}
-            {typeof zoom === 'number' && ![25, 50, 75, 100, 150, 200, 300, 400].includes(zoom) && (
-              <option value={zoom}>{Math.round(zoom)}%</option>
-            )}
-          </select>
-          <button title="放大画布" onClick={() => changeZoom(scale * 100 * 1.2)}>
-            <Icon name="plus" size={14} />
-          </button>
-          <button
-            title="适应画布"
-            onClick={() => {
-              setZoom('fit');
-              setPan({ x: 0, y: 0 });
-            }}
-          >
-            <Icon name="fit" size={14} />
-          </button>
+      {footerStart ? (
+        <div className="viewer-controls studio-viewer-controls">
+          <div className="viewer-footer-start">{footerStart}</div>
+          <div className="viewer-control-group">
+            <button
+              className={checker ? 'pressed' : ''}
+              title="透明网格"
+              aria-label="透明网格"
+              onClick={() => setChecker(!checker)}
+            >
+              <Icon name="grid" size={14} />
+            </button>
+            <button className={safe ? 'pressed' : ''} title="安全框" aria-label="安全框" onClick={() => setSafe(!safe)}>
+              <Icon name="rect" size={14} />
+            </button>
+          </div>
+          <div className="viewer-control-group viewer-chips">
+            <button
+              className={zoom === 'fit' ? 'pressed chip' : 'chip'}
+              title={`适应画布 · ${tip}`}
+              onClick={() => {
+                setZoom('fit');
+                setPan({ x: 0, y: 0 });
+              }}
+            >
+              适应
+            </button>
+            <span className="chip mono" title="画布尺寸">
+              {width} × {height}
+            </span>
+            <span className="chip zoom-chip">
+              <button title="缩小画布" aria-label="缩小画布" onClick={() => changeZoom((scale * 100) / 1.2)}>
+                <Icon name="minus" size={12} />
+              </button>
+              <select
+                aria-label="画布缩放"
+                value={zoom}
+                onChange={(e) => {
+                  setZoom(e.target.value === 'fit' ? 'fit' : Number(e.target.value));
+                  setPan({ x: 0, y: 0 });
+                }}
+              >
+                <option value="fit">{Math.round(fit * 100)}%</option>
+                {[25, 50, 75, 100, 150, 200, 300, 400].map((v) => (
+                  <option key={v} value={v}>
+                    {v}%
+                  </option>
+                ))}
+                {typeof zoom === 'number' && ![25, 50, 75, 100, 150, 200, 300, 400].includes(zoom) && (
+                  <option value={zoom}>{Math.round(zoom)}%</option>
+                )}
+              </select>
+              <button title="放大画布" aria-label="放大画布" onClick={() => changeZoom(scale * 100 * 1.2)}>
+                <Icon name="plus" size={12} />
+              </button>
+            </span>
+          </div>
         </div>
-        <div className="viewer-control-group">
-          <button
-            className={checker ? 'pressed' : ''}
-            title="透明网格"
-            onClick={() => setChecker(!checker)}
-          >
-            <Icon name="grid" size={14} />
-          </button>
-          <button className={safe ? 'pressed' : ''} title="安全框" onClick={() => setSafe(!safe)}>
-            <Icon name="rect" size={14} />
-          </button>
-          <span>SDR · sRGB</span>
-          <span className="view-tip">{tip}</span>
+      ) : (
+        <div className="viewer-controls">
+          <div className="viewer-control-group">
+            <button title="缩小画布" onClick={() => changeZoom((scale * 100) / 1.2)}>
+              <Icon name="minus" size={14} />
+            </button>
+            <select
+              aria-label="画布缩放"
+              value={zoom}
+              onChange={(e) => {
+                setZoom(e.target.value === 'fit' ? 'fit' : Number(e.target.value));
+                setPan({ x: 0, y: 0 });
+              }}
+            >
+              <option value="fit">适应画布 · {Math.round(fit * 100)}%</option>
+              {[25, 50, 75, 100, 150, 200, 300, 400].map((v) => (
+                <option key={v} value={v}>
+                  {v}%
+                </option>
+              ))}
+              {typeof zoom === 'number' && ![25, 50, 75, 100, 150, 200, 300, 400].includes(zoom) && (
+                <option value={zoom}>{Math.round(zoom)}%</option>
+              )}
+            </select>
+            <button title="放大画布" onClick={() => changeZoom(scale * 100 * 1.2)}>
+              <Icon name="plus" size={14} />
+            </button>
+            <button
+              title="适应画布"
+              onClick={() => {
+                setZoom('fit');
+                setPan({ x: 0, y: 0 });
+              }}
+            >
+              <Icon name="fit" size={14} />
+            </button>
+          </div>
+          <div className="viewer-control-group">
+            <button
+              className={checker ? 'pressed' : ''}
+              title="透明网格"
+              onClick={() => setChecker(!checker)}
+            >
+              <Icon name="grid" size={14} />
+            </button>
+            <button className={safe ? 'pressed' : ''} title="安全框" onClick={() => setSafe(!safe)}>
+              <Icon name="rect" size={14} />
+            </button>
+            <span>SDR · sRGB</span>
+            <span className="view-tip">{tip}</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

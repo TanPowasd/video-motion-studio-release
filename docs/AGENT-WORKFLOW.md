@@ -4,11 +4,11 @@ Vmotion 不接入模型。外部 agent 通过工程文件、CLI 或本地 MCP �
 
 平面特效批量创作使用 effects_guide/inspect/plan，支持稳定 ID、排序/复制时的关键帧迁移和图层本地扭曲/擦除。详见 [平面特效](EFFECTS2D.md)。
 
-MCP 默认只加载 10 个入口。用 tools_search/tool_schema 找到能力，再通过 tool_call 调用，或 tools_load 加载需要的直接工具；126 项内置能力保持可用。详见 [按需工具发现](AGENT-DISCOVERY.md)。需要原全量工具目录时启动 `mcp --tools all`。
+MCP 默认只加载 10 个入口。用 tools_search/tool_schema 找到能力，再通过 tool_call 调用，或 tools_load 加载需要的直接工具；147 项内置能力保持可用。详见 [按需工具发现](AGENT-DISCOVERY.md)。需要原全量工具目录时启动 `mcp --tools all`。
 
 建议流程：
 
-先调用 `agent_guide` 选择 animation/editing/3d/math/recovery 工作流。3D 画面优先使用 [4×4 矩阵与网格](MATRIX3D.md)，素材编排见 [Agent 媒体工作流](AGENT-MEDIA.md)，数值运算见 [线性代数](LINEAR-ALGEBRA.md)。
+先调用 `agent_guide` 选择 animation/editing/image/glyphs/3d/math/recovery 工作流。不依赖字体的文字使用 topic=glyphs：`glyphs_inspect project=true` 查看缺字，`glyphs_plan` 建库/改部件/拼字/指派图层后原样预检与提交，见 [偏旁部件拼字](GLYPHS.md)。海报、封面、缩略图等单帧图片使用 topic=image：`still_inspect` 读取预设/画板，`still_plan` 创建/标记/对齐并返回 planId，`project_preflight`/`project_apply` 原样提交（一次撤销），再用 `image_export` 带 revision 或 planId 导出 PNG/JPEG/WebP；超出 8192px/48MP 返回 RESOLUTION，需降低 scale 或尺寸，见 [静态图片](STILL-IMAGES.md)。3D 画面优先使用 [4×4 矩阵与网格](MATRIX3D.md)，素材编排见 [Agent 媒体工作流](AGENT-MEDIA.md)，数值运算见 [线性代数](LINEAR-ALGEBRA.md)。
 
 3D 穿插网格使用 `scene3DLayer` 和 `scene3d_render` 的原生深度/面 ID 图，定位真实可见对象后再检查最终合成帧；详见 [深度场景](DEPTH3D.md)。mesh_generate/mesh_import 生成资源与放置候选，默认用短 planId 预检/提交，避免重复读取大量顶点；详见 [网格与 OBJ](MESHES.md)。
 

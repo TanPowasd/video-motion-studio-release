@@ -1,3 +1,4 @@
+import { renderSizeIssue } from './still-schema.js';
 import {
   GlobalFonts,
   ImageData,
@@ -48,6 +49,8 @@ import { temporalActive } from './temporal-effect.js';
 import { ThemeResolver } from './theme.js';
 import { frameSeconds } from './time.js';
 import { TypographyLayout, invalidateTypographyFonts } from './typography.js';
+import { GlyphSetResolver } from './glyphs/glyph-resources.js';
+import { MixedTextMeasurer, glyphSourceFor, type GlyphTextSource } from './glyphs/glyph-text.js';
 import { shapeBounds, shapePath } from './vector.js';
 
 export type RenderDriverScope = Pick<DriverContext, 'width' | 'height' | 'duration'> & {
@@ -69,6 +72,7 @@ export class Renderer {
 
   readonly surfaces = new SurfacePool();
   readonly typography: TypographyLayout;
+  readonly glyphSets: GlyphSetResolver;
   readonly geometry: GeometryCache<ReturnType<typeof shapePath>>;
   readonly themes: ThemeResolver;
   readonly templates: TemplateResolver;
@@ -79,6 +83,7 @@ export class Renderer {
     return {
       ...this.timings,
       typography: this.typography.report(),
+      glyphSets: this.glyphSets.report(),
       geometry: this.geometry.report(),
       themes: this.themes.report(),
       templates: this.templates.report(),
@@ -160,6 +165,7 @@ export class Renderer {
     });
     const budget = options.graphicsCache === false ? 0 : 8 * 1024 * 1024;
     this.typography = new TypographyLayout(budget);
+    this.glyphSets = new GlyphSetResolver(options.resourceCache === false ? 0 : 4 * 1024 * 1024);
     this.geometry = new GeometryCache(budget);
     this.themes = new ThemeResolver(options.resourceCache === false ? 0 : 4 * 1024 * 1024);
     this.templates = new TemplateResolver(options.resourceCache === false ? 0 : 8 * 1024 * 1024);
@@ -227,8 +233,8 @@ export class Renderer {
       throw new VmotionError('FRAME_RANGE', 'Frame must be finite and nonnegative');
     const width = Math.round(options.width ?? snapshot.project.width),
       height = Math.round(options.height ?? snapshot.project.height);
-    if (width < 16 || height < 16 || width > 3840 || height > 2160)
-      throw new VmotionError('RESOLUTION', 'Motion blur resolution must be within UHD 4K');
+    const blurIssue = renderSizeIssue(width, height, isStillTarget(snapshot, options.sceneId));
+    if (blurIssue) throw new VmotionError('RESOLUTION', `Motion blur: ${blurIssue}`);
     const accumulator = new Float32Array(width * height * 4),
       linear = Array.from({ length: 256 }, (_, v) => {
         const c = v / 255;
@@ -326,8 +332,8 @@ export class Renderer {
       throw new VmotionError('FRAME_RANGE', 'Frame must be finite and nonnegative');
     const width = Math.round(options.width ?? snapshot.project.width),
       height = Math.round(options.height ?? snapshot.project.height);
-    if (width < 16 || height < 16 || width > 3840 || height > 2160)
-      throw new VmotionError('RESOLUTION', 'Render size must be between 16px and UHD 4K');
+    const sizeIssue = renderSizeIssue(width, height, isStillTarget(snapshot, options.sceneId));
+    if (sizeIssue) throw new VmotionError('RESOLUTION', sizeIssue);
     for (const asset of snapshot.project.assets.filter((a) => a.type === 'font')) {
       const file = path.resolve(this.root, asset.path);
       if (!this.fonts.has(file)) {
@@ -1131,7 +1137,7 @@ export class Renderer {
           let polygons: InteractionLayer['contentPolygons'],
             textLayout: InteractionLayer['textLayout'];
           if (n.type === 'text') {
-            const text = this.textGeometry(n, localFrame);
+            const text = this.textGeometry(n, localFrame, snapshot);
             textLayout = text.metrics;
             const regions = text.runs
               .filter((run) => run.alpha >= 0.05 && run.text.trim())
@@ -1397,29 +1403,29 @@ export class Renderer {
     this.timings.componentMs += performance.now() - started;
     return composeGenerated(nodes, n);
   }
-  textGeometry(n: Node, frame = 0) {
-    const ctx = createCanvas(1, 1).getContext('2d');
-    if (n.pathText || n.textAnimators.length) return this.typography.layout(ctx, n, frame);
-    const lines = this.textLines(ctx, n),
+  /** Glyph-set source for a text node; snapshot gives access to project glyph sets. */
+  glyphSource(n: Node, snapshot?: Pick<Snapshot, 'files'>): GlyphTextSource {
+    return glyphSourceFor(n, snapshot, this.glyphSets);
+  }
+  textGeometry(n: Node, frame = 0, snapshot?: Pick<Snapshot, 'files'>) {
+    const ctx = createCanvas(1, 1).getContext('2d'),
+      glyphs = this.glyphSource(n, snapshot);
+    if (n.pathText || n.textAnimators.length) return this.typography.layout(ctx, n, frame, glyphs);
+    const lines = this.textLines(ctx, n, glyphs),
       rendered = lines.filter((_, i) => i * n.fontSize * n.lineHeight < n.height),
-      full = n.reveal === 1 ? lines : this.textLines(ctx, { ...n, reveal: 1 });
-    const runs = this.textRuns(ctx, n, frame).map((run, index) => {
+      full = n.reveal === 1 ? lines : this.textLines(ctx, { ...n, reveal: 1 }, glyphs);
+    const runs = this.textRuns(ctx, n, frame, glyphs).map((run, index) => {
       ctx.font = nativeTextFont(n.fontWeight, n.fontSize, n.fontFamily);
       ctx.textAlign = 'left';
       ctx.textBaseline = run.baseline;
-      const m = ctx.measureText(run.text);
+      const measure = new MixedTextMeasurer(ctx, glyphs, n.fontSize);
       return {
         ...run,
         index,
         wordIndex: -1,
         lineIndex: 0,
-        width: m.width,
-        box: {
-          x: -m.actualBoundingBoxLeft,
-          y: -m.actualBoundingBoxAscent,
-          width: Math.max(m.width, m.actualBoundingBoxRight) + m.actualBoundingBoxLeft,
-          height: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent,
-        },
+        width: measure.width(run.text),
+        box: measure.box(run.text, run.baseline),
       };
     });
     return {
@@ -1433,12 +1439,14 @@ export class Renderer {
       },
     };
   }
-  private textLines(ctx: SKRSContext2D, n: Node) {
-    return this.typography.lines(ctx, n);
+  private textLines(ctx: SKRSContext2D, n: Node, glyphs?: GlyphTextSource) {
+    return this.typography.lines(ctx, n, glyphs);
   }
-  private textRuns(ctx: SKRSContext2D, n: Node, frame: number) {
-    if (n.pathText || n.textAnimators.length) return this.typography.layout(ctx, n, frame).runs;
-    const lines = this.textLines(ctx, n);
+  private textRuns(ctx: SKRSContext2D, n: Node, frame: number, glyphs?: GlyphTextSource) {
+    if (n.pathText || n.textAnimators.length)
+      return this.typography.layout(ctx, n, frame, glyphs).runs;
+    const lines = this.textLines(ctx, n, glyphs),
+      measure = new MixedTextMeasurer(ctx, glyphs ?? { fallback: 'font' }, n.fontSize);
     const runs: Array<{
       text: string;
       x: number;
@@ -1461,7 +1469,7 @@ export class Renderer {
             }).segment(line),
             (s) => s.segment,
           ),
-          lineWidth = ctx.measureText(line).width,
+          lineWidth = measure.width(line),
           origin =
             n.align === 'center'
               ? (n.width - lineWidth) / 2
@@ -1475,7 +1483,7 @@ export class Renderer {
               Math.min(1, (frame - motion.start - unitIndex++ * motion.stagger) / motion.duration),
             ),
             e = 1 - (1 - p) ** 3,
-            position = ctx.measureText(prefix).width;
+            position = measure.width(prefix);
           prefix += unit;
           if (p === 0) continue;
           runs.push({
@@ -1491,7 +1499,7 @@ export class Renderer {
         }
         return;
       }
-      const width = ctx.measureText(line).width;
+      const width = measure.width(line);
       runs.push({
         text: line,
         x: n.align === 'center' ? (n.width - width) / 2 : n.align === 'right' ? n.width - width : 0,
@@ -1505,8 +1513,10 @@ export class Renderer {
     });
     return runs;
   }
-  private text(ctx: SKRSContext2D, n: Node, frame: number) {
-    const runs = this.textRuns(ctx, n, frame);
+  private text(ctx: SKRSContext2D, n: Node, frame: number, snapshot?: Pick<Snapshot, 'files'>) {
+    const glyphs = this.glyphSource(n, snapshot),
+      runs = this.textRuns(ctx, n, frame, glyphs),
+      measure = new MixedTextMeasurer(ctx, glyphs, n.fontSize);
     ctx.textAlign = 'left';
     for (const run of runs) {
       ctx.save();
@@ -1516,8 +1526,7 @@ export class Renderer {
       ctx.scale(run.scaleX, run.scaleY);
       ctx.textBaseline = run.baseline;
       if (run.fill) ctx.fillStyle = run.fill;
-      if (n.strokeWidth) ctx.strokeText(run.text, 0, 0);
-      ctx.fillText(run.text, 0, 0);
+      measure.draw(run.text, n.strokeWidth);
       ctx.restore();
     }
   }
@@ -1571,6 +1580,7 @@ export class Renderer {
     this.templates.clear();
     this.effectGraphs.clear();
     this.typography.clear();
+    this.glyphSets.clear();
     this.geometry.clear();
     for (const controller of this.audioControllers.values()) controller.abort();
     await Promise.allSettled(this.audioAnalysis.values());
@@ -1582,4 +1592,10 @@ export class Renderer {
     await this.media.clear();
     this.surfaces.clear();
   }
+}
+
+/** Still artboards (and still projects rendered through their sequence) use the still budget. */
+export function isStillTarget(snapshot: Snapshot, sceneId?: string) {
+  if (sceneId) return !!snapshot.scenes.find((s) => s.id === sceneId)?.still;
+  return snapshot.project.kind === 'still';
 }

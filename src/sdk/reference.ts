@@ -43,7 +43,7 @@ export const animationReference = {
     {
       name: 'vmotion.audio / builtin registry',
       purpose:
-        'All 12 sound/music/mix/timeline/evidence tools use the audio builtin module and the same host candidate/media guards. Eighteen modules dispatch all 137 capabilities through a validated tool/method/dependency registry; core/recovery/cache/review use shared host services. project_diagnostics pages compact diagnostic/conflict/pending-file evidence with detail opt-in; queries preserve history and source. audio_timeline pages 24 clips by default with exact rational sample clocks; includeAll opts into full data.',
+        'All 12 sound/music/mix/timeline/evidence tools use the audio builtin module and the same host candidate/media guards. Eighteen modules dispatch all 147 capabilities through a validated tool/method/dependency registry; core/recovery/cache/review use shared host services. project_diagnostics pages compact diagnostic/conflict/pending-file evidence with detail opt-in; queries preserve history and source. audio_timeline pages 24 clips by default with exact rational sample clocks; includeAll opts into full data.',
     },
     {
       name: 'vmotion.editing / vmotion.render',
@@ -61,9 +61,9 @@ export const animationReference = {
         'Drawing edit/publication/native evidence, generated composition structure/overrides/shared scene instances and background tracking all use builtin modules with shared source/history/task guards. assets_query returns paged asset summaries; drawing_query pages layers/strokes and explicit pressure-point ranges. Full documents, metadata and native media remain opt-in.',
     },
     {
-      name: 'definePlugin / definePluginTool / plugins_inspect / plugins_plan',
+      name: 'definePlugin / definePluginTool / plugins_inspect / plugins_plan / plugins_pack / plugins_install',
       purpose:
-        'Project-local typed plugin tools and reusable component/effect/motion/theme/sound/template resources. Semantic dependencies/API/IDs are checked. Explicit bounded context and deterministic exact candidates reuse worker/cache/preflight/apply/undo; MCP schemas/discovery refresh with manifests. Design is the first extracted builtin module, other host modules remain to migrate. See docs/PLUGINS.md.',
+        'Project-local typed plugin tools and reusable component/effect/motion/theme/sound/template resources. Semantic dependencies/API/IDs are checked. Explicit bounded context and deterministic exact candidates reuse worker/cache/preflight/apply/undo; MCP schemas/discovery refresh with manifests. Portable deterministic .vmplugin bundles (per-file sha256, bundled plugin dependencies) install from folders/bundles/explicit Git refs as exact candidates. Design is the first extracted builtin module, other host modules remain to migrate. See docs/PLUGINS.md.',
     },
     {
       name: 'bindTheme / ThemeResolver / template_inspect / template_plan',

@@ -14,9 +14,13 @@ export const agentOnlyMethods = new Set([
   'agentToolInvoke',
   'pluginCatalog',
 ]);
+/** Human-only controls: an external agent must not be able to lift its own pause. */
+export const studioOnlyMethods = new Set(['agentHold']);
 export function assertSurfaceMethod(surface: 'studio' | 'agent' | 'legacy', method: unknown) {
   if (typeof method !== 'string')
     throw new VmotionError('METHOD_NOT_FOUND', 'RPC method must be a string');
+  if (surface !== 'studio' && studioOnlyMethods.has(method))
+    throw new VmotionError('SURFACE_METHOD', 'This control belongs to the Studio UI');
   if (surface === 'studio' && agentOnlyMethods.has(method))
     throw new VmotionError('SURFACE_METHOD', 'This automation method belongs to /api/agent/rpc');
 }

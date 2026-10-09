@@ -40,3 +40,38 @@ export function definePlugin<T extends Record<string, PluginToolImplementation<a
 }) {
   return plugin;
 }
+export type { PluginBundleManifest, PluginManifest } from '../core/plugin-schema.js';
+/** Result summary of plugins_install (candidate.summary.install). */
+export interface PluginInstallSummary {
+  origin: { type: 'bundle' | 'folder' | 'git' | string; [key: string]: unknown };
+  digest: string;
+  root: string;
+  plugins: Array<{
+    id: string;
+    name: string;
+    role: 'root' | 'dependency';
+    change: 'install' | 'upgrade' | 'downgrade' | 'reinstall' | 'unchanged';
+    from?: string;
+    to: string;
+    source: string;
+    previousSource?: string;
+    contentHash: string;
+    enabled: boolean;
+    pinned: boolean;
+    files: { added: number; changed: number; unchanged: number; stale: string[] };
+    tools: { added: string[]; removed: string[] };
+    contributions: { added: string[]; removed: string[] };
+    dependencies?: Record<string, { from: string | null; to: string | null }>;
+  }>;
+  dependencies: Array<{
+    from: string;
+    id: string;
+    range: string;
+    status: 'builtin' | 'installed' | 'enable' | 'bundled' | 'upgrade' | 'missing' | 'conflict';
+    version?: string;
+    bundledVersion?: string;
+    installedVersion?: string;
+  }>;
+  skipped: string[];
+  fileEdits: number;
+}

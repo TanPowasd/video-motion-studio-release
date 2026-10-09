@@ -11,6 +11,7 @@ import {
   planGraphics,
 } from '../service/graphics.js';
 import { applyOperations } from '../service/operations.js';
+import { glyphsInspectSchema, glyphsPlanSchema, inspectGlyphs, planGlyphs } from '../service/glyphs.js';
 import { createRepeater, repeatCreateSchema } from '../service/repeater.js';
 import { compositionStructure } from '../service/structure.js';
 import { bakeVector, vectorBakeSchema } from '../service/vector.js';
@@ -30,9 +31,41 @@ export const graphicsPlugin: BuiltinPluginModule = {
     'vectorBake',
     'repeatDescribe',
     'repeatCreate',
+    'glyphsInspect',
+    'glyphsPlan',
   ]),
   tools(): ToolDefinition[] {
     return [
+      {
+        name: 'glyphs_inspect',
+        description:
+          'Radical-composed glyph sets (偏旁部件拼字, no font file): list project/built-in sets, components and glyphs (paginated), coverage report for text or the whole project (text layers + captions, missing chars with locations), per-char IDS composition, and live IDS expression preview with split/inner adjustments. preview="chars" renders a native PNG sheet (media block, no Base64 in JSON).',
+        method: 'glyphsInspect',
+        schema: glyphsInspectSchema.shape,
+        categories: ['vector', 'glyphs'],
+        keywords: '字形 字形库 偏旁 部件 拼字 IDS 覆盖率 缺字 预览 glyph radical component coverage typeface',
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false,
+        },
+      },
+      {
+        name: 'glyphs_plan',
+        description:
+          'Plan glyph-set edits as one exact candidate: create a set (extends or copyFrom builtin:demo), set global stroke style/metrics, add/update/remove components (stroke centerlines with order or fill outlines, preferred proportions, surround inner box), glyph IDS (⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻, nested, [ratio] params, per-node adjust) or explicit paths, operator defaults, kerning, and assign a set/fallback (font|none|tofu) to text layers. Returns a preview sheet of changed chars and planId for project_preflight/project_apply (one undo).',
+        method: 'glyphsPlan',
+        schema: glyphsPlanSchema.shape,
+        categories: ['vector', 'glyphs'],
+        keywords: '新建字形库 部件 偏旁 拼字 IDS 笔画 粗细 倾斜 圆角 字距 字形 glyph radical component stroke slant kerning',
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false,
+        },
+      },
       {
         name: 'graphics_inspect',
         description:
@@ -139,6 +172,25 @@ export const graphicsPlugin: BuiltinPluginModule = {
 };
 
 export const graphicsRpcHandlers = {
+  glyphsInspect: defineRpcHandler(
+    z.object(glyphsInspectSchema.shape).extend({ inline: z.boolean().optional() }).passthrough(),
+    async (host, params) => {
+      const { inline, ...request } = params as Record<string, unknown>;
+      return inspectGlyphs(
+        { root: host.root, glyphSets: host.renderer.glyphSets },
+        host.snapshot,
+        request,
+        inline === true,
+      );
+    },
+  ),
+  glyphsPlan: defineRpcHandler(
+    z.object(glyphsPlanSchema.shape).extend({ inline: z.boolean().optional() }).passthrough(),
+    async (host, params) => {
+      const { inline, ...request } = params as Record<string, unknown>;
+      return planGlyphs({ root: host.root }, structuredClone(host.snapshot), request, inline === true);
+    },
+  ),
   graphicsInspect: defineRpcHandler(
     z.object(graphicsInspectSchema.shape).extend({ inline: z.boolean().optional() }).passthrough(),
     async (host, params) => {

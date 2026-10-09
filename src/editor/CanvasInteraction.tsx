@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { layerBox, snapDelta, snapTargets, unionBox, type SnapTargets } from '../core/still.js';
 import {
+  isDescendant,
   canvasTarget,
   marqueeLayers,
   movingLayers,
@@ -11,6 +13,7 @@ import {
   type InteractionGraph,
   type InteractionLayer,
   type Point,
+  type Bounds,
 } from '../core/interaction.js';
 
 type Gesture = {
@@ -27,6 +30,7 @@ type Gesture = {
   layers: InteractionLayer[];
   toggle?: string;
   additive: boolean;
+  snap?: { box: Bounds; targets: SnapTargets };
 };
 export function CanvasInteraction({
   graph,
@@ -39,6 +43,7 @@ export function CanvasInteraction({
   onDraft,
   onCommit,
   onEnter,
+  snapBoxes,
 }: {
   graph: InteractionGraph;
   selection: string[];
@@ -50,10 +55,13 @@ export function CanvasInteraction({
   onDraft: (draft: CompositionDraft[] | undefined) => void;
   onCommit: (draft: CompositionDraft[], revision: string) => Promise<unknown>;
   onEnter: (id: string) => void;
+  /** When set, moves snap to these boxes' edges/centres and to the other layers (image mode). */
+  snapBoxes?: Bounds[];
 }) {
   const gesture = useRef<Gesture | undefined>(undefined),
     [delta, setDelta] = useState<Point>(),
     [box, setBox] = useState<{ a: Point; b: Point }>(),
+    [guides, setGuides] = useState<{ x?: number; y?: number }>(),
     [committing, setCommitting] = useState(false);
   const point = (e: React.PointerEvent): Point => {
     const bounds = stage.current!.getBoundingClientRect();
@@ -69,6 +77,7 @@ export function CanvasInteraction({
     if (g) onSelect(g.before);
     setDelta(undefined);
     setBox(undefined);
+    setGuides(undefined);
     onDraft(undefined);
   };
   const cancelRef = useRef(cancel);
@@ -123,6 +132,14 @@ export function CanvasInteraction({
       if (Math.abs(g.delta.x) >= Math.abs(g.delta.y)) g.delta.y = 0;
       else g.delta.x = 0;
     }
+    if (g.snap && !e.ctrlKey && !e.metaKey) {
+      const bounds = stage.current!.getBoundingClientRect(),
+        snapped = snapDelta(g.snap.box, g.delta, g.snap.targets, (6 * width) / bounds.width);
+      g.delta = e.shiftKey
+        ? { x: g.delta.x ? snapped.delta.x : 0, y: g.delta.y ? snapped.delta.y : 0 }
+        : snapped.delta;
+      setGuides(snapped.guides);
+    }
     setDelta(g.delta);
     onDraft(draft(g));
   };
@@ -158,6 +175,24 @@ export function CanvasInteraction({
           toggle: hit && control && selection.includes(hit.node.id) ? hit.node.id : undefined,
           additive: control,
         };
+        if (hit && snapBoxes) {
+          const moving = gesture.current.layers,
+            box = unionBox(moving.map(layerBox));
+          if (box)
+            gesture.current.snap = {
+              box,
+              targets: snapTargets([
+                ...snapBoxes,
+                ...graph.layers
+                  .filter(
+                    (l) =>
+                      !l.container &&
+                      !moving.some((m) => m === l || isDescendant(graph.layers, l, m)),
+                  )
+                  .map(layerBox),
+              ]),
+            };
+        }
         e.currentTarget.setPointerCapture(e.pointerId);
       }}
       onPointerMove={(e) => {
@@ -172,6 +207,7 @@ export function CanvasInteraction({
         e.stopPropagation();
         move(e);
         gesture.current = undefined;
+        setGuides(undefined);
         if (g.capture.hasPointerCapture(e.pointerId)) g.capture.releasePointerCapture(e.pointerId);
         if (!g.moved || Math.hypot(e.clientX - g.client.x, e.clientY - g.client.y) < 3) {
           if (g.toggle) onSelect(toggleSelection(g.before, g.toggle));
@@ -234,6 +270,12 @@ export function CanvasInteraction({
           </div>
         );
       })}
+      {guides?.x !== undefined && (
+        <div className="snap-guide v" style={{ left: `${(guides.x / width) * 100}%` }} />
+      )}
+      {guides?.y !== undefined && (
+        <div className="snap-guide h" style={{ top: `${(guides.y / height) * 100}%` }} />
+      )}
       {box && (
         <div
           className="canvas-marquee"
