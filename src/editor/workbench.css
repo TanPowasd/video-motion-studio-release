@@ -713,28 +713,28 @@
   border-radius: 3px 3px 0 0;
 }
 .handle {
+  /* Hit area (16px, screen space) centred on the corner; the visible square is ::before.
+     Above .stage-overlays (z-index 5) so the context toolbar / AI chips never cover it. */
   position: absolute;
+  z-index: 6;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  touch-action: none;
+}
+.handle::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 4px;
   width: 6px;
   height: 6px;
   background: var(--vm-bg-4);
   border: 1px solid var(--vm-accent-text);
-  transform: translate(-50%, -50%);
 }
-.h0 {
-  left: 0;
-  top: 0;
-}
-.h1 {
-  left: 100%;
-  top: 0;
-}
-.h2 {
-  left: 0;
-  top: 100%;
-}
-.h3 {
-  left: 100%;
-  top: 100%;
+.canvas-picking.dragging .handle {
+  pointer-events: none;
 }
 .stroke-overlay {
   pointer-events: none;

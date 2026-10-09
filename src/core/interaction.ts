@@ -280,3 +280,159 @@ export function movePatch(node: Node, frame: number, delta: Point): Partial<Node
   }
   return { x, y, ...(keyed ? { animations } : {}) };
 }
+
+/** Corner handles of a selection box, in the order the canvas draws them: TL, TR, BL, BR. */
+export type HandleIndex = 0 | 1 | 2 | 3;
+/** Screen-pixel radius around a selection handle / border that grabs it. */
+export const HANDLE_HIT_PX = 8;
+export function handleCorners(layer: InteractionLayer): Point[] {
+  const b = layer.bounds;
+  return [
+    { x: b.x, y: b.y },
+    { x: b.x + b.width, y: b.y },
+    { x: b.x, y: b.y + b.height },
+    { x: b.x + b.width, y: b.y + b.height },
+  ];
+}
+export type SelectionHit =
+  | { kind: 'handle'; layer: InteractionLayer; handle: HandleIndex }
+  | { kind: 'frame'; layer: InteractionLayer };
+/**
+ * Hit-tests the selection chrome (corner handles, then the box border) of the selected
+ * layers. It runs before layer picking, so a handle or border of the selected layer always
+ * wins over whatever layer lies under or over it. `radius` is in canvas units (convert the
+ * screen-pixel radius with the current zoom). Clips are ignored: the chrome is drawn
+ * unclipped, so it is grabbable where it is drawn. On a box smaller than four radii the
+ * part of a handle zone that falls inside the box shrinks, so the box body stays draggable.
+ */
+export function selectionHit(
+  layers: InteractionLayer[],
+  selected: string[],
+  p: Point,
+  radius: number,
+): SelectionHit | undefined {
+  const chosen = layers.filter((l) => selected.includes(l.node.id)).reverse();
+  let best: { layer: InteractionLayer; handle: HandleIndex; distance: number } | undefined;
+  for (const layer of chosen) {
+    const q = localPoint(layer.matrix, p);
+    if (!q) continue;
+    const m = layer.matrix,
+      sx = Math.hypot(m[0], m[1]),
+      sy = Math.hypot(m[2], m[3]),
+      inside = within(layer.bounds, q),
+      side = Math.min(layer.bounds.width * sx, layer.bounds.height * sy),
+      reach = inside && side < 4 * radius ? side / 4 : radius;
+    handleCorners(layer).forEach((corner, i) => {
+      const c = transform(m, corner),
+        distance = Math.hypot(c.x - p.x, c.y - p.y);
+      if (distance <= reach && (!best || distance < best.distance - 1e-9))
+        best = { layer, handle: i as HandleIndex, distance };
+    });
+  }
+  if (best) return { kind: 'handle', layer: best.layer, handle: best.handle };
+  for (const layer of chosen) {
+    const q = localPoint(layer.matrix, p);
+    if (!q) continue;
+    const m = layer.matrix,
+      b = layer.bounds,
+      sx = Math.max(1e-6, Math.hypot(m[0], m[1])),
+      sy = Math.max(1e-6, Math.hypot(m[2], m[3])),
+      rx = radius / sx,
+      ry = radius / sy;
+    if (!within(b, q, Math.max(rx, ry))) continue;
+    const insideX = q.x >= b.x - rx && q.x <= b.x + b.width + rx,
+      insideY = q.y >= b.y - ry && q.y <= b.y + b.height + ry,
+      nearX = Math.min(Math.abs(q.x - b.x), Math.abs(q.x - b.x - b.width)) <= rx,
+      nearY = Math.min(Math.abs(q.y - b.y), Math.abs(q.y - b.y - b.height)) <= ry;
+    // Thin layers: their whole body is "border", which is still the selected layer.
+    if ((nearX && insideY) || (nearY && insideX)) return { kind: 'frame', layer };
+  }
+}
+
+export type ResizeResult = {
+  patch: Partial<Node>;
+  /** Local-space scale about `anchor` that previews the result: world' = matrix · S(anchor). */
+  scale: Point;
+  anchor: Point;
+};
+const round2 = (v: number) => Math.round(v * 100) / 100;
+const SIZED = new Set<string>(['rect', 'ellipse', 'image', 'video']);
+/**
+ * Resizes a layer by dragging one corner handle to world point `p`; the opposite corner stays
+ * put. Shapes with an intrinsic box (rect, ellipse, image…) change width/height; everything
+ * else (text, groups, components, paths) changes scaleX/scaleY. `keepAspect` locks the ratio.
+ * Animated properties get a key at `frame`, like movePatch.
+ */
+export function resizePatch(
+  layer: InteractionLayer,
+  frame: number,
+  handle: HandleIndex,
+  p: Point,
+  keepAspect = false,
+): ResizeResult | undefined {
+  const corners = handleCorners(layer),
+    corner = corners[handle],
+    anchor = corners[3 - handle],
+    q = localPoint(layer.matrix, p),
+    spanX = corner.x - anchor.x,
+    spanY = corner.y - anchor.y;
+  if (!q || Math.abs(spanX) < 1e-9 || Math.abs(spanY) < 1e-9) return;
+  // Never flip or collapse: at least one canvas unit along each local axis.
+  const m = layer.matrix,
+    minX = 1 / Math.max(1e-6, Math.hypot(m[0], m[1]) * Math.abs(spanX)),
+    minY = 1 / Math.max(1e-6, Math.hypot(m[2], m[3]) * Math.abs(spanY));
+  let sx = Math.max(minX, (q.x - anchor.x) / spanX),
+    sy = Math.max(minY, (q.y - anchor.y) / spanY);
+  if (keepAspect) {
+    const s = Math.max(sx, sy);
+    sx = sy = s;
+  }
+  const node = evaluateNode(layer.node, frame),
+    b = layer.bounds,
+    sized =
+      SIZED.has(node.type) &&
+      Math.abs(b.x) < 1e-6 &&
+      Math.abs(b.y) < 1e-6 &&
+      Math.abs(b.width - node.width) < 1e-3 &&
+      Math.abs(b.height - node.height) < 1e-3;
+  const next: Node = sized
+    ? { ...node, width: node.width * sx, height: node.height * sy }
+    : { ...node, scaleX: node.scaleX * sx, scaleY: node.scaleY * sy };
+  // Where the anchor lands with the new size/scale and the old position, then shift x/y so it
+  // lands back on its current world position.
+  const anchorLocal = sized ? { x: anchor.x * sx, y: anchor.y * sy } : anchor,
+    want = transform(layer.matrix, anchor),
+    got = transform(multiply(layer.parentMatrix, nodeMatrix(next)), anchorLocal),
+    shift = parentDelta(layer, { x: want.x - got.x, y: want.y - got.y });
+  if (!shift) return;
+  const values: Partial<Record<'x' | 'y' | 'width' | 'height' | 'scaleX' | 'scaleY', number>> = {
+    x: round2(node.x + shift.x),
+    y: round2(node.y + shift.y),
+    ...(sized
+      ? { width: round2(next.width), height: round2(next.height) }
+      : {
+          scaleX: Math.round(next.scaleX * 10000) / 10000,
+          scaleY: Math.round(next.scaleY * 10000) / 10000,
+        }),
+  };
+  return { patch: keyedPatch(layer.node, frame, values), scale: { x: sx, y: sy }, anchor };
+}
+function keyedPatch(
+  node: Node,
+  frame: number,
+  values: Partial<Record<string, number>>,
+): Partial<Node> {
+  const animations = structuredClone(node.animations);
+  let keyed = false;
+  for (const [property, value] of Object.entries(values)) {
+    const channel = animations.find((a) => a.property === property);
+    if (channel && value !== undefined) {
+      const keyFrame = Math.round(frame);
+      channel.keys = channel.keys.filter((k) => k.frame !== keyFrame);
+      channel.keys.push({ frame: keyFrame, value, easing: 'easeInOut' });
+      channel.keys.sort((a, b) => a.frame - b.frame);
+      keyed = true;
+    }
+  }
+  return { ...(values as Partial<Node>), ...(keyed ? { animations } : {}) };
+}

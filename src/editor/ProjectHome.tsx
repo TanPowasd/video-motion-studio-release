@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import './desktop-api.js';
 import { Icon } from './Icons.js';
 import { McpConnectionButton } from './McpConnection.js';
+import { ThemeSwitch } from './ThemeSwitch.js';
 import { projectCreationSchema, type ProjectHome as HomeData } from '../core/project-creation.js';
 import './project-home.css';
 import { NewImageDialog } from './still/NewImageDialog.js';
@@ -390,7 +391,10 @@ export function ProjectHome() {
           <span className="brand-name">Vmotion</span>
         </div>
         <span>本地创作工作站</span>
-        <McpConnectionButton />
+        <div className="project-home-tools">
+          <ThemeSwitch compact />
+          <McpConnectionButton />
+        </div>
       </header>
       <div className="project-home-content">
         <section className="project-home-intro">

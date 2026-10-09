@@ -1,6 +1,8 @@
 import { Suspense, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import './theme.css';
+import { startTheme } from './theme.js';
+startTheme();
 import { ProjectHome } from './ProjectHome.js';
 import { McpConnection } from './McpConnection.js';
 import { Workbench } from './Workbench.js';

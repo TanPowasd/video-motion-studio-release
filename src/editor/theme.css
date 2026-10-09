@@ -5,7 +5,15 @@
  * must reference these tokens instead of literal values so the whole product stays
  * visually consistent (and can be re-themed from one place).
  */
-:root {
+/*
+ * Colour tokens. The resolved theme is set on <html> as data-theme="dark"|"light"
+ * (theme.ts + the inline boot script in index.html). Dark is the fallback when no
+ * attribute is present. Meaning is fixed across themes: coral = human edits and the
+ * primary action, mint = changes made by external AI.
+ * The video frame itself never follows the theme; only the chrome around it does.
+ */
+:root,
+:root[data-theme='dark'] {
   color-scheme: dark;
 
   /* ── Surfaces (dark graphite, faint cool tint) ─────────────────────── */
@@ -29,11 +37,16 @@
   --vm-text-4: #66645f; /* faint / disabled */
 
   /* ── Accent & semantic ─────────────────────────────────────────────── */
-  --vm-accent: #ff8a5b; /* coral: human edits, selection, primary action */
-  --vm-accent-hover: #ff9d74;
-  --vm-accent-text: #ffa781; /* accent used as text on dark surfaces */
-  --vm-accent-bg: #3a2620; /* selected rows / pressed toggles */
-  --vm-accent-on: #1f120c; /* text on solid accent */
+  --vm-coral: #ff8a5b; /* human edits, selection, primary action */
+  --vm-coral-hover: #ff9d74;
+  --vm-coral-text: #ffa781; /* coral used as text on app surfaces */
+  --vm-coral-bg: #3a2620; /* selected rows / pressed toggles */
+  --vm-coral-on: #1f120c; /* text on solid coral */
+  --vm-accent: var(--vm-coral);
+  --vm-accent-hover: var(--vm-coral-hover);
+  --vm-accent-text: var(--vm-coral-text);
+  --vm-accent-bg: var(--vm-coral-bg);
+  --vm-accent-on: var(--vm-coral-on);
   --vm-purple: #a28bf7; /* animation layers / keyframes */
   --vm-purple-bg: #2c2550;
   --vm-success: #7be0c3;
@@ -47,11 +60,170 @@
   --vm-ai-bg: #183129;
   --vm-ai-line: color-mix(in srgb, #7be0c3 55%, transparent);
   --vm-human: var(--vm-accent);
-  --vm-gap: 12px; /* gap between floating panels */
   --vm-orange: #f2a65e; /* music workspace identity */
+  --vm-orange-hover: #f6b97a;
+  --vm-orange-text: #f7c08a;
+  --vm-orange-bg: #3a2816;
   --vm-orange-on: #1d1308;
+  --vm-gold: #ffc56b; /* logo gradient stop */
   --vm-key: #f3c45b; /* keyframe diamonds */
   --vm-playhead: #ff8a5b;
+  --vm-on-color: #ffffff; /* text/marks on saturated fills (badges, logo) */
+  --vm-on-color-ring: rgb(255 255 255 / 0.85);
+  --vm-on-media: #f4f1ea; /* text drawn over video thumbnails/frames (same in both themes) */
+  --vm-ink-mix: 0%; /* how much ink to mix into data colours (track/pattern colours) used as text */
+  --vm-fill-active: #32343b; /* active list row (= bg-5 in dark) */
+  --vm-fill-selected: #3d4048; /* selected card (= bg-6 in dark) */
+  --vm-fill-raised: #32343b; /* raised secondary button fill */
+
+  /* ── Overlays, tooltip ─────────────────────────────────────────────── */
+  --vm-scrim: rgb(5 6 9 / 0.58); /* modal backdrop */
+  --vm-tooltip-bg: #f1f3f7;
+  --vm-tooltip-text: #12151b;
+  --vm-tooltip-kbd-bg: #e1e5ec;
+  --vm-tooltip-kbd-line: #c3c9d4;
+  --vm-tooltip-kbd-text: #2a303a;
+  --vm-text-shadow: 0 1px 2px rgb(0 0 0 / 0.6); /* labels drawn over the video frame */
+  --vm-inset-hi: rgb(255 255 255 / 0.03); /* top highlight on raised surfaces */
+
+  /* ── Small editors (bezier / curve / piano roll) ───────────────────── */
+  --vm-graph-bg: #151923;
+  --vm-graph-grid: #283246;
+  --vm-graph-axis: #405775;
+  --vm-graph-line: #7e9fc9;
+  --vm-graph-curve: #b9a4ff;
+  --vm-graph-point: #c9b9ff;
+  --vm-graph-point-on: #fff0bd;
+  --vm-graph-point-line: #18152b;
+  --vm-graph-handle: #e8bd80;
+  --vm-graph-label: #718fb9;
+  --vm-piano-white: #d3dae3;
+  --vm-piano-black: #192331;
+  --vm-piano-label-white: #344050;
+  --vm-piano-label-black: #8393a9;
+  --vm-piano-row: #1b2432;
+  --vm-piano-row-black: #151d2a;
+  --vm-piano-grid: #111925;
+
+  /* ── Elevation ─────────────────────────────────────────────────────── */
+  --vm-shadow-1: 0 1px 2px rgb(0 0 0 / 0.35);
+  --vm-shadow-2: 0 6px 18px rgb(0 0 0 / 0.38), 0 1px 0 rgb(255 255 255 / 0.03) inset;
+  --vm-shadow-3: 0 24px 64px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.04);
+  --vm-shadow-float: 0 12px 32px rgb(0 0 0 / 0.45); /* floating chips/toolbars */
+  --vm-shadow-panel: 0 1px 0 rgb(255 255 255 / 0.02) inset, 0 10px 28px rgb(0 0 0 / 0.22); /* Studio columns */
+  --vm-shadow-frame: 0 0 0 1px rgb(255 255 255 / 0.06), 0 18px 48px rgb(0 0 0 / 0.55); /* video frame on the stage */
+}
+
+/* ── Light: warm paper, ink text; coral/mint darkened for ≥4.5:1 text ──── */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --vm-bg-0: #e2ddd3; /* viewer well / stage backdrop */
+  --vm-bg-1: #f3f0e9; /* application background (paper) */
+  --vm-bg-2: #faf8f4; /* floating panels */
+  --vm-bg-3: #fffdf9; /* raised: cards, inputs */
+  --vm-bg-4: #ece8df; /* hover */
+  --vm-bg-5: #e3ded3; /* pressed / active */
+  --vm-bg-6: #cdc6b8; /* strong fill, scrollbar thumb */
+
+  --vm-line-1: #e9e4da;
+  --vm-line-2: #dcd6ca;
+  --vm-line-3: #c6bfb1;
+
+  --vm-text-1: #1d1b18;
+  --vm-text-2: #3b3833;
+  --vm-text-3: #5c5850;
+  --vm-text-4: #6f6a61;
+
+  --vm-coral: #d9612f;
+  --vm-coral-hover: #e2703f;
+  --vm-coral-text: #b0461b;
+  --vm-coral-bg: #fbe4d8;
+  --vm-coral-on: #1f0f08;
+  --vm-purple: #6a4dd0;
+  --vm-purple-bg: #ebe5fb;
+  --vm-success: #15775a;
+  --vm-success-bg: #daf0e6;
+  --vm-warning: #8a5806;
+  --vm-warning-bg: #f8ead0;
+  --vm-danger: #bb3129;
+  --vm-danger-bg: #f9e0dc;
+  --vm-ai: #1b9273;
+  --vm-ai-text: #0f7259;
+  --vm-ai-bg: #daf0e6;
+  --vm-ai-line: color-mix(in srgb, #1b9273 60%, transparent);
+  --vm-orange: #ad5c16;
+  --vm-orange-hover: #bb6820;
+  --vm-orange-text: #96500f;
+  --vm-orange-bg: #f8e6d2;
+  --vm-orange-on: #ffffff;
+  --vm-gold: #e9a93a;
+  --vm-key: #b07e0c;
+  --vm-playhead: #d9612f;
+  --vm-on-color: #ffffff;
+  --vm-on-color-ring: rgb(255 255 255 / 0.9);
+  --vm-on-media: #f4f1ea;
+  --vm-ink-mix: 50%;
+  --vm-fill-active: #f3e5da;
+  --vm-fill-selected: #f8dfd1;
+  --vm-fill-raised: #fffdf9;
+
+  --vm-scrim: rgb(52 44 32 / 0.32);
+  --vm-tooltip-bg: #2b2824;
+  --vm-tooltip-text: #f6f3ec;
+  --vm-tooltip-kbd-bg: #3d3934;
+  --vm-tooltip-kbd-line: #57524a;
+  --vm-tooltip-kbd-text: #ece7de;
+  --vm-text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+  --vm-inset-hi: rgb(255 255 255 / 0.6);
+
+  --vm-graph-bg: #f1eee7;
+  --vm-graph-grid: #dcd6ca;
+  --vm-graph-axis: #b7b0a2;
+  --vm-graph-line: #8a8478;
+  --vm-graph-curve: #6a4dd0;
+  --vm-graph-point: #6a4dd0;
+  --vm-graph-point-on: #d9612f;
+  --vm-graph-point-line: #fffdf9;
+  --vm-graph-handle: #b0461b;
+  --vm-graph-label: #67635b;
+  --vm-piano-white: #fffdf9;
+  --vm-piano-black: #3b3833;
+  --vm-piano-label-white: #67635b;
+  --vm-piano-label-black: #ece8df;
+  --vm-piano-row: #faf8f4;
+  --vm-piano-row-black: #efebe3;
+  --vm-piano-grid: #f3f0e9;
+
+  --vm-shadow-1: 0 1px 2px rgb(64 48 24 / 0.12);
+  --vm-shadow-2: 0 6px 18px rgb(64 48 24 / 0.12), 0 0 0 1px rgb(64 48 24 / 0.04);
+  --vm-shadow-3: 0 24px 64px rgb(64 48 24 / 0.2), 0 0 0 1px rgb(64 48 24 / 0.08);
+  --vm-shadow-float: 0 10px 28px rgb(64 48 24 / 0.16);
+  --vm-shadow-panel: 0 1px 0 rgb(255 255 255 / 0.7) inset, 0 6px 22px rgb(64 48 24 / 0.07);
+  --vm-shadow-frame: 0 0 0 1px rgb(64 48 24 / 0.12), 0 14px 40px rgb(64 48 24 / 0.22);
+}
+
+/* Theme switch cross-fade (class set briefly by theme.ts); off for reduced motion. */
+:root.vm-theme-transition,
+:root.vm-theme-transition *,
+:root.vm-theme-transition *::before,
+:root.vm-theme-transition *::after {
+  transition:
+    background-color 200ms var(--vm-ease),
+    border-color 200ms var(--vm-ease),
+    color 200ms var(--vm-ease),
+    fill 200ms var(--vm-ease),
+    stroke 200ms var(--vm-ease) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root.vm-theme-transition,
+  :root.vm-theme-transition * {
+    transition: none !important;
+  }
+}
+
+:root {
+  --vm-gap: 12px; /* gap between floating panels */
 
   /* ── Typography ────────────────────────────────────────────────────── */
   --vm-font: 'Segoe UI', 'Vmotion UI Sans', 'Microsoft YaHei UI', 'Microsoft YaHei',
@@ -95,9 +267,6 @@
   --vm-radius-full: 999px;
 
   /* ── Elevation ─────────────────────────────────────────────────────── */
-  --vm-shadow-1: 0 1px 2px rgb(0 0 0 / 0.35);
-  --vm-shadow-2: 0 6px 18px rgb(0 0 0 / 0.38), 0 1px 0 rgb(255 255 255 / 0.03) inset;
-  --vm-shadow-3: 0 24px 64px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.04);
   --vm-focus-ring: 0 0 0 2px var(--vm-bg-1), 0 0 0 4px color-mix(in srgb, var(--vm-accent) 80%, transparent);
 
   /* ── Motion ────────────────────────────────────────────────────────── */
@@ -189,8 +358,8 @@ kbd,
   max-width: 320px;
   padding: 5px 8px;
   border-radius: var(--vm-radius-sm);
-  background: #f1f3f7;
-  color: #12151b;
+  background: var(--vm-tooltip-bg);
+  color: var(--vm-tooltip-text);
   font-size: var(--vm-fs-xs);
   font-weight: var(--vm-fw-medium);
   line-height: 1.4;
@@ -208,9 +377,9 @@ kbd,
 }
 .vm-tooltip kbd {
   margin-left: 6px;
-  background: #e1e5ec;
-  border-color: #c3c9d4;
-  color: #2a303a;
+  background: var(--vm-tooltip-kbd-bg);
+  border-color: var(--vm-tooltip-kbd-line);
+  color: var(--vm-tooltip-kbd-text);
 }
 
 /* ── Empty state ─────────────────────────────────────────────────────── */
@@ -240,7 +409,7 @@ kbd,
   justify-content: center;
   align-items: flex-start;
   padding-top: 12vh;
-  background: rgb(5 6 9 / 0.55);
+  background: var(--vm-scrim);
   backdrop-filter: blur(2px);
   animation: vm-fade var(--vm-dur) var(--vm-ease);
 }
@@ -503,7 +672,7 @@ a:focus-visible {
   min-height: var(--vm-control-h);
   font-weight: var(--vm-fw-semibold);
   white-space: nowrap;
-  box-shadow: var(--vm-shadow-1), 0 1px 0 rgb(255 255 255 / 0.18) inset;
+  box-shadow: var(--vm-shadow-1), 0 1px 0 rgb(255 255 255 / 0.18) inset; /* theme-ok: white sheen on coral */
 }
 .primary:hover {
   background: var(--vm-accent-hover);
@@ -725,4 +894,35 @@ body.vm-resizing-col * {
 body.vm-resizing-row,
 body.vm-resizing-row * {
   cursor: row-resize !important;
+}
+
+/* ── Theme switch (跟随系统 / 暗色 / 亮色) ───────────────────────────────── */
+.vm-theme-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--vm-radius-md);
+  background: var(--vm-bg-1);
+  border: 1px solid var(--vm-line-2);
+}
+.vm-theme-switch button {
+  height: 24px;
+  padding: 0 8px;
+  gap: 5px;
+  border-radius: var(--vm-radius-sm);
+  color: var(--vm-text-3);
+  font-size: var(--vm-fs-xs);
+  white-space: nowrap;
+}
+.vm-theme-switch.compact button {
+  width: 26px;
+  padding: 0;
+}
+.vm-theme-switch button.on {
+  background: var(--vm-bg-3);
+  color: var(--vm-text-1);
+  box-shadow: var(--vm-shadow-1), 0 0 0 1px var(--vm-line-2);
+}
+.vm-theme-switch button.on svg {
+  color: var(--vm-accent-text);
 }

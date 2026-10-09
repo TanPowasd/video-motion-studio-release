@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, shell, session } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, nativeTheme, shell, session } from 'electron';
 import path from 'node:path';
 import { writeFile } from 'node:fs/promises';
 import { existsSync, mkdirSync } from 'node:fs';
@@ -9,6 +9,7 @@ import { initProject } from '../service/template.js';
 import { resolveNativeBinary } from '../core/native.js';
 import { projectCreationSchema } from '../core/project-creation.js';
 import { availableRecent, rememberProject, projectFolder, projectRoot } from './projects.js';
+import { parseThemeSource, readSettings, windowBackground, writeSettings } from './settings.js';
 import type http from 'node:http';
 import type net from 'node:net';
 
@@ -27,6 +28,27 @@ else if (app.isPackaged && existsSync(path.join(path.dirname(process.execPath), 
 }
 if (process.env.VMOTION_UI_TEST || process.env.VMOTION_SMOKE) app.disableHardwareAcceleration();
 const recentFile = () => path.join(app.getPath('userData'), 'recent-projects.json');
+const settingsFile = () => path.join(app.getPath('userData'), 'settings.json');
+// Interface theme (跟随系统 / 暗色 / 亮色). Stored here rather than only in localStorage because
+// the editor origin (127.0.0.1:<port>) changes on every project switch. nativeTheme keeps
+// native menus, dialogs and scrollbars in step with the page.
+let settings = { theme: 'system' as 'system' | 'dark' | 'light' } as ReturnType<typeof readSettings>;
+function applyNativeTheme() {
+  nativeTheme.themeSource = settings.theme;
+  window?.setBackgroundColor(windowBackground(nativeTheme.shouldUseDarkColors));
+}
+ipcMain.on('theme:initial', (event) => {
+  event.returnValue = settings.theme;
+});
+ipcMain.handle('theme:set', async (_event, value: unknown) => {
+  const theme = parseThemeSource(value);
+  if (theme === settings.theme) return;
+  settings = { ...settings, theme };
+  applyNativeTheme();
+  await writeSettings(settingsFile(), settings).catch((error) =>
+    process.stderr.write(`Cannot save settings: ${error.message}\n`),
+  );
+});
 const clientDirectory = () => path.join(app.getAppPath(), 'dist/client');
 function serverUrl(server: http.Server) {
   const address = server.address();
@@ -90,6 +112,8 @@ app
   .whenReady()
   .then(async () => {
     const base = app.getAppPath();
+    settings = readSettings(settingsFile());
+    nativeTheme.themeSource = settings.theme;
     process.env.VMOTION_NATIVE = resolveNativeBinary(
       app.isPackaged ? path.join(process.resourcesPath, 'native') : path.join(base, 'dist/native'),
     );
@@ -120,7 +144,7 @@ app
       minWidth: 1100,
       minHeight: 720,
       title: 'Vmotion Studio',
-      backgroundColor: '#111217',
+      backgroundColor: windowBackground(nativeTheme.shouldUseDarkColors),
       autoHideMenuBar: true,
       webPreferences: {
         preload: path.join(base, 'dist/desktop/preload.cjs'),
@@ -132,6 +156,7 @@ app
       },
     });
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+    nativeTheme.on('updated', () => window?.setBackgroundColor(windowBackground(nativeTheme.shouldUseDarkColors)));
     window.webContents.on('will-navigate', (event, url) => {
       if (!url.startsWith('http://127.0.0.1:')) event.preventDefault();
     });

@@ -32,7 +32,7 @@
   background: var(--vm-bg-2);
   border: 1px solid var(--vm-line-1);
   border-radius: var(--vm-radius-2xl);
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.02) inset, 0 10px 28px rgb(0 0 0 / 0.22);
+  box-shadow: var(--vm-shadow-panel);
   min-height: 0;
   min-width: 0;
 }
@@ -114,7 +114,7 @@
   height: 30px;
   flex: none;
   border-radius: 9px;
-  background: conic-gradient(from 210deg, var(--vm-accent), #ffc56b, var(--vm-ai), var(--vm-accent));
+  background: conic-gradient(from 210deg, var(--vm-accent), var(--vm-gold), var(--vm-ai), var(--vm-accent));
   display: grid;
   place-items: center;
 }
@@ -123,7 +123,7 @@
   height: 13px;
   border-radius: 50%;
   background: var(--vm-bg-1);
-  box-shadow: 0 0 0 3px rgb(255 255 255 / 0.85);
+  box-shadow: 0 0 0 3px var(--vm-on-color-ring);
 }
 .st-project {
   flex: none;
@@ -424,6 +424,38 @@ button.st-pill:hover {
 .st-menu button b.on {
   background: var(--vm-accent);
 }
+.st-menu-theme {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 4px 8px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--vm-line-1);
+  color: var(--vm-text-3);
+  font-size: var(--vm-fs-xs);
+  white-space: nowrap;
+}
+.st-menu:has(.st-menu-theme) {
+  min-width: 290px;
+}
+.st-menu .vm-theme-switch button {
+  display: inline-flex;
+  height: 24px;
+  padding: 0 8px;
+  font-size: var(--vm-fs-xs);
+  color: var(--vm-text-3);
+}
+.st-menu .vm-theme-switch button span {
+  flex: none;
+}
+.st-menu .vm-theme-switch button.on {
+  background: var(--vm-bg-3);
+  color: var(--vm-text-1);
+}
+.st-menu .vm-theme-switch button:hover:not(.on) {
+  background: var(--vm-bg-4);
+}
 .st-menu kbd {
   font-size: var(--vm-fs-2xs);
   color: var(--vm-text-3);
@@ -560,8 +592,8 @@ button.st-pill:hover {
   left: 6px;
   top: 4px;
   font-size: var(--vm-fs-xs);
-  color: var(--vm-text-1);
-  text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+  color: var(--vm-on-media);
+  text-shadow: var(--vm-text-shadow);
 }
 .ss-meta {
   flex: 1;
@@ -735,7 +767,7 @@ button.st-pill:hover {
 }
 .studio-stage .canvas-fit-box {
   border-radius: 6px;
-  box-shadow: 0 20px 60px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(255 255 255 / 0.04);
+  box-shadow: var(--vm-shadow-3);
 }
 .studio-viewer-controls.viewer-controls {
   height: 52px;
@@ -846,12 +878,12 @@ button.st-pill:hover {
   min-width: 0;
   border-radius: inherit;
   background: transparent;
-  --vm-accent: #ff8a5b;
-  --vm-accent-hover: #ff9d74;
-  --vm-accent-text: #ffa781;
-  --vm-accent-bg: #3a2620;
-  --vm-accent-on: #1f120c;
-  --music-accent: #ff8a5b;
+  --vm-accent: var(--vm-coral);
+  --vm-accent-hover: var(--vm-coral-hover);
+  --vm-accent-text: var(--vm-coral-text);
+  --vm-accent-bg: var(--vm-coral-bg);
+  --vm-accent-on: var(--vm-coral-on);
+  --music-accent: var(--vm-coral);
 }
 .music-app.embedded .music-header {
   height: 46px;
@@ -893,16 +925,17 @@ button.st-pill:hover {
   border-radius: 9px;
   background: color-mix(in srgb, var(--vm-ai-bg) 92%, black);
   border: 1px solid color-mix(in srgb, var(--vm-ai) 30%, transparent);
-  box-shadow: 0 6px 16px rgb(0 0 0 / 0.35);
+  box-shadow: var(--vm-shadow-float);
   pointer-events: auto;
   white-space: nowrap;
   max-width: 520px;
 }
 .ai-chip.below {
-  transform: translateY(8px);
+  /* 14px: clears the 8px hit radius of the selection handles at the box corners. */
+  transform: translateY(14px);
 }
 .ai-chip.above {
-  transform: translateY(calc(-100% - 8px));
+  transform: translateY(calc(-100% - 14px));
 }
 .ai-chip button {
   height: 24px;
@@ -945,7 +978,7 @@ button.st-pill:hover {
   border-radius: 12px;
   background: color-mix(in srgb, var(--vm-bg-3) 94%, transparent);
   border: 1px solid var(--vm-line-2);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 0.45);
+  box-shadow: var(--vm-shadow-float);
   pointer-events: auto;
   white-space: nowrap;
   z-index: 3;
@@ -1799,4 +1832,24 @@ button.st-pill:hover {
 /* Keep a gutter for the closed-drawer tab so it never covers stage / music controls. */
 .studio-app.right-drawer:has(.studio-drawer-tab) .studio-stage {
   margin-right: 28px;
+}
+/* Settings modal: app appearance (local, not saved in the project). */
+.settings-appearance {
+  display: grid;
+  justify-items: start;
+  gap: var(--vm-space-4);
+  margin-top: var(--vm-space-6);
+  padding-top: var(--vm-space-6);
+  border-top: 1px solid var(--vm-line-2);
+}
+.settings-appearance h3 {
+  margin: 0;
+  color: var(--vm-text-1);
+  font-size: var(--vm-fs-md);
+  font-weight: var(--vm-fw-semibold);
+}
+.settings-appearance small {
+  color: var(--vm-text-3);
+  font-size: var(--vm-fs-xs);
+  line-height: 1.5;
 }

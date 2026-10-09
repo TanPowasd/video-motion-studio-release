@@ -35,7 +35,8 @@
       "tests/music-patterns.test.ts",
       "tests/midi-recording.test.ts",
       "tests/change-journal.test.ts",
-      "tests/studio-shell.test.ts"
+      "tests/studio-shell.test.ts",
+      "tests/theme.test.ts"
     ]
   },
   "integration": {
@@ -133,7 +134,7 @@
       },
       {
         "file": "scripts/check-desktop-projects.mjs",
-        "args": ["--packaged", "--isolated"]
+        "args": ["--packaged", "--isolated", "--interaction"]
       },
       {
         "file": "scripts/check-gpu-effects.mjs",

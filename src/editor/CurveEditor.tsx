@@ -107,12 +107,12 @@ export function CurveEditor({
         setDraft(undefined);
       }}
     >
-      <rect x="0" y="0" width="236" height="114" rx="5" fill="#151923" />
+      <rect x="0" y="0" width="236" height="114" rx="5" style={{ fill: 'var(--vm-graph-bg)' }} />
       {[0, 1, 2, 3, 4].map((i) => (
         <path
           key={i}
           d={`M 12 ${12 + i * 22} H 224 M ${12 + i * 53} 12 V 100`}
-          stroke="#283246"
+          style={{ stroke: 'var(--vm-graph-grid)' }}
           strokeWidth=".6"
         />
       ))}
@@ -122,7 +122,7 @@ export function CurveEditor({
           return `${i ? 'L' : 'M'} ${x(frame)} ${y(interpolate(values, frame))}`;
         }).join(' ')}
         fill="none"
-        stroke="#b9a4ff"
+        style={{ stroke: 'var(--vm-graph-curve)' }}
         strokeWidth="1.7"
       />
       {values.map((k, i) => (
@@ -131,9 +131,11 @@ export function CurveEditor({
           cx={x(k.frame)}
           cy={y(k.value)}
           r="4"
-          fill={selectedFrames.includes(k.frame) ? '#fff0bd' : '#c9b9ff'}
-          stroke="#18152b"
-          style={{ cursor: 'grab' }}
+          style={{
+            cursor: 'grab',
+            fill: selectedFrames.includes(k.frame) ? 'var(--vm-graph-point-on)' : 'var(--vm-graph-point)',
+            stroke: 'var(--vm-graph-point-line)',
+          }}
           onPointerDown={(event) => {
             if (disabled || event.button !== 0 || !event.isPrimary) return;
             event.preventDefault();

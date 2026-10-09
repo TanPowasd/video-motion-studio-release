@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Icon } from '../Icons.js';
 import { ProjectActions } from '../ProjectHome.js';
+import { ThemeSwitch } from '../ThemeSwitch.js';
 import { MODES, type StudioMode } from './model.js';
 import { formatAgo, prettyClient } from './change-feed.js';
 
@@ -234,6 +235,10 @@ export function StudioTopBar({
           </button>
           {menu && (
             <div className="st-menu" role="menu">
+              <div className="st-menu-theme" role="group" aria-label="外观">
+                <span>外观</span>
+                <ThemeSwitch />
+              </div>
               {more.map((a) => (
                 <button
                   key={a.id}

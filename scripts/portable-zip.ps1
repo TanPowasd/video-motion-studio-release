@@ -1,6 +1,7 @@
 $ErrorActionPreference = 'Stop'
-$vmotionRelease = [System.IO.Path]::GetFullPath((Join-Path (Get-Location) 'release'))
-$vmotionSource = Join-Path $vmotionRelease 'Vmotion'
+$vmotionSource = [System.IO.Path]::GetFullPath($(if ($env:VMOTION_PACKAGE_ROOT) { $env:VMOTION_PACKAGE_ROOT } else { Join-Path (Get-Location) 'release/Vmotion' }))
+if ([System.IO.Path]::GetFileName($vmotionSource) -ne 'Vmotion') { throw 'VMOTION_PACKAGE_ROOT must name a Vmotion directory' }
+$vmotionRelease = [System.IO.Path]::GetDirectoryName($vmotionSource)
 if (!(Test-Path -LiteralPath (Join-Path $vmotionSource 'portable-manifest.json'))) { throw 'Build the portable package first' }
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem

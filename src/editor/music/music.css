@@ -200,7 +200,7 @@ body {
 }
 .music-app .music-new {
   margin: 12px;
-  background: var(--vm-bg-5);
+  background: var(--vm-fill-raised);
   border-color: var(--vm-line-3);
 }
 .music-browser-scroll {
@@ -240,7 +240,7 @@ body {
   margin-bottom: 2px;
 }
 .music-resource.active {
-  background: var(--vm-bg-5) !important;
+  background: var(--vm-fill-active) !important;
   border-color: var(--vm-text-4) !important;
 }
 .music-resource > span {
@@ -590,7 +590,8 @@ body {
   border-radius: 4px;
   border: 1px solid var(--pattern-color);
   background: color-mix(in srgb, var(--pattern-color) 14%, var(--vm-bg-4));
-  color: var(--pattern-color);
+  /* Pattern colours are project data tuned for dark; ink-mix keeps them readable on light. */
+  color: color-mix(in srgb, var(--pattern-color), var(--vm-text-1) var(--vm-ink-mix));
   padding: 0;
   touch-action: none;
   cursor: move;
@@ -673,7 +674,7 @@ body {
 }
 .music-channel.selected {
   border-color: var(--channel-color);
-  background: var(--vm-bg-6);
+  background: var(--vm-fill-selected);
 }
 .music-app .music-channel-name {
   display: flex;
@@ -1161,9 +1162,9 @@ body {
  * as the Studio shell. */
 .music-app {
   --vm-accent: var(--vm-orange);
-  --vm-accent-hover: #f6b97a;
-  --vm-accent-text: #f7c08a;
-  --vm-accent-bg: #3a2816;
+  --vm-accent-hover: var(--vm-orange-hover);
+  --vm-accent-text: var(--vm-orange-text);
+  --vm-accent-bg: var(--vm-orange-bg);
   --vm-accent-on: var(--vm-orange-on);
   --music-accent: var(--vm-orange);
   grid-template-rows: var(--vm-header-h) 56px minmax(0, 1fr) 40px;
@@ -1243,10 +1244,10 @@ body {
   height: 24px;
   border-radius: var(--vm-radius-md);
   background: linear-gradient(135deg, var(--vm-accent-hover), var(--vm-purple));
-  color: #fff;
+  color: var(--vm-on-color);
   font-size: 14px;
   font-weight: 800;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.12) inset, var(--vm-shadow-1);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--vm-on-color) 12%, transparent) inset, var(--vm-shadow-1);
 }
 .music-project {
   padding-left: var(--vm-space-5);

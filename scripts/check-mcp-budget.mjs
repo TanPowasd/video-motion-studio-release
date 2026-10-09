@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 const packaged = process.argv.includes('--packaged'),
-  packageRoot = path.resolve('release/Vmotion'),
+  packageRoot = path.resolve(process.env.VMOTION_PACKAGE_ROOT ?? 'release/Vmotion'),
   executable = packaged ? path.join(packageRoot, 'Vmotion.exe') : process.execPath,
   cli = packaged
     ? path.join(packageRoot, 'resources/app/dist/cli/index.mjs')

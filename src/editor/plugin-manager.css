@@ -1,7 +1,7 @@
 /* Plugin manager dialog. Uses theme.css tokens only. */
 .vm-plg-backdrop {
   z-index: 260;
-  background: rgb(5 6 9 / 0.6);
+  background: var(--vm-scrim);
   backdrop-filter: blur(2px);
   animation: vm-fade var(--vm-dur) var(--vm-ease);
 }

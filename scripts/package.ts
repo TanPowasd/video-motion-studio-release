@@ -6,9 +6,18 @@ import { randomUUID } from 'node:crypto';
 import { acquirePackageLock, publishPackage } from './package-publish.js';
 import { prepareRuntime } from './prepare-runtime.js';
 const root = path.resolve('.'),
-  release = path.join(root, 'release'),
+  target = path.resolve(process.env.VMOTION_PACKAGE_ROOT ?? path.join(root, 'release/Vmotion')),
+  release = path.dirname(target),
   stage = path.join(release, `.staging-${randomUUID()}`),
-  target = path.join(release, 'Vmotion');
+  relativeTarget = path.relative(path.join(root, 'release'), target);
+if (
+  path.basename(target) !== 'Vmotion' ||
+  relativeTarget.startsWith('..') ||
+  path.isAbsolute(relativeTarget)
+)
+  throw new Error(
+    'VMOTION_PACKAGE_ROOT must name a Vmotion directory within this workspace release directory',
+  );
 if (process.platform !== 'win32')
   throw new Error('The current portable package target is Windows x64');
 await stat(path.join(root, 'dist/native/manifest.json'));

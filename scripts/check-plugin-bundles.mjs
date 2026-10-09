@@ -13,7 +13,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 
 const packaged = process.argv.includes('--packaged'),
   dev = process.argv.includes('--dev'),
-  packageRoot = path.resolve('release/Vmotion'),
+  packageRoot = path.resolve(process.env.VMOTION_PACKAGE_ROOT ?? 'release/Vmotion'),
   executable = packaged ? path.join(packageRoot, 'Vmotion.exe') : process.execPath,
   cliArgs = packaged
     ? [path.join(packageRoot, 'resources/app/dist/cli/index.mjs')]

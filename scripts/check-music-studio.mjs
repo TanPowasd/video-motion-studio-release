@@ -5,7 +5,7 @@ import path from 'node:path';
 import net from 'node:net';
 import assert from 'node:assert/strict';
 const packaged = process.argv.includes('--packaged'),
-  packageRoot = path.resolve('release/Vmotion');
+  packageRoot = path.resolve(process.env.VMOTION_PACKAGE_ROOT ?? 'release/Vmotion');
 const runtime = packaged ? path.join(packageRoot, 'Vmotion.exe') : process.execPath;
 const cli = packaged
   ? path.join(packageRoot, 'resources/app/dist/cli/index.mjs')

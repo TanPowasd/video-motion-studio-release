@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 const packaged = process.argv.includes('--packaged'),
-  pkg = path.resolve('release/Vmotion');
+  pkg = path.resolve(process.env.VMOTION_PACKAGE_ROOT ?? 'release/Vmotion');
 await mkdir('artifacts', { recursive: true });
 const root = await mkdtemp(path.resolve('artifacts/audio-plugins-'));
 const plugin = path.join(root + '-plugins', 'External Plugins 空格', 'vmotion-audio-fixture.vst3');

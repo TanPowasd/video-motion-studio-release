@@ -211,17 +211,17 @@ export function PianoRoll({
                 y={top + i * row}
                 width={length * px}
                 height={row}
-                fill={black ? '#151d2a' : '#1b2432'}
+                style={{ fill: black ? 'var(--vm-piano-row-black)' : 'var(--vm-piano-row)' }}
               />
               <rect
                 x={window.x}
                 y={top + i * row}
                 width={left}
                 height={row - 1}
-                fill={black ? '#192331' : '#d3dae3'}
+                style={{ fill: black ? 'var(--vm-piano-black)' : 'var(--vm-piano-white)' }}
                 pointerEvents="none"
               />
-              <text x={window.x + 8} y={top + i * row + 12} fill={black ? '#8393a9' : '#344050'}>
+              <text x={window.x + 8} y={top + i * row + 12} style={{ fill: black ? 'var(--vm-piano-label-black)' : 'var(--vm-piano-label-white)' }}>
                 {note % 12 === 0 ? noteLabel(note) : black ? '' : noteLabel(note).slice(0, -1)}
               </text>
               <line
@@ -298,7 +298,7 @@ export function PianoRoll({
           y={window.y}
           width={window.width}
           height={top}
-          fill="#111925"
+          style={{ fill: 'var(--vm-piano-grid)' }}
         />
         {ticks.map((at) => (
           <text

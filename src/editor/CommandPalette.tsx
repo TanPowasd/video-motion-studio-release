@@ -179,6 +179,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
       ['重做', 'Ctrl+Shift+Z'],
       ['保存', 'Ctrl+S'],
       ['新建 / 打开项目', 'Ctrl+N / Ctrl+O'],
+      ['切换亮色 / 暗色主题', 'Ctrl+Alt+D'],
     ],
   },
   {

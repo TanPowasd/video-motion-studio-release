@@ -8,7 +8,7 @@ await mkdir('artifacts', { recursive: true });
 const test = await mkdtemp(path.resolve('artifacts/portable-')),
   moved = path.join(test, '新电脑 可复制/Vmotion'),
   project = path.join(test, '新电脑 可复制/视频工程');
-await cp(path.resolve('release/Vmotion'), moved, {
+await cp(path.resolve(process.env.VMOTION_PACKAGE_ROOT ?? 'release/Vmotion'), moved, {
   recursive: true,
   filter: (file) => path.basename(file) !== 'profile',
 });

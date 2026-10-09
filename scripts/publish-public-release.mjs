@@ -7,7 +7,8 @@ const owner = 'TanPowasd',
   name = 'video-motion-studio-release',
   repo = `${owner}/${name}`;
 const source = path.resolve(process.argv[2] ?? ''),
-  zip = path.resolve('release/Vmotion-Windows-x64-Portable.zip');
+  packageRoot = path.resolve(process.env.VMOTION_PACKAGE_ROOT ?? 'release/Vmotion'),
+  zip = path.join(path.dirname(packageRoot), 'Vmotion-Windows-x64-Portable.zip');
 if (!process.argv[2] || !source.startsWith(path.resolve('artifacts') + path.sep))
   throw Error('Pass an exported product snapshot under artifacts');
 const manifest = JSON.parse(await readFile(path.join(source, 'SOURCE-MANIFEST.json'), 'utf8'));
@@ -27,7 +28,7 @@ const releaseSummary = notesHeading
   ? notes.slice(notesHeading[0].length).trim()
   : `Vmotion ${version} 开源预览版。\n\n- 人通过动画、剪辑、音乐、绘画和代码界面直接编辑。\n- AI 在外部通过文件或 MCP 修改同一工程，顶部“连接 MCP”复制配置。\n- Windows 10/11 x64 便携包内置运行时、VST3 宿主和 MIDI 接口。\n- 外部 AI 通过文件/CLI/MCP 操作；程序不调用模型。\n- Apache-2.0，第三方许可与 FFmpeg 对应源码保留。`;
 const packageManifest = JSON.parse(
-  await readFile('release/Vmotion/portable-manifest.json', 'utf8'),
+  await readFile(path.join(packageRoot, 'portable-manifest.json'), 'utf8'),
 );
 if (
   packageManifest.gitCommit !== manifest.sourceCommit ||

@@ -71,6 +71,8 @@ import { useWorkbenchController } from './state/workbench-controller.js';
 import { mergeApplicationState } from './state/workbench-effects.js';
 import './workbench.css';
 import './studio-shell.css';
+import { ThemeSwitch } from './ThemeSwitch.js';
+import { THEME_PREFERENCES, THEME_TOGGLE_KEYS, getTheme, setThemePreference, themeCommandLabel, toggledTheme, useTheme } from './theme.js';
 import { NewImageDialog, type NewImageSettings } from './still/NewImageDialog.js';
 import { ImageExportDialog } from './still/ImageExportDialog.js';
 import {
@@ -574,6 +576,7 @@ export function Workbench() {
     if (fit.rightDrawer) setDrawerOpen(true);
   };
   const [glyphPanel, setGlyphPanel] = useState(false);
+  const theme = useTheme();
   // Shell-level shortcuts. Registered in the capture phase so they win over the
   // playback/editing handlers, and only for combinations those handlers don't use.
   useEffect(() => {
@@ -594,6 +597,12 @@ export function Workbench() {
         e.preventDefault();
         e.stopPropagation();
         setOverlay('shortcuts');
+        return;
+      }
+      if (mod && e.altKey && !e.shiftKey && e.code === 'KeyD') {
+        e.preventDefault();
+        e.stopPropagation();
+        setThemePreference(toggledTheme(getTheme().resolved));
         return;
       }
       if (mod && e.altKey && ['l', 'i', 't'].includes(key)) {
@@ -999,6 +1008,16 @@ export function Workbench() {
           icon: 'reset',
           run: resetStudioLayout,
         },
+        ...THEME_PREFERENCES.map((p) => ({
+          id: `view.theme.${p.id}`,
+          group: '外观',
+          label: themeCommandLabel(p.id),
+          keywords: `theme appearance ${p.id} 主题 外观 ${p.id === 'light' ? '亮色 浅色 白色 light' : p.id === 'dark' ? '暗色 深色 黑色 dark' : '跟随系统 自动 system auto'}`,
+          icon: p.icon,
+          keys: p.id === toggledTheme(theme.resolved) ? THEME_TOGGLE_KEYS : undefined,
+          disabled: theme.preference === p.id,
+          run: () => setThemePreference(p.id),
+        })),
         {
           id: 'help.shortcuts',
           group: '帮助',
@@ -2303,6 +2322,11 @@ export function Workbench() {
                 />
                 <p>SDR · sRGB · 48 kHz audio</p>
                 <p>新建或打开其他工程请使用顶部项目入口（Ctrl+N / Ctrl+O）。</p>
+                <div className="settings-appearance">
+                  <h3>界面外观</h3>
+                  <ThemeSwitch />
+                  <small>只影响本机界面，不写入工程；画面内容不随主题变化。{THEME_TOGGLE_KEYS} 切换亮色 / 暗色。</small>
+                </div>
               </>
             )}
           </div>

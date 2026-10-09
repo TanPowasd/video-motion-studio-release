@@ -12,6 +12,9 @@ declare global {
       openAgentWorkbench: (route?: string) => Promise<void>;
       openStudioWorkbench: () => Promise<void>;
       showFile: (file: string) => Promise<void>;
+      /** Theme preference stored in the desktop settings file (read synchronously by the preload). */
+      themePreference?: 'system' | 'dark' | 'light';
+      setThemePreference?: (preference: 'system' | 'dark' | 'light') => Promise<void>;
     };
   }
 }

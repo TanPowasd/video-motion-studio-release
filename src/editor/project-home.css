@@ -241,8 +241,8 @@
 .project-home kbd {
   margin-left: var(--vm-space-5);
   opacity: 0.85;
-  background: rgb(0 0 0 / 0.18);
-  border-color: rgb(255 255 255 / 0.18);
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  border-color: color-mix(in srgb, currentColor 22%, transparent);
   color: inherit;
 }
 .recent-projects {
@@ -255,4 +255,10 @@
 }
 .recent-projects > button:hover {
   background: var(--vm-bg-3);
+}
+
+.project-home-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--vm-space-5);
 }

@@ -118,10 +118,10 @@ body.vm-resizing .splitter:active {
   place-items: center;
   border-radius: var(--vm-radius-md);
   background: linear-gradient(135deg, var(--vm-accent-hover), var(--vm-purple));
-  color: #fff;
+  color: var(--vm-on-color);
   font-weight: 800;
   font-size: 14px;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.12) inset, var(--vm-shadow-1);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--vm-on-color) 12%, transparent) inset, var(--vm-shadow-1);
 }
 .project-title {
   min-width: 0;
@@ -571,9 +571,7 @@ body.vm-resizing .splitter:active {
   background: radial-gradient(ellipse at 50% 40%, var(--vm-bg-2), var(--vm-bg-0) 80%);
 }
 .canvas-fit-box {
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.06),
-    0 18px 48px rgb(0 0 0 / 0.55);
+  box-shadow: var(--vm-shadow-frame);
 }
 .viewer-controls {
   height: 34px;
@@ -685,7 +683,7 @@ body.vm-resizing .splitter:active {
 .transport .play-button {
   width: 32px;
   background: var(--vm-accent) !important;
-  color: #fff !important;
+  color: var(--vm-accent-on) !important;
   border-radius: var(--vm-radius-sm);
 }
 .transport .play-button:hover {
@@ -838,7 +836,7 @@ body.vm-resizing .splitter:active {
   border-color: var(--vm-text-1);
   box-shadow:
     0 0 0 1px var(--vm-text-1),
-    0 4px 14px rgb(0 0 0 / 0.4);
+    var(--vm-shadow-float);
 }
 .tl-clip.layer {
   background: color-mix(in srgb, var(--vm-purple) 26%, var(--vm-bg-3));
@@ -872,7 +870,7 @@ body.vm-resizing .splitter:active {
   color: var(--vm-key);
 }
 .tl-key[aria-pressed='true'] {
-  color: #fff;
+  color: var(--vm-text-1);
   filter: drop-shadow(0 0 3px var(--vm-key));
 }
 .tl-marker {
@@ -881,13 +879,21 @@ body.vm-resizing .splitter:active {
 .tl-playhead {
   pointer-events: none;
 }
+.tl-playhead {
+  /* Knob width must stay odd so it centres on the 1px line at whole-pixel offsets
+   * (no translateX(-50%) half-pixel blur): left = (line - knob) / 2 = -5px. */
+  --tl-knob: 11px;
+}
 .tl-playhead > span {
   background: var(--vm-playhead) !important;
-  width: 11px !important;
+  box-sizing: border-box;
+  width: var(--tl-knob) !important;
   height: 12px !important;
-  margin-left: -5px !important;
+  left: calc((1px - var(--tl-knob)) / 2) !important;
+  margin-left: 0 !important;
+  transform: none;
   border-radius: 2px 2px 50% 50% / 2px 2px 60% 60% !important;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
+  box-shadow: var(--vm-shadow-1);
   border: 0 !important;
 }
 .tl-playhead > i {
@@ -944,7 +950,7 @@ body.vm-resizing .splitter:active {
 
 /* ── Modals ──────────────────────────────────────────────────────────── */
 .modal-backdrop {
-  background: rgb(5 6 9 / 0.6);
+  background: var(--vm-scrim);
   backdrop-filter: blur(2px);
   animation: vm-fade var(--vm-dur) var(--vm-ease);
 }

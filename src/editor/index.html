@@ -4,6 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Vmotion Studio</title>
+    <meta name="color-scheme" content="dark light" />
+    <!-- Apply the theme before first paint (same rules as theme.ts; kept in sync by tests/theme.test.ts). -->
+    <script id="vm-theme-boot">
+      (function () {
+        var d = document.documentElement, p;
+        try {
+          p = window.vmotionDesktop && window.vmotionDesktop.themePreference;
+          if (p !== 'dark' && p !== 'light' && p !== 'system') p = localStorage.getItem('vmotion.theme');
+        } catch (e) {}
+        if (p !== 'dark' && p !== 'light') p = 'system';
+        var dark = !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var t = p === 'system' ? (dark ? 'dark' : 'light') : p;
+        d.setAttribute('data-theme', t);
+        d.setAttribute('data-theme-pref', p);
+        d.style.colorScheme = t;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -2,6 +2,17 @@
 
 `release/Vmotion-Windows-x64-Portable.zip` 解压得到一个完整 `Vmotion` 文件夹。复制整个文件夹到 Windows 10/11 x64 的可写目录，双击 `Vmotion.exe` 或 `启动 Vmotion.cmd`。不需要安装 Node.js、Rust、FFmpeg 或编译器，编辑、预览和导出可以离线运行。此版本使用本机正常的 Windows 系统组件和显卡驱动；GPU 不可用时 auto 使用 CPU。
 
+如果旧版目录正被桌面或外部 MCP 会话使用，可通过 `VMOTION_PACKAGE_ROOT` 在 `release` 下并排打包。打包、ZIP、发布脚本和 `npm run test:acceptance` 使用同一变量，默认路径保持不变。例如 PowerShell：
+
+```powershell
+$env:VMOTION_PACKAGE_ROOT = Join-Path $PWD 'release/v0.1.3/Vmotion'
+npx tsx scripts/package.ts
+npm run test:acceptance
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/portable-zip.ps1
+```
+
+上例生成 `release/v0.1.3/Vmotion` 和同目录的 ZIP。原有会话继续使用旧版；结束会话后可改用新目录下的启动文件和 MCP 配置。
+
 包内包含 Electron/Node、React 界面、自研 CPU/GPU 核心、TypeScript 编译器与 SDK、FFmpeg/FFprobe 及同目录 DLL、Noto Sans CJK SC 字体和 CPython 标准库。Python 许可保留在 runtime/licenses，下载版本和哈希记录在 runtime manifest。额外 Python 包通过 VMOTION_PYTHON 自定义环境管理，须单独迁移。项目字体优先，复现排版须收集字体；保留第三方许可、FFmpeg 对应源码和固定 LGPL shared 构建。
 
 同时内置独立 VST3 音频宿主（静态 C runtime）和 MIDI 实时监听界面。Steinberg VST3 SDK / nlohmann-json 均使用固定 MIT 版本，notices/provenance 在 native/licenses/audio。商业 VST3 插件不随软件分发：另一台电脑需要另行安装/授权同一版本，并修改工程中的插件路径/指纹；pack 保留音色状态，不能替代插件安装。详见 [音频插件与 MIDI](AUDIO-PLUGINS-MIDI.md)。AU 后端只适用于 macOS，当前 Windows 包不提供 AU。

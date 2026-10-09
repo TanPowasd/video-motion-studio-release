@@ -86,21 +86,21 @@ export function BezierEditor({
           }
         }}
       >
-        <rect width="236" height="120" rx="5" fill="#142033" />
+        <rect width="236" height="120" rx="5" style={{ fill: 'var(--vm-graph-bg)' }} />
         <path
           d={`M 24 ${y(1)} H 212 V ${y(0)} H 24 Z M 24 ${y(0)} L 212 ${y(1)}`}
-          stroke="#405775"
+          style={{ stroke: 'var(--vm-graph-axis)' }}
           fill="none"
           strokeWidth="0.8"
         />
         <path
           d={`M 24 ${y(0)} L ${x(curve[0])} ${y(curve[1])} M 212 ${y(1)} L ${x(curve[2])} ${y(curve[3])}`}
-          stroke="#7e9fc9"
+          style={{ stroke: 'var(--vm-graph-line)' }}
           fill="none"
         />
         <path
           d={`M 24 ${y(0)} C ${x(curve[0])} ${y(curve[1])}, ${x(curve[2])} ${y(curve[3])}, 212 ${y(1)}`}
-          stroke="#aabaff"
+          style={{ stroke: 'var(--vm-graph-curve)' }}
           strokeWidth="2"
           fill="none"
         />
@@ -110,8 +110,7 @@ export function BezierEditor({
             cx={x(curve[handle * 2])}
             cy={y(curve[handle * 2 + 1])}
             r={5}
-            fill={handle ? '#e8bd80' : '#90c4f8'}
-            style={{ cursor: 'grab' }}
+            style={{ cursor: 'grab', fill: handle ? 'var(--vm-graph-handle)' : 'var(--vm-graph-point)' }}
             onPointerDown={(e) => {
               if (disabled || e.button !== 0 || !e.isPrimary) return;
               e.preventDefault();
@@ -132,10 +131,10 @@ export function BezierEditor({
             <title>控制点 {handle + 1}</title>
           </circle>
         ))}
-        <text x="24" y="113" fill="#718fb9" fontSize="9">
+        <text x="24" y="113" style={{ fill: 'var(--vm-graph-label)' }} fontSize="9">
           0
         </text>
-        <text x="207" y="113" fill="#718fb9" fontSize="9">
+        <text x="207" y="113" style={{ fill: 'var(--vm-graph-label)' }} fontSize="9">
           1
         </text>
       </svg>

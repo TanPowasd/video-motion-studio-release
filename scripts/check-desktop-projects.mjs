@@ -13,6 +13,10 @@ const preferences = path.join(root, 'preferences'),
   projects = path.join(root, 'projects');
 await mkdir(preferences);
 await mkdir(projects);
+await writeFile(
+  path.join(preferences, 'settings.json'),
+  JSON.stringify({ theme: 'system', retainedSetting: 'desktop-acceptance' }),
+);
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function until(fn, message, timeout = 20000) {
   const start = Date.now();
@@ -228,6 +232,38 @@ try {
     );
   });
   check('loads both runtime FontFace entries without build asset URLs', true);
+  const theme = () => desktop.evaluate(`document.documentElement.dataset.theme`);
+  const settledTheme = () =>
+    until(
+      () => desktop.evaluate(`!document.documentElement.classList.contains('vm-theme-transition')`),
+      'Theme transition did not settle',
+      2000,
+    );
+  const persistedTheme = async () =>
+    JSON.parse(await readFile(path.join(preferences, 'settings.json'), 'utf8'));
+  await desktop.call('Emulation.setEmulatedMedia', {
+    features: [{ name: 'prefers-color-scheme', value: 'light' }],
+  });
+  await until(async () => (await theme()) === 'light', 'System light theme did not apply');
+  await desktop.call('Emulation.setEmulatedMedia', {
+    features: [{ name: 'prefers-color-scheme', value: 'dark' }],
+  });
+  await until(async () => (await theme()) === 'dark', 'System dark theme did not apply');
+  check('system theme responds to OS colour preference', true);
+  await desktop.evaluate(`document.querySelector('[data-theme-option="light"]').click()`);
+  await until(
+    async () => (await persistedTheme()).theme === 'light',
+    'Light theme did not persist',
+  );
+  check('explicit theme overrides system preference', (await theme()) === 'light');
+  await settledTheme();
+  await writeFile(path.join(root, 'home-light.png'), Buffer.from(await capture(), 'base64'));
+  await desktop.evaluate(`document.querySelector('[data-theme-option="dark"]').click()`);
+  await until(async () => (await persistedTheme()).theme === 'dark', 'Dark theme did not persist');
+  check(
+    'theme save preserves unrelated desktop preferences',
+    (await persistedTheme()).retainedSetting === 'desktop-acceptance',
+  );
   const homeImage = await capture();
   await writeFile(path.join(root, 'home.png'), Buffer.from(homeImage, 'base64'));
   await desktop.call('Input.dispatchKeyEvent', {
@@ -292,6 +328,46 @@ try {
     state.result.snapshot.scenes[0].nodes.length === 0 && state.result.diagnostics.length === 0,
   );
   const revision = state.result.snapshot.revision;
+  check('desktop theme survives project origin changes', (await theme()) === 'dark');
+  const frameHash = () =>
+    desktop.evaluate(
+      `(async()=>{const bytes=await (await fetch('/api/frame?frame=0&width=320&height=180&format=rgba')).arrayBuffer();return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),v=>v.toString(16).padStart(2,'0')).join('');})()`,
+    );
+  const beforeTheme = await frameHash();
+  await desktop.call('Input.dispatchKeyEvent', {
+    type: 'keyDown',
+    key: 'd',
+    code: 'KeyD',
+    modifiers: 3,
+  });
+  await desktop.call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'd', code: 'KeyD' });
+  await until(async () => (await theme()) === 'light', 'Theme shortcut did not apply');
+  await settledTheme();
+  check(
+    'Studio applies the light palette after the transition',
+    await desktop.evaluate(
+      `getComputedStyle(document.querySelector('.studio-app')).getPropertyValue('--vm-bg-1').trim()==='#f3f0e9'`,
+    ),
+  );
+  check(
+    'theme switching leaves video pixels and project revision unchanged',
+    (await frameHash()) === beforeTheme &&
+      (await desktop.evaluate(
+        `fetch('/api/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:'state'})}).then(r=>r.json()).then(r=>r.result.snapshot.revision)`,
+      )) === revision,
+  );
+  await writeFile(path.join(root, 'editor-light.png'), Buffer.from(await capture(), 'base64'));
+  await desktop.call('Input.dispatchKeyEvent', {
+    type: 'keyDown',
+    key: 'd',
+    code: 'KeyD',
+    modifiers: 3,
+  });
+  await desktop.call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'd', code: 'KeyD' });
+  await until(
+    async () => (await persistedTheme()).theme === 'dark',
+    'Theme shortcut save did not complete',
+  );
   check(
     'Studio exposes six creation modes on the shared project',
     JSON.stringify(
@@ -364,6 +440,7 @@ try {
   await desktop.close();
   desktop = await launch();
   check('restart defaults to home', await desktop.evaluate("location.hash === '#/welcome'"));
+  check('desktop restart restores explicit theme', (await theme()) === 'dark');
   await until(
     () => desktop.evaluate("document.querySelectorAll('.recent-projects > button').length === 2"),
     'Recent projects did not persist',
@@ -377,6 +454,139 @@ try {
     'Recent reopen failed',
   );
   check('reopens chosen project after restart', true);
+  if (process.argv.includes('--interaction')) {
+    const rpc = (method, params = {}) =>
+      desktop.evaluate(
+        `fetch('/api/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(${JSON.stringify({ method, params })})}).then(r=>r.json()).then(r=>{if(r.error)throw Error(r.error.message);return r.result})`,
+      );
+    await click('动效');
+    await desktop.evaluate(`document.querySelector('[aria-label="Shape"]').click()`);
+    await until(
+      () => desktop.evaluate(`!!document.querySelector('.selection-handle')`),
+      'Created shape did not become selected',
+    );
+    const original = (await rpc('state')).snapshot.scenes[0].nodes.find((n) => n.type === 'rect');
+    assert.ok(original);
+    await rpc('transact', {
+      operations: [
+        {
+          type: 'addNode',
+          sceneId: 'intro',
+          node: {
+            id: 'ui-handle-cover',
+            name: 'Handle cover',
+            type: 'rect',
+            x: original.x + original.width - 60,
+            y: original.y + original.height - 60,
+            width: 120,
+            height: 120,
+            fill: '#f06060',
+          },
+        },
+      ],
+    });
+    await until(
+      () =>
+        desktop.evaluate(
+          `Array.from(document.querySelectorAll('.layer-name')).some(b=>b.textContent==='Handle cover')`,
+        ),
+      'Overlapping layer did not sync',
+    );
+    const readCorner = () =>
+      desktop.evaluate(
+        `(()=>{const h=document.querySelector('.selection-handle[data-node-id="${original.id}"][data-handle="3"]'),r=h.getBoundingClientRect(),s=document.querySelector('.canvas-interaction').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,scale:s.width/1280,stageX:s.x,stageY:s.y};})()`,
+      );
+    let corner = await readCorner();
+    const drag = async (dx, dy, cancel = false) => {
+      await desktop.call('Input.dispatchMouseEvent', {
+        type: 'mousePressed',
+        x: corner.x,
+        y: corner.y,
+        button: 'left',
+        buttons: 1,
+        clickCount: 1,
+      });
+      await desktop.call('Input.dispatchMouseEvent', {
+        type: 'mouseMoved',
+        x: corner.x + dx,
+        y: corner.y + dy,
+        button: 'left',
+        buttons: 1,
+      });
+      if (cancel) {
+        await desktop.call('Input.dispatchKeyEvent', {
+          type: 'keyDown',
+          key: 'Escape',
+          code: 'Escape',
+        });
+        await desktop.call('Input.dispatchKeyEvent', {
+          type: 'keyUp',
+          key: 'Escape',
+          code: 'Escape',
+        });
+      }
+      await desktop.call('Input.dispatchMouseEvent', {
+        type: 'mouseReleased',
+        x: corner.x + dx,
+        y: corner.y + dy,
+        button: 'left',
+        buttons: 0,
+        clickCount: 1,
+      });
+    };
+    await drag(24, 18);
+    await until(
+      async () =>
+        (await rpc('state')).snapshot.scenes[0].nodes.find((n) => n.id === original.id).width >
+        original.width,
+      'Native corner drag did not resize the selected layer',
+    );
+    const resized = (await rpc('state')).snapshot.scenes[0].nodes.find((n) => n.id === original.id);
+    check(
+      'native handle drag wins over overlapping layers and fixes the opposite corner',
+      resized.x === original.x &&
+        resized.y === original.y &&
+        Math.abs(resized.width - original.width - 24 / corner.scale) < 0.1 &&
+        Math.abs(resized.height - original.height - 18 / corner.scale) < 0.1,
+    );
+    await desktop.evaluate(`document.querySelector('.topbar [aria-label="Undo"]').click()`);
+    await until(
+      async () =>
+        (await rpc('state')).snapshot.scenes[0].nodes.find((n) => n.id === original.id).width ===
+        original.width,
+      'Resize undo did not restore dimensions',
+    );
+    const beforeCancel = (await rpc('state')).snapshot.revision;
+    corner = await until(async () => {
+      const current = await readCorner();
+      return (
+        Math.abs((current.x - current.stageX) / current.scale - original.x - original.width) <
+          0.1 &&
+        Math.abs((current.y - current.stageY) / current.scale - original.y - original.height) <
+          0.1 &&
+        current
+      );
+    }, 'Selection bounds did not return after undo');
+    await drag(20, 20, true);
+    check(
+      'Escape cancels resize without a project transaction',
+      (await rpc('state')).snapshot.revision === beforeCancel,
+    );
+    await rpc('undo');
+    await rpc('undo');
+    check(
+      'interaction checks restore the original blank scene',
+      (await rpc('state')).snapshot.scenes[0].nodes.length === 0,
+    );
+    await until(
+      () => desktop.evaluate(`document.querySelectorAll('.layer-name').length===0`),
+      'UI did not restore the blank layer list',
+    );
+    const playhead = await desktop.evaluate(
+      `(()=>{const p=document.querySelector('.tl-playhead'),a=p.getBoundingClientRect(),b=p.querySelector('span').getBoundingClientRect();return Math.abs(a.x+a.width/2-b.x-b.width/2);})()`,
+    );
+    check('timeline knob stays centred on the playhead line', playhead < 0.1);
+  }
   if (process.argv.includes('--plugins')) {
     const rpc = (method, params = {}) =>
         desktop.evaluate(
