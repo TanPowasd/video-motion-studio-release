@@ -24,6 +24,7 @@ it('publishes an explicit product snapshot including both licensed UIs and exclu
     'scripts/build-audio.ps1',
     'tests/core.test.ts',
     'examples/science/project.vmotion.json',
+    'skills/vmotion/SKILL.md',
     'LICENSE',
   ])
     expect(publishableSource(file), file).toBe(true);

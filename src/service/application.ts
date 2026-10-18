@@ -1,3 +1,5 @@
+import { encoderCapabilities, probeVideoEncoders } from '../media/video-encoder.js';
+import { videoCodecs, type VideoCodec } from '../core/video-export-schema.js';
 import { EventEmitter } from 'node:events';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
@@ -34,12 +36,16 @@ import {
 } from '../mcp/discovery.js';
 import { agentDiscoverySchema } from './surfaces.js';
 import { invokeTool, toolCallSchema } from '../mcp/invoke.js';
+import { parseArguments } from '../mcp/argument-errors.js';
 import { z } from 'zod';
 import { resolveAgentPlan } from './agent-plans.js';
 import { audioSourceFile } from '../media/sound-source.js';
 import { ProxyManager } from '../media/proxy-cache.js';
 import { applyCacheCleanup } from './cache-management.js';
 import { builtinPlugins } from '../plugins/index.js';
+import type { BuiltinPluginHost } from '../plugins/types.js';
+import { builtinCandidate } from '../plugins/candidate.js';
+import { capturedPlanTools } from '../mcp/tool-definition.js';
 import { PluginRegistry } from '../core/plugins.js';
 import { pluginCatalog, callPluginTool } from './plugins.js';
 import { projectPluginTools } from '../mcp/plugin-tools.js';
@@ -148,9 +154,12 @@ export class Application extends EventEmitter {
     this.service.extraValidation = async (snapshot) => {
       try {
         const typed = this.renderer.components.typecheck(snapshot);
-        if (typed.length) return typed;
+        if (typed.some((d) => d.severity === 'error')) return typed;
         await this.renderer.components.validate(snapshot);
-        return this.plugins.resolve(snapshot).flatMap((entry) => entry.metadataWarnings);
+        return [
+          ...typed,
+          ...this.plugins.resolve(snapshot).flatMap((entry) => entry.metadataWarnings),
+        ];
       } catch (e) {
         return [
           {
@@ -379,10 +388,92 @@ export class Application extends EventEmitter {
   async dispatchTyped<M extends RpcMethod>(method: M, params: RpcInput<M>): Promise<RpcOutput<M>> {
     return (await this.dispatch(method, params)) as RpcOutput<M>;
   }
+  /** Run one captured-plan write handler with its single transaction recorded, not committed. */
+  private async capturePlan(raw: unknown) {
+    const request = z
+      .object({ method: z.string().min(1), params: z.record(z.unknown()).default({}) })
+      .strict()
+      .parse(raw);
+    const tool = this.builtinTools.find((t) => t.method === request.method);
+    if (!tool || !capturedPlanTools.has(tool.name) || !builtinPlugins.hasMethod(request.method))
+      throw new VmotionError('PLAN_MODE', 'mode=plan is not available for this capability', {
+        method: request.method,
+      });
+    const snapshot = this.service.snapshot,
+      signal = Symbol('captured');
+    let captured: { operations: Operation[]; revision?: string } | undefined;
+    const transact = async (operations: Operation[], revision?: string) => {
+      if (captured)
+        throw new VmotionError('PLAN_MODE', 'mode=plan supports one transaction per call');
+      captured = { operations: structuredClone(operations), revision };
+      throw signal;
+    };
+    const service = this.service,
+      coreService = new Proxy(service, {
+        get(target, key) {
+          if (key === 'transact') return transact;
+          const value = Reflect.get(target, key, target);
+          return typeof value === 'function' ? value.bind(target) : value;
+        },
+      });
+    try {
+      await builtinPlugins.dispatch(
+        this.pluginHost({
+          transact: transact as BuiltinPluginHost['transact'],
+          coreService: coreService as BuiltinPluginHost['coreService'],
+          select: () => {
+            throw signal;
+          },
+        }),
+        request.method,
+        request.params,
+      );
+    } catch (e) {
+      if (e !== signal) throw e;
+    }
+    if (!captured)
+      throw new VmotionError('PLAN_MODE', 'This call produced no project transaction to plan');
+    if (captured.revision && captured.revision !== snapshot.revision)
+      throw new VmotionError('REVISION_CONFLICT', 'Project changed before planning', {
+        expected: captured.revision,
+        actual: snapshot.revision,
+      });
+    const candidate = applyOperations(this.root, snapshot, captured.operations),
+      p = request.params,
+      sceneId = typeof p.sceneId === 'string' ? p.sceneId : undefined,
+      frame = typeof p.frame === 'number' && p.frame >= 0 ? p.frame : 0,
+      samples =
+        sceneId && candidate.scenes.some((scene) => scene.id === sceneId)
+          ? [
+              {
+                sceneId,
+                frame,
+                path: Array.isArray(p.path) ? (p.path as string[]) : [],
+                contextFrames: Array.isArray(p.contextFrames) ? (p.contextFrames as number[]) : [],
+              },
+            ]
+          : [];
+    return builtinCandidate(
+      this.root,
+      { revision: snapshot.revision, operations: captured.operations, samples, width: 320 },
+      candidate.revision,
+      'stored',
+      { captured: tool.name },
+    );
+  }
+  private pluginHost(overrides: Partial<BuiltinPluginHost> = {}): BuiltinPluginHost {
+    return {
+      ...this.basePluginHost(),
+      ...overrides,
+    };
+  }
   private async dispatchImpl(method: string, params: unknown = {}): Promise<unknown> {
     if (builtinPlugins.hasMethod(method))
-      return builtinPlugins.dispatch(
-        {
+      return builtinPlugins.dispatch(this.pluginHost(), method, params);
+    return this.dispatchHost(method, params);
+  }
+  private basePluginHost(): BuiltinPluginHost {
+    return {
           root: this.root,
           renderer: this.renderer,
           snapshot: this.service.snapshot,
@@ -423,10 +514,9 @@ export class Application extends EventEmitter {
           candidateSnapshot: (params) => this.candidateSnapshot(params),
           withMediaTask: (work) => this.withMediaTask(work),
           edit: (s, scene, frame, edits) => this.compositionOperations(s, scene, frame, edits),
-        },
-        method,
-        params,
-      );
+    };
+  }
+  private async dispatchHost(method: string, params: unknown = {}): Promise<unknown> {
     if (method.startsWith('plugin:')) {
       const [, id, toolId] = method.split(':');
       return callPluginTool(
@@ -444,6 +534,8 @@ export class Application extends EventEmitter {
         ? (params as Record<string, unknown>)
         : {};
     switch (method) {
+      case 'agentPlanCapture':
+        return this.capturePlan(params);
       case 'pluginCatalog':
         return pluginCatalog(
           this.plugins,
@@ -456,6 +548,19 @@ export class Application extends EventEmitter {
           this.service.snapshot,
           typeof input.ifHash === 'string' ? input.ifHash : undefined,
         );
+      case 'encoderProbe': {
+        // Editor/CLI only (not an MCP tool): real hardware encoder probe table, cached per process.
+        const codecs = Array.isArray(input.codecs)
+          ? input.codecs.filter((c): c is VideoCodec => videoCodecs.includes(c as VideoCodec))
+          : undefined;
+        return {
+          ...(await probeVideoEncoders({
+            codecs: codecs?.length ? codecs : undefined,
+            bitDepth: input.bitDepth === 10 ? 10 : undefined,
+          })),
+          capabilities: encoderCapabilities(),
+        };
+      }
       case 'ping':
         // Optional `agent` lets an MCP server announce its client for the Studio's
         // connection pill. Older callers send no params and get the same answer.
@@ -505,9 +610,33 @@ export class Application extends EventEmitter {
               request.intent ??
               (typeof request.arguments.intent === 'string' ? request.arguments.intent : undefined),
           };
+        const definitions = [...this.builtinTools, ...this.pluginDefinitions()];
+        // CLI/bridge parity with MCP: read-only entry tools are callable by name too.
+        if (request.name === 'tools_search' || request.name === 'tool_schema') {
+          const value =
+            request.name === 'tools_search'
+              ? searchTools(definitions, request.arguments)
+              : toolSchema(
+                  definitions,
+                  String(request.arguments.name ?? ''),
+                  parseArguments('tool_schema', toolSchemaRequestSchema, request.arguments),
+                );
+          return {
+            value,
+            result: {
+              structuredContent: value as Record<string, unknown>,
+              content: [{ type: 'text' as const, text: JSON.stringify(value) }],
+            },
+          };
+        }
+        if (request.name === 'tools_load' || request.name === 'tool_call')
+          throw new VmotionError(
+            'TOOL_ARGUMENTS',
+            `${request.name} is an MCP connection entry tool; pass the capability name directly`,
+          );
         return withChangeOrigin(origin, () =>
           invokeTool(
-            findTool([...this.builtinTools, ...this.pluginDefinitions()], request.name),
+            findTool(definitions, request.name),
             request.arguments,
             (method, args) => this.dispatch(method, args),
             {
@@ -515,6 +644,7 @@ export class Application extends EventEmitter {
               inline: request.inline,
               fields: request.fields,
               media: request.media,
+              root: this.root,
             },
           ),
         );
@@ -584,7 +714,8 @@ export class Application extends EventEmitter {
           scope: 'point-effects',
           fullSceneGpu: false,
         },
-        workspaces: ['animation', 'editing', 'music', 'drawing','code'],
+        videoEncode: encoderCapabilities(),
+        workspaces: ['animation', 'editing', 'music', 'drawing', 'code'],
         agentWorkbench: '/agent/',
         aiIntegration: false,
         animationTools: [

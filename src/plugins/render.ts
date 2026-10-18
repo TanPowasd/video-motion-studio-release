@@ -7,6 +7,11 @@ import { compareRendering, renderCompareSchema } from '../service/render-compare
 import { profileRendering, renderProfileSchema } from '../service/render-profile.js';
 import { exportStill, imageExportSchema } from '../service/stills.js';
 import { defineRpcHandler, invokeRpcHandler } from './rpc-handler.js';
+import {
+  encoderRequestSchema,
+  videoCodecSchema,
+  videoQualitySchema,
+} from '../core/video-export-schema.js';
 import type { BuiltinPluginModule } from './types.js';
 
 const renderStatus = z.enum(['queued', 'running', 'completed', 'cancelled', 'failed']);
@@ -88,7 +93,7 @@ export const renderPlugin: BuiltinPluginModule = {
         method: 'renderCompare',
         schema: renderCompareSchema.shape,
         description:
-          'Compare pinned CPU/GPU graph runtime and sampled frames: default exact hashes, explicit pixelTolerance for premultiplied SDR differences, local timings including native transfers, fused/readback/scalar work, adapter/fallback/correction evidence and bounded node locators. baseline/optimized.gpu selects cpu/auto/gpu; tolerance comparison retains at most 32M baseline pixels. Checks media before/after. detail opts into pairs; no saved edits.',
+          'Compare pinned CPU/GPU graph runtime and sampled frames: default exact hashes, explicit pixelTolerance for premultiplied SDR differences, local timings including native transfers, fused/readback/scalar work, adapter/fallback/correction evidence and bounded node locators. baseline/optimized.gpu selects cpu/auto/gpu; baseline/optimized.encoder opts into video encode timing (other side software) with used encoder and wall time; tolerance comparison retains at most 32M baseline pixels. Checks media before/after. detail opts into pairs; no saved edits.',
         categories: ['render', 'effects'],
         keywords:
           '优化 对照 性能 像素 等价 区域 分块 旁路 显卡 硬件 GPU D3D Direct3D compare profile optimize ROI keyer',
@@ -120,7 +125,7 @@ export const renderPlugin: BuiltinPluginModule = {
         method: 'renderProfile',
         schema: renderProfileSchema.shape,
         description:
-          'Measure pinned scene/sequence/focused frames or exact candidates with gpu=cpu/auto/gpu. Reports actual hardware point-kernel fusion, transfers/readback, CPU rounding correction/fallbacks, warm/cold wall time, bounded surfaces and repeated pixel hashes. Timing includes GPU transport. Default CPU compact evidence; detail opts into rounds. Full-scene GPU remains unsupported; no quality reduction or frame-result cache.',
+          'Measure pinned scene/sequence/focused frames or exact candidates with gpu=cpu/auto/gpu. Reports actual hardware point-kernel fusion, transfers/readback, CPU rounding correction/fallbacks, warm/cold wall time, bounded surfaces and repeated pixel hashes. Timing includes GPU transport. encoder=auto/software/nvenc/… opts into videoEncode (used encoder, fallbackReason, encodeFrames wall time). Default CPU compact evidence; detail opts into rounds. Full-scene GPU remains unsupported; no quality reduction or frame-result cache.',
         keywords: '显卡 GPU Direct3D D3D 硬件 渲染 性能 profile render point effects',
 
         categories: ['effects', 'composition', 'render'],
@@ -149,7 +154,7 @@ export const renderPlugin: BuiltinPluginModule = {
       {
         name: 'render_start',
         description:
-          'Start a cancellable pinned render with checkpoint resume and explicit gpu=cpu/auto/gpu point effects. GPU runtime/adapter identity is fixed for resume, execution loss fails the task and preserves checkpoints. Supply the accepted revision to reject intervening edits. render_status includes final GPU evidence; other graphics/video encoding keep existing CPU/FFmpeg paths.',
+          'Start a cancellable pinned render with checkpoint resume, explicit gpu=cpu/auto/gpu point effects and MP4 encoder=auto|software|nvenc|qsv|amf|mediafoundation|videotoolbox|vaapi (or an FFmpeg encoder name), codec h264/hevc/av1 and quality {crf,bitrateKbps,preset,keyframeInterval,bitDepth}; omitted fields use project videoExport, then VMOTION_ENCODER, then auto. auto probes hardware with a real test encode and otherwise uses software; explicit hardware errors when unavailable. GPU and encoder identity are fixed for resume; execution loss fails the task, keeps checkpoints and never mixes encoders. Supply the accepted revision to reject intervening edits. render_status reports encoder requested/used/fallbackReason/probe and GPU evidence.',
         method: 'render',
         schema: {
           output: z.string(),
@@ -158,14 +163,16 @@ export const renderPlugin: BuiltinPluginModule = {
           end: z.number().int().positive().optional(),
           width: z.number().int().optional(),
           height: z.number().int().optional(),
-          encoder: z.string().optional(),
+          encoder: encoderRequestSchema.optional(),
+          codec: videoCodecSchema.optional(),
+          quality: videoQualitySchema.optional(),
           resume: z.boolean().optional(),
           gpu: z.enum(['cpu', 'auto', 'gpu']).optional(),
           revision: z.string().optional(),
         },
 
         categories: ['render'],
-        keywords: '导出 渲染 视频 编码',
+        keywords: '导出 渲染 视频 编码 硬件编码 NVENC QSV AMF HEVC AV1 encoder',
         annotations: {
           readOnlyHint: false,
           destructiveHint: false,
@@ -285,7 +292,9 @@ export const renderRpcHandlers = {
         end: z.number().int().positive().optional(),
         width: z.number().int().optional(),
         height: z.number().int().optional(),
-        encoder: z.string().optional(),
+        encoder: encoderRequestSchema.optional(),
+        codec: videoCodecSchema.optional(),
+        quality: videoQualitySchema.optional(),
         resume: z.boolean().optional(),
         gpu: z.enum(['cpu', 'auto', 'gpu']).optional(),
         revision: z.string().optional(),
@@ -312,6 +321,8 @@ export const renderRpcHandlers = {
         width: params.width,
         height: params.height,
         encoder: params.encoder,
+        codec: params.codec,
+        quality: params.quality,
         resume: params.resume,
         revision: params.revision,
         gpu: params.gpu,

@@ -1,0 +1,23 @@
+[package]
+name = "vmotion-layout"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Flexbox/grid layout for Vmotion JSX (taffy), compiled to wasm32-unknown-unknown"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+taffy = { version = "0.9", default-features = false, features = ["std", "flexbox", "grid", "block_layout", "content_size"] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+# Vendored + patched by scripts/build-layout-wasm.mjs (see patches/taffy.mjs).
+[patch.crates-io]
+taffy = { path = "vendor/taffy" }

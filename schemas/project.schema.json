@@ -209,6 +209,69 @@
             "samples"
           ],
           "additionalProperties": false
+        },
+        "videoExport": {
+          "type": "object",
+          "properties": {
+            "encoder": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "software",
+                "nvenc",
+                "qsv",
+                "amf",
+                "mediafoundation",
+                "videotoolbox",
+                "vaapi"
+              ]
+            },
+            "codec": {
+              "type": "string",
+              "enum": [
+                "h264",
+                "hevc",
+                "av1"
+              ]
+            },
+            "quality": {
+              "type": "object",
+              "properties": {
+                "crf": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 63
+                },
+                "bitrateKbps": {
+                  "type": "integer",
+                  "minimum": 100,
+                  "maximum": 400000
+                },
+                "preset": {
+                  "type": "string",
+                  "enum": [
+                    "speed",
+                    "balanced",
+                    "quality"
+                  ]
+                },
+                "keyframeInterval": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1200
+                },
+                "bitDepth": {
+                  "type": "number",
+                  "enum": [
+                    8,
+                    10
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": [

@@ -43,7 +43,7 @@ export const animationReference = {
     {
       name: 'vmotion.audio / builtin registry',
       purpose:
-        'All 12 sound/music/mix/timeline/evidence tools use the audio builtin module and the same host candidate/media guards. Eighteen modules dispatch all 147 capabilities through a validated tool/method/dependency registry; core/recovery/cache/review use shared host services. project_diagnostics pages compact diagnostic/conflict/pending-file evidence with detail opt-in; queries preserve history and source. audio_timeline pages 24 clips by default with exact rational sample clocks; includeAll opts into full data.',
+        'All 12 sound/music/mix/timeline/evidence tools use the audio builtin module and the same host candidate/media guards. Eighteen modules dispatch all 148 capabilities through a validated tool/method/dependency registry; core/recovery/cache/review use shared host services. project_diagnostics pages compact diagnostic/conflict/pending-file evidence with detail opt-in; queries preserve history and source. audio_timeline pages 24 clips by default with exact rational sample clocks; includeAll opts into full data.',
     },
     {
       name: 'vmotion.editing / vmotion.render',

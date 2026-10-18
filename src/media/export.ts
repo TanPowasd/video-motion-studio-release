@@ -13,7 +13,9 @@ import { renderAudio } from './audio.js';
 export { audioClips } from './audio.js';
 import { atomicWrite, hash, json, safePath } from '../platform/project-files.js';
 import { validateSnapshot } from '../service/project.js';
-import { ffmpegBinary, runProcess, probe, fingerprint } from './ffmpeg.js';
+import { ffmpegBinary, runProcess, fingerprint } from './ffmpeg.js';
+import type { VideoCodec, VideoQuality } from '../core/video-export-schema.js';
+import { encoderEvidence, resolveVideoEncoder, type EncoderResolution } from './video-encoder.js';
 
 export interface RenderOptions {
   output: string;
@@ -22,7 +24,10 @@ export interface RenderOptions {
   end?: number;
   width?: number;
   height?: number;
+  /** auto|software|nvenc|qsv|amf|mediafoundation|videotoolbox|vaapi, or a raw FFmpeg encoder name. */
   encoder?: string;
+  codec?: VideoCodec;
+  quality?: VideoQuality;
   resume?: boolean;
   revision?: string;
   gpu?: GpuMode;
@@ -38,31 +43,18 @@ export interface RenderJob {
   error?: string;
   stage: string;
   gpu?: ReturnType<Renderer['performanceInfo']>['gpu'];
+  /** MP4 only: requested/used encoder, fallback reason, probe rows and encode timing. */
+  encoder?: ReturnType<typeof encoderEvidence> & {
+    segments: number;
+    encodedSegments: number;
+    resumedSegments: number;
+    /** Wall time from encoder spawn to close summed over encoded segments (includes rendering fed to it). */
+    segmentWallMs: number;
+    /** Time the render loop was blocked on encoder backpressure plus the final flush. */
+    encoderWaitMs: number;
+  };
   startedAt: string;
   finishedAt?: string;
-}
-async function encoderArgs(encoder?: string) {
-  const list = (await runProcess(ffmpegBinary(), ['-v', 'quiet', '-encoders'])).toString();
-  if (encoder && !new RegExp(`\\b${encoder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(list))
-    throw new VmotionError(
-      'NO_ENCODER',
-      `Requested encoder is unavailable in this media runtime: ${encoder}`,
-    );
-  if (encoder)
-    return [
-      '-c:v',
-      encoder,
-      ...(encoder === 'libx264' ? ['-preset', 'veryfast', '-crf', '18'] : ['-b:v', '20M']),
-    ];
-  const found = ['libopenh264', 'libx264', 'h264_mf', 'mpeg4'].find((e) =>
-    new RegExp(`\\b${e}\\b`).test(list),
-  );
-  if (!found) throw new VmotionError('NO_ENCODER', 'No supported video encoder is available');
-  return [
-    '-c:v',
-    found,
-    ...(found === 'libx264' ? ['-preset', 'veryfast', '-crf', '18'] : ['-b:v', '20M']),
-  ];
 }
 export class RenderManager {
   jobs = new Map<string, RenderJob>();
@@ -161,6 +153,26 @@ export class RenderManager {
         renderer.native.binary,
         {...await renderer.gpu.identity(),programRuntime:await renderer.programs.identity(snapshot)},
       );
+      let video: EncoderResolution | undefined;
+      if (options.format === 'mp4') {
+        job.stage = 'encoder-probe';
+        this.onChange();
+        const defaults = snapshot.project.videoExport;
+        video = await resolveVideoEncoder({
+          encoder: options.encoder ?? defaults?.encoder,
+          codec: options.codec ?? defaults?.codec,
+          quality: { ...defaults?.quality, ...options.quality },
+        });
+        job.encoder = {
+          ...encoderEvidence(video),
+          segments: 0,
+          encodedSegments: 0,
+          resumedSegments: 0,
+          segmentWallMs: 0,
+          encoderWaitMs: 0,
+        };
+        if (signal.aborted) throw new VmotionError('CANCELLED', 'Render cancelled');
+      }
       const key = hash(
           snapshot.revision +
             json({
@@ -171,6 +183,7 @@ export class RenderManager {
               width: options.width,
               height: options.height,
               encoder: options.encoder,
+              ...(video ? { video: video.identity } : {}),
               assets: [...sourceFingerprints.entries()],
               runtime: runtime.fingerprint,
             }),
@@ -179,6 +192,8 @@ export class RenderManager {
       await mkdir(cache, { recursive: true });
       await atomicWrite(path.join(cache, 'snapshot.json'), json(snapshot));
       await atomicWrite(path.join(cache, 'runtime.json'), json(runtime));
+      const videoIdentity = video ? hash(json(video.identity)) : undefined;
+      if (video) await atomicWrite(path.join(cache, 'encoder.json'), json(video.identity));
       await mkdir(path.dirname(options.output), { recursive: true });
       if (options.format === 'wav') {
         job.stage = 'audio';
@@ -213,6 +228,7 @@ export class RenderManager {
             if (
               saved.revision === snapshot.revision &&
               saved.runtime === runtime.fingerprint &&
+              saved.encoder === videoIdentity &&
               Array.isArray(saved.completed) &&
               saved.completed.every(
                 (i: unknown) => typeof i === 'number' && Number.isInteger(i) && i >= 0,
@@ -229,7 +245,9 @@ export class RenderManager {
             Math.round((snapshot.project.fps.num / snapshot.project.fps.den) * 5),
           ),
           segments: string[] = [],
-          codec = await encoderArgs(options.encoder);
+          codec = video!.args,
+          evidence = job.encoder!,
+          hevc = video!.codec === 'hevc';
         for (
           let begin = options.start, index = 0;
           begin < options.end;
@@ -239,19 +257,22 @@ export class RenderManager {
           const end = Math.min(begin + segmentSize, options.end),
             file = path.join(cache, `segment-${String(index).padStart(6, '0')}.mp4`);
           segments.push(file);
+          evidence.segments = segments.length;
           let exists = false;
           try {
             exists = (await stat(file)).size > 0;
           } catch {}
           if (!completed.includes(index) || !exists) {
             job.stage = 'video';
-            const partial = file + '.partial';
+            const partial = file + '.partial',
+              segmentStarted = performance.now();
             const child = spawn(
               ffmpegBinary(),
               [
                 '-y',
                 '-v',
                 'error',
+                ...codec.input,
                 '-f',
                 'rawvideo',
                 '-pix_fmt',
@@ -263,9 +284,7 @@ export class RenderManager {
                 '-i',
                 'pipe:0',
                 '-an',
-                ...codec,
-                '-pix_fmt',
-                'yuv420p',
+                ...codec.output,
                 '-f',
                 'mp4',
                 partial,
@@ -279,7 +298,13 @@ export class RenderManager {
               child.on('close', (code) =>
                 code === 0
                   ? resolve()
-                  : reject(new VmotionError('ENCODE_FAILED', stderr || `Encoder exited ${code}`)),
+                  : reject(
+                      new VmotionError(
+                        'ENCODE_FAILED',
+                        `${video!.used} failed in segment ${index} (no encoder fallback inside a started export; completed checkpoints kept): ${stderr.trim() || `exit ${code}`}`,
+                        { encoder: video!.used, segment: index },
+                      ),
+                    ),
               );
             });
             closed.catch(() => {});
@@ -292,22 +317,34 @@ export class RenderManager {
                 const ok = child.stdin.write(
                   Buffer.from(pixels.buffer, pixels.byteOffset, pixels.byteLength),
                 );
-                if (!ok)
+                if (!ok) {
+                  const waitStarted = performance.now();
                   await Promise.race([
                     once(child.stdin, 'drain'),
                     closed.then(() => {
                       throw new VmotionError(
                         'ENCODE_FAILED',
-                        'Encoder exited before all frames were written',
+                        `${video!.used} exited before all frames were written`,
+                        { encoder: video!.used, segment: index },
                       );
                     }),
-                  ]);
+                  ]).catch(async (e) => {
+                    // A dying encoder surfaces first as stdin EPIPE; report its stderr instead.
+                    await closed;
+                    throw e;
+                  });
+                  evidence.encoderWaitMs += performance.now() - waitStarted;
+                }
                 job.frame = frame + 1;
                 job.progress = (0.9 * (frame + 1 - options.start)) / (options.end - options.start);
                 this.onChange();
               }
               child.stdin.end();
+              const flushStarted = performance.now();
               await closed;
+              evidence.encoderWaitMs += performance.now() - flushStarted;
+              evidence.segmentWallMs += performance.now() - segmentStarted;
+              evidence.encodedSegments++;
               await rename(partial, file);
             } catch (e) {
               child.kill();
@@ -316,14 +353,22 @@ export class RenderManager {
             completed.push(index);
             await atomicWrite(
               checkpoint,
-              json({ revision: snapshot.revision, runtime: runtime.fingerprint, completed }),
+              json({
+                revision: snapshot.revision,
+                runtime: runtime.fingerprint,
+                ...(videoIdentity ? { encoder: videoIdentity } : {}),
+                completed,
+              }),
             );
           } else {
+            evidence.resumedSegments++;
             job.frame = end;
             job.progress = (0.9 * (end - options.start)) / (options.end - options.start);
             this.onChange();
           }
         }
+        evidence.segmentWallMs = Math.round(evidence.segmentWallMs);
+        evidence.encoderWaitMs = Math.round(evidence.encoderWaitMs);
         await verify();
         job.stage = 'audio';
         this.onChange();
@@ -356,6 +401,7 @@ export class RenderManager {
             '1:a:0',
             '-c:v',
             'copy',
+            ...(hevc ? ['-tag:v', 'hvc1'] : []),
             '-c:a',
             'aac',
             '-b:a',

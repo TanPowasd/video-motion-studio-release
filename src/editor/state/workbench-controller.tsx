@@ -471,7 +471,7 @@ export function useWorkbenchController() {
   }, [node?.id, node?.component, node?.templateInstance?.source, snapshot?.revision]);
   useEffect(() => {
     if (!snapshot || codeDirty) return;
-    const file = codePath || Object.keys(snapshot.files).find((f) => f.endsWith('.ts')) || '';
+    const file = codePath || Object.keys(snapshot.files).find((f) => /\.tsx?$/.test(f)) || '';
     setCodePath(file);
     const ticket = ++codeBaseTicket.current;
     const content = state?.pendingFiles?.[file] ?? snapshot.files[file] ?? '';

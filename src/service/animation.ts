@@ -30,9 +30,22 @@ export const animationEditSchema = z
 export const animationInspectSchema = z
   .object({
     offset: z.number().int().nonnegative().default(0),
-    limit: z.number().int().min(1).max(1000).default(200),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(1000)
+      .optional()
+      .describe(
+        'Keys per channel with nodeId (default 200); animated nodes per page without it (default 30, max 200)',
+      ),
     sceneId: z.string(),
-    nodeId: z.string(),
+    nodeId: z
+      .string()
+      .optional()
+      .describe(
+        'Omit for a paged scene-wide overview of animated layers (channels, key counts, frame ranges)',
+      ),
     path: z.array(z.string()).max(32).default([]),
     contextFrames: contextFramesSchema.default([]),
     frame: z.number().finite().nonnegative().default(0),
@@ -112,8 +125,90 @@ export async function animationEdits(renderer: Renderer, snapshot: Snapshot, raw
   }
   return { request, edits };
 }
+/** Scene/scope-wide overview: which layers animate what, without key arrays. */
+async function animationOverview(
+  renderer: Renderer,
+  snapshot: Snapshot,
+  request: z.infer<typeof animationInspectSchema>,
+) {
+  const scope = await renderer.inspectComposition(
+      snapshot,
+      request.sceneId,
+      request.frame,
+      request.path,
+      request.contextFrames,
+    ),
+    limit = Math.min(request.limit ?? 30, 200),
+    range = (frames: number[]) =>
+      frames.length ? [Math.min(...frames), Math.max(...frames)] : undefined,
+    animated = scope.scene.nodes
+      .map((node) => {
+        const channels = (node.animations ?? [])
+            .filter((a) => !request.properties || request.properties.includes(a.property))
+            .map((a) => ({
+              property: a.property,
+              keyCount: a.keys.length,
+              frameRange: range(a.keys.map((k) => k.frame)),
+            })),
+          layers = node.animationLayers?.length ?? 0,
+          expressions = Object.keys(node.expressions ?? {}).length,
+          frames = (node.animations ?? []).flatMap((a) => a.keys.map((k) => k.frame));
+        return {
+          id: node.id,
+          name: node.name,
+          type: node.type,
+          channels,
+          ...(layers ? { animationLayers: layers } : {}),
+          ...(expressions ? { expressions } : {}),
+          ...(node.motionPath ? { motionPath: true } : {}),
+          frameRange: range(frames),
+        };
+      })
+      .filter(
+        (node) =>
+          node.channels.length ||
+          (!request.properties && (node.animationLayers || node.expressions || node.motionPath)),
+      ),
+    page = animated.slice(request.offset, request.offset + limit);
+  return {
+    revision: snapshot.revision,
+    sceneId: request.sceneId,
+    path: request.path,
+    frame: request.frame,
+    fps: snapshot.project.fps.num / snapshot.project.fps.den,
+    layersInScope: scope.scene.nodes.length,
+    total: animated.length,
+    offset: request.offset,
+    limit,
+    nodes: page,
+    truncated: request.offset + limit < animated.length,
+    ...(request.offset + limit < animated.length ? { nextOffset: request.offset + limit } : {}),
+    next: 'Pass nodeId (and frames/properties) for keys and sampled values of one layer; animation_edit changes keys.',
+  };
+}
+/** animation_inspect: one layer with nodeId, otherwise the scope overview. */
+export type AnimationOverview = Awaited<ReturnType<typeof animationOverview>>;
+export async function inspectAnimationRequest(
+  renderer: Renderer,
+  snapshot: Snapshot,
+  raw: unknown,
+): Promise<Awaited<ReturnType<typeof inspectAnimation>>> {
+  const parsed = animationInspectSchema.parse(raw);
+  // Typed RPC callers always pass nodeId; agents omitting it get the overview shape at runtime.
+  return parsed.nodeId === undefined
+    ? ((await animationOverview(renderer, snapshot, parsed)) as unknown as Awaited<
+        ReturnType<typeof inspectAnimation>
+      >)
+    : inspectAnimation(renderer, snapshot, parsed);
+}
 export async function inspectAnimation(renderer: Renderer, snapshot: Snapshot, raw: unknown) {
-  const request = animationInspectSchema.parse(raw),
+  const parsed = animationInspectSchema.parse(raw);
+  if (parsed.nodeId === undefined)
+    throw new VmotionError(
+      'NOT_FOUND',
+      'nodeId is required for one layer; omit it for the overview',
+    );
+  const request = { ...parsed, nodeId: parsed.nodeId, limit: parsed.limit ?? 200 },
     node = await animationNode(
       renderer,
       snapshot,

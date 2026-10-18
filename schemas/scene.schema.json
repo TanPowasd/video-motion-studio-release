@@ -4089,6 +4089,14 @@
               "source": {
                 "type": "string"
               },
+              "fit": {
+                "type": "string",
+                "enum": [
+                  "fill",
+                  "contain",
+                  "cover"
+                ]
+              },
               "sceneId": {
                 "$ref": "#/definitions/scene/properties/id"
               },
@@ -5418,6 +5426,9 @@
                         },
                         "source": {
                           "$ref": "#/definitions/scene/properties/nodes/items/properties/source"
+                        },
+                        "fit": {
+                          "$ref": "#/definitions/scene/properties/nodes/items/properties/fit"
                         },
                         "sceneId": {
                           "$ref": "#/definitions/scene/properties/nodes/items/properties/sceneId"

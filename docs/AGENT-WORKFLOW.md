@@ -4,7 +4,7 @@ Vmotion 不接入模型。外部 agent 通过工程文件、CLI 或本地 MCP �
 
 平面特效批量创作使用 effects_guide/inspect/plan，支持稳定 ID、排序/复制时的关键帧迁移和图层本地扭曲/擦除。详见 [平面特效](EFFECTS2D.md)。
 
-MCP 默认只加载 10 个入口。用 tools_search/tool_schema 找到能力，再通过 tool_call 调用，或 tools_load 加载需要的直接工具；147 项内置能力保持可用。详见 [按需工具发现](AGENT-DISCOVERY.md)。需要原全量工具目录时启动 `mcp --tools all`。
+MCP 默认只加载 10 个入口。用 tools_search/tool_schema 找到能力，再通过 tool_call 调用，或 tools_load 加载需要的直接工具；148 项内置能力保持可用。不在 tools/list 中的能力不能按名字直接调用，请用 tool_call。所有 planner 与 `mode:"plan"` 写调用返回 `plan {planId, candidateRevision, summary, samples?}` 与 `committed:false`，下一步固定为 `project_preflight({planId})` → `project_apply({planId})`；直接写返回 `committed`/`next`。详见 [按需工具发现](AGENT-DISCOVERY.md)。需要原全量工具目录时启动 `mcp --tools all`。
 
 建议流程：
 
@@ -16,7 +16,7 @@ MCP 默认只加载 10 个入口。用 tools_search/tool_schema 找到能力，�
 2. `project_file_read` 按行读取目标文件；记录返回的完整文件 hash。需要 schema 时调用 `project_schema`，可只查询一个 operationType。
 3. `project_preflight` 提交候选 operations/files 和待检查帧。它不会替换活动工程文件或改变撤销记录；临时编译、图片只进入 `.vmotion` 缓存。
 4. 检查 diagnostics、samples 和返回的画面。预检包括格式、引用、TypeScript 与组件加载；运行时检查只覆盖请求的帧。`determinism: true` 会将每个采样帧渲染两次并比较像素，用来发现有状态或随机行为。
-5. 用同一请求调用 `project_apply`，增加 `expectedCandidateRevision`。工程 revision 与候选 revision 都匹配且检查通过后，整个批次原子保存为一次撤销操作。
+5. 用同一请求调用 `project_apply`，增加 `expectedCandidateRevision`。工程 revision 与候选 revision 都匹配且检查通过后，整个批次原子保存为一次撤销操作。存储候选直接传 `{planId}`；只要结构检查时加 `visual:false` 或 `samples:false`，不会渲染计划中的样帧。
 
 `project_context` 和 `project_apply` 不返回全部源码。旧的 `project_inspect` / `project_transact` 保留兼容。MCP 工具目录使用精简的操作描述，完整的 JSON Schema 按需读取，避免每次创作先加载所有格式定义。
 
@@ -26,7 +26,7 @@ MCP 默认只加载 10 个入口。用 tools_search/tool_schema 找到能力，�
 
 组件支持结构化参数。调用 `component_parameters` 获取默认值、类型 Schema、当前求值和可动画路径，再使用 `component_parameters_edit` 修改嵌套字段、向量、数组项目或数字关键帧；数组插入/删除/排序自动映射项目动画。详见 [组件参数](COMPONENT-PARAMETERS.md)。
 
-`animation_inspect` 可查询通道分页、指定帧的数值与速度估计；`animation_edit` 对多图层执行关键帧复制、平移、时间/数值缩放、删除和缓动设置，保留生成图层源码。默认拒绝时间碰撞，整个批次共享一次撤销。详见 [关键帧接口](KEYFRAMES.md)。
+`animation_inspect` 可查询通道分页、指定帧的数值与速度估计；省略 nodeId 时返回场景范围的动画图层总览（通道、键数、帧范围，分页）。关键帧格式用 `project_schema name=keyframe`（node 的 `animations` 字段见 `properties` 索引）；`animation_edit` 对多图层执行关键帧复制、平移、时间/数值缩放、删除和缓动设置，保留生成图层源码。默认拒绝时间碰撞，整个批次共享一次撤销。详见 [关键帧接口](KEYFRAMES.md)。
 
 声音检查使用 `audio_timeline` 的采样位置与嵌套包络，再调用 `audio_preview` 检查短片段的原生音频、RMS、峰值和波形数据。预览与导出复用本地混音器，详见 [声音工具](AUDIO.md)。
 
@@ -82,3 +82,5 @@ node dist/cli/index.mjs apply --project ./my-project --request-file ./approved-c
 界面的代码工作区提供「预检代码」，可检查当前合成的开头、当前帧、中间和末帧，查看画面并点击诊断定位。保存组件也会进行这些检查，使用最初读取的文件 hash 防止覆盖别人的新源码。
 
 代码工作区切换文件或刷新时保留未保存草稿。草稿属于当前编辑页面，不自动写入工程；重新提交时仍检查原文件 hash，外部改动不会被草稿静默覆盖。
+
+组件也可以用 JSX/TSX 编写：`components/*.tsx` 的 `render` 返回 JSX，按帧降低为同样的节点并由原生核心渲染，与 `.ts` 组件共用预检、提交、撤销和变更记录。元素写 `id`/`key` 以保持稳定 ID；HTML 标签、React hook、浏览器 API 和不支持的 CSS 会在预检中返回带替代方案的 `JSX_*` 诊断。详见 [JSX / TSX 组件](JSX-COMPONENTS.md)，示例为 examples/jsx-lab。

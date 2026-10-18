@@ -36,6 +36,7 @@ export const cachePlugin: BuiltinPluginModule = {
       {
         name: 'cache_plan',
         method: 'cachePlan',
+        applyWith: 'cache_apply',
         schema: cachePlanSchema.shape,
         description:
           'Plan oldest eligible regenerable-cache files toward an explicit byte budget and minimum age without deleting. Fixed SHA-256 plan includes exact paths/size/mtime, excludes live leases and registered project media, and reports incomplete quotas. Stored candidates, source/history, render checkpoints and compiled modules stay protected.',

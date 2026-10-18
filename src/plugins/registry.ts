@@ -68,6 +68,14 @@ export class BuiltinPluginRegistry {
             { id: module.id, name: tool.name },
           );
         const normalized = normalizeToolDefinition(tool);
+        if (
+          (normalized.effect === 'read' && !normalized.annotations.readOnlyHint) ||
+          (normalized.effect === 'write' && normalized.annotations.readOnlyHint)
+        )
+          throw new VmotionError('BUILTIN_PLUGIN_METADATA', 'Tool effect contradicts annotations', {
+            name: tool.name,
+            effect: normalized.effect,
+          });
         this.byTool.set(normalized.name, module);
         tools.push({
           ...normalized,

@@ -17,6 +17,54 @@ import { visualAudit } from './visual-audit.js';
 import { visualOptionsSchema } from '../core/visual-audit.js';
 import { contextFramesSchema } from '../core/content-time.js';
 import { assetCheckSchema, checkAssets } from './media-evidence.js';
+import { readdir, stat, unlink } from 'node:fs/promises';
+
+/** Contact sheets are regenerable evidence; keep the newest few so .vmotion stays bounded. */
+export const preflightRetention = { files: 48, bytes: 64 * 1024 * 1024 };
+export async function prunePreflightEvidence(root: string, keep?: string) {
+  const dir = safePath(root, '.vmotion/preflight');
+  let names: string[];
+  try {
+    names = (await readdir(dir)).filter((name) => name.endsWith('.png'));
+  } catch {
+    return { removed: 0 };
+  }
+  const entries = (
+    await Promise.all(
+      names.map(async (name) => {
+        const file = path.join(dir, name);
+        try {
+          const info = await stat(file);
+          return { file, mtime: info.mtimeMs, size: info.size };
+        } catch {
+          return undefined;
+        }
+      }),
+    )
+  )
+    .filter((entry): entry is { file: string; mtime: number; size: number } => !!entry)
+    .sort((a, b) => b.mtime - a.mtime || (a.file === keep ? -1 : b.file === keep ? 1 : 0));
+  let kept = 0,
+    bytes = 0,
+    removed = 0;
+  for (const entry of entries) {
+    const retain =
+      entry.file === keep ||
+      (kept < preflightRetention.files && bytes + entry.size <= preflightRetention.bytes);
+    if (retain) {
+      kept++;
+      bytes += entry.size;
+      continue;
+    }
+    try {
+      await unlink(entry.file);
+      removed++;
+    } catch {
+      /* concurrently removed or locked on Windows; the next preflight retries */
+    }
+  }
+  return { removed };
+}
 export const preflightSchema = z
   .object({
     version: z.enum(['active', 'pending']).default('active'),
@@ -206,6 +254,7 @@ export async function preflight(root: string, base: Snapshot, raw: PreflightRequ
             safePath(root, `.vmotion/preflight/${candidate.revision}-${sampleKey}.png`),
         );
         await atomicWrite(output, buffer);
+        if (!params.output) await prunePreflightEvidence(root, output);
         if (params.inline) data = buffer.toString('base64');
       }
       if (params.visual && !diagnostics.some((d) => d.severity === 'error')) {

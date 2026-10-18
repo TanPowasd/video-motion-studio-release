@@ -13,7 +13,7 @@
 
 外部 agent 可先查询摘要与源码片段，再对候选代码/JSON 预检类型、运行错误和画面，最后原子提交；错误文件仍保留最后有效预览。详见 [agent 代码创作流程](AGENT-WORKFLOW.md)。
 
-MCP 默认以 10 个入口提供按需发现：tools_search 搜索能力，tool_schema 读取一个接口，tool_call 调用全部 147 项内置能力及启用的项目插件，tools_load 按任务加载直接工具。写操作返回精简版本/诊断，完整源码与传统目录可显式请求。详见 [按需工具发现](AGENT-DISCOVERY.md)。
+MCP 默认以 10 个入口提供按需发现：tools_search 搜索能力，tool_schema 读取一个接口，tool_call 调用全部 148 项内置能力及启用的项目插件，tools_load 按任务加载直接工具。写操作返回精简版本/诊断，完整源码与传统目录可显式请求。详见 [按需工具发现](AGENT-DISCOVERY.md)。
 
 本地插件声明语义版本/依赖、组件/效果图/动作/主题/声音/模板贡献和类型化 Agent 工具。plugins_inspect/plan 管理注册与准确候选，MCP目录/Schema随升级、禁用和撤销动态刷新；工具在有界worker中复用工程快照与共享预检/提交。主题与版本模板已抽出为首个内置模块，其他内置功能继续迁移。详见 [插件系统](PLUGINS.md)，可编辑示例为 examples/plugin-lab。
 
@@ -29,7 +29,7 @@ MCP 搜索/Schema 默认省略重复说明，`detail:true` 显式读取完整元
 
 原生颜色示波器、准确候选画面对比与图层临时隐藏影响分析提供有界像素证据，默认短摘要与原生图片，分布数组按需读取。检查不修改源码/历史，区分画面差异与艺术判断。详见 [像素检查](PIXEL-REVIEW.md)。
 
-Windows 使用独立 Rust/wgpu Direct3D12 进程加速特效图中的颜色矩阵、色键/亮度键及单输入通道处理。连续节点合并为一次 dispatch，二进制传输、缓冲复用与舍入边界修正保留 CPU 画面；预览/导出共用执行器，`render_profile/render_compare` 返回设备、传输、修正与耗时证据。文字/矢量/3D 与其它效果仍走 CPU。详见 [显卡特效](GPU-EFFECTS.md)。
+Windows 使用独立 Rust/wgpu Direct3D12 进程加速特效图中的颜色矩阵、色键/亮度键及单输入通道处理。连续节点合并为一次 dispatch，二进制传输、缓冲复用与舍入边界修正保留 CPU 画面；预览/导出共用执行器，`render_profile/render_compare` 返回设备、传输、修正与耗时证据。文字/矢量/3D 与其它效果仍走 CPU。详见 [显卡特效](GPU-EFFECTS.md)。MP4 导出可用 NVENC/QSV/AMF/Media Foundation/VideoToolbox/VA-API 硬件编码 H.264/HEVC/AV1，自动模式经真实小样编码确认后才使用，否则回退软件，详见 [硬件视频编码](HW-ENCODE.md)。
 
 Agent 可用 `agent_guide` 获取精简路线，通过 `media_sample` 取证素材，再用 `sequence_plan` 返回固定版本的剪辑候选。矩阵 3D 提供批量顶点、层级、相机与剪裁；`scene3DLayer` 使用 Rust 深度缓冲绘制穿插网格，`scene3d_render` 返回彩色/深度/面 ID 图和像素对象定位。详见 [Agent 媒体](AGENT-MEDIA.md)、[矩阵 3D](MATRIX3D.md) 与 [深度 3D](DEPTH3D.md)。
 
@@ -60,6 +60,8 @@ keyer支持颜色/亮度抠像、柔和遮罩和去溢色；运行时通过严�
 媒体工作流支持稳定 ID 重链接候选、后台无损代理生成/取消/失效、实际代理/屏幕尺寸预览解码，以及受保护文件之外的准确缓存清理计划。桌面素材库提供“媒体与缓存”，最终导出保持原素材。详见 [媒体与缓存](MEDIA-CACHE.md)。
 
 TypeScript 组件可暴露枚举、布尔、向量、数组和嵌套对象，SDK 自动推导类型，界面与 MCP 共用验证和关键帧规则。详见 [组件参数](COMPONENT-PARAMETERS.md)，可运行示例位于 `examples/parameter-lab`。
+
+组件可用 JSX/TSX 编写：自有 JSX 运行时（无浏览器/React DOM）把元素按帧降低为现有节点，提供 Stage/LocalTime/Steps 时间容器、useClock/remap/springTo/beatClock、CSS 样式子集与稳定 ID；不支持的 DOM/React/CSS 写法在预检中给出替代方案。详见 [JSX / TSX 组件](JSX-COMPONENTS.md)，15 秒示例为 `examples/jsx-lab`。
 
 主时间轴支持本地声音试听，按 48 kHz 采样位置分段加载，并复用导出的混音规则。MCP 可返回短音频及 RMS/峰值/波形检查数据。详见 [声音预览](AUDIO.md)，同步示例位于 `examples/audio-lab`。
 
@@ -114,6 +116,8 @@ node dist/cli/index.mjs inspect --project D:/Projects/MyVideo
 node dist/cli/index.mjs validate --project D:/Projects/MyVideo --json
 node dist/cli/index.mjs frame --project D:/Projects/MyVideo --frame 90 --output frame.png
 node dist/cli/index.mjs render --project D:/Projects/MyVideo --output video.mp4
+node dist/cli/index.mjs render --project D:/Projects/MyVideo --output video.mp4 --encoder nvenc --codec hevc --crf 22
+node dist/cli/index.mjs encoders --project D:/Projects/MyVideo
 node dist/cli/index.mjs render --project D:/Projects/MyVideo --format png --output frames
 node dist/cli/index.mjs render --project D:/Projects/MyVideo --format wav --output audio.wav
 node dist/cli/index.mjs pack --project D:/Projects/MyVideo --output D:/Portable/MyVideo

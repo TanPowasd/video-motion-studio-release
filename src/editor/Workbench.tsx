@@ -75,6 +75,8 @@ import { ThemeSwitch } from './ThemeSwitch.js';
 import { THEME_PREFERENCES, THEME_TOGGLE_KEYS, getTheme, setThemePreference, themeCommandLabel, toggledTheme, useTheme } from './theme.js';
 import { NewImageDialog, type NewImageSettings } from './still/NewImageDialog.js';
 import { ImageExportDialog } from './still/ImageExportDialog.js';
+import { VideoEncodeFields } from './VideoEncodeFields.js';
+import type { VideoExportSettings } from '../core/video-export-schema.js';
 import {
   ArtboardGuides,
   ArtboardInspector,
@@ -251,6 +253,7 @@ export function Workbench() {
     setJobs,
   } = useWorkbenchController();
   const [overlay, setOverlay] = useState<'palette' | 'shortcuts'>();
+  const [videoExport, setVideoExport] = useState<VideoExportSettings>();
   const [imageDialog, setImageDialog] = useState<'new' | 'export'>();
   const [artboardView, setArtboardViewState] = useState<ArtboardView>(() => {
     try {
@@ -498,7 +501,7 @@ export function Workbench() {
     setPlaying(false);
     setStudioTab(undefined);
     if (id === 'code' && !codePath) {
-      const first = Object.keys(snapshot?.files ?? {}).find((f) => f.endsWith('.ts'));
+      const first = Object.keys(snapshot?.files ?? {}).find((f) => /\.tsx?$/.test(f));
       if (first) setCodePath(first);
     }
     setWorkspace(id);
@@ -1624,6 +1627,7 @@ export function Workbench() {
               <>
                 <CodeEditor
                   key={codePath}
+                  language={/\.tsx$/.test(codePath) ? 'tsx' : /\.(ts|mts|cts)$/.test(codePath) ? 'ts' : 'text'}
                   value={code}
                   readOnly={codeBusy}
                   jumpTo={codeJump}
@@ -2218,6 +2222,15 @@ export function Workbench() {
                     <option value="gpu">要求硬件 GPU</option>
                   </select>
                 </label>
+                {format === 'mp4' && (
+                  <VideoEncodeFields
+                    value={videoExport ?? project.videoExport ?? {}}
+                    saved={project.videoExport}
+                    onChange={setVideoExport}
+                    run={run}
+                    transact={transact}
+                  />
+                )}
                 <div className="export-summary">
                   <span>
                     分辨率
@@ -2239,6 +2252,7 @@ export function Workbench() {
                       output: exportPath,
                       format,
                       gpu: exportGpu,
+                      ...(format === 'mp4' ? (videoExport ?? project.videoExport ?? {}) : {}),
                       revision: stateRef.current?.snapshot.revision,
                       ...(sequence.workArea
                         ? { start: sequence.workArea.start, end: sequence.workArea.end }

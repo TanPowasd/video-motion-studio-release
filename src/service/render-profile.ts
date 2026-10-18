@@ -2,6 +2,11 @@ import { z } from 'zod';
 import { Renderer } from '../core/renderer.js';
 import { VmotionError, type Snapshot } from '../core/model.js';
 import { hash } from './project.js';
+import {
+  encoderRequestSchema,
+  videoCodecSchema,
+} from '../core/video-export-schema.js';
+import { measureEncode, resolveVideoEncoder } from '../media/video-encoder.js';
 export const renderProfileSchema = z
   .object({
     revision: z.string().optional(),
@@ -18,6 +23,10 @@ export const renderProfileSchema = z
     height: z.number().int().min(90).max(2160).optional(),
     repeat: z.number().int().min(1).max(4).default(2),
     encode: z.boolean().default(false),
+    /** Opt-in video encode timing of the sampled frames (auto|software|nvenc|…); omitted = none. */
+    encoder: encoderRequestSchema.optional(),
+    codec: videoCodecSchema.optional(),
+    encodeFrames: z.number().int().min(1).max(600).default(60),
     detail: z.boolean().default(false),
     surfacePoolMb: z.number().int().min(0).max(256).default(96),
     fieldScan: z.enum(['bounded', 'full']).default('bounded'),
@@ -77,7 +86,8 @@ export async function profileRendering(
       performance: ReturnType<Renderer['performanceInfo']>;
     }> = [],
     expected = new Map<number, string>(),
-    mismatches: number[] = [];
+    mismatches: number[] = [],
+    retained = new Map<number, Uint8ClampedArray>();
   try {
     let width = request.width,
       height = request.height;
@@ -100,6 +110,13 @@ export async function profileRendering(
         'RESOLUTION',
         'Profile aspect ratio exceeds supported height; choose explicit dimensions',
       );
+    if (request.encoder && (width % 2 || height % 2))
+      throw new VmotionError('RESOLUTION', 'Video encode timing requires even width and height');
+    if (request.encoder && width * height * 4 * request.frames.length > 256 * 1024 * 1024)
+      throw new VmotionError(
+        'RENDER_PROFILE_BUDGET',
+        'Video encode timing retains at most 256MB of sampled RGBA; reduce frames or dimensions',
+      );
     if (capture && width * height * request.frames.length * request.repeat > 32 * 1024 * 1024)
       throw new VmotionError(
         'RENDER_COMPARE_BUDGET',
@@ -121,6 +138,7 @@ export async function profileRendering(
           const rgba = canvas.getContext('2d').getImageData(0, 0, width, height).data,
             pixelHash = hash(Buffer.from(rgba.buffer, rgba.byteOffset, rgba.byteLength));
           capture?.(samples.length, rgba, width, height);
+          if (request.encoder && round === 0) retained.set(frame, rgba);
           if (expected.has(frame) && expected.get(frame) !== pixelHash) mismatches.push(frame);
           else expected.set(frame, pixelHash);
           let encodeMs: number | undefined;
@@ -142,6 +160,21 @@ export async function profileRendering(
           canvas.height = 1;
         }
       }
+    const videoEncode = request.encoder
+      ? await measureEncode(
+          await resolveVideoEncoder({
+            encoder: request.encoder,
+            codec: request.codec ?? copy.project.videoExport?.codec,
+            quality: copy.project.videoExport?.quality,
+          }),
+          [...retained.values()],
+          width,
+          height,
+          copy.project.fps,
+          request.encodeFrames,
+        )
+      : undefined;
+    retained.clear();
     const times = samples.map((s) => s.renderMs).sort((a, b) => a - b),
       warm = samples.filter((s) => s.round > 0),
       mean = (values: number[]) =>
@@ -166,6 +199,7 @@ export async function profileRendering(
         meanEncodeMs: request.encode ? mean(samples.map((s) => s.encodeMs!)) : undefined,
       },
       cache: renderer.performanceInfo(),
+      ...(videoEncode ? { videoEncode } : {}),
       ...(request.graphDetail
         ? { graphNodes: renderer.graphExecution.detail(request.graphNodeLimit) }
         : {}),

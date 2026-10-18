@@ -78,6 +78,7 @@ export function projectPluginTools(catalog: PluginCatalog): ToolDefinition[] {
       },
       categories: tool.categories,
       keywords: tool.keywords,
+      effect: tool.mode === 'plan' ? 'plan' : 'read',
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,

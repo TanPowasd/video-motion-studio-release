@@ -1,4 +1,5 @@
 import { Field, Section } from './WorkbenchFields.js';
+import { JsxWriteBack } from '../JsxWriteBack.js';
 type ControllerValues = ReturnType<typeof useWorkbenchController>;
 type PanelProps<K extends keyof ControllerValues> = Pick<ControllerValues, K> & {
   [P in Extract<K, 'project' | 'scene' | 'sequence' | 'state'>]: NonNullable<ControllerValues[P]>;
@@ -347,6 +348,29 @@ export const InspectorPanel = React.memo(function InspectorPanel({
               </button>
             </Section>
           )}
+          {(() => {
+            const root = snapshot?.scenes.find((s) => s.id === sceneId),
+              isTsx = (n?: { type: string; component?: string }) =>
+                n?.type === 'component' && !!n.component?.endsWith('.tsx'),
+              owner = !focusPath.length
+                ? isTsx(node)
+                  ? node
+                  : undefined
+                : focusPath.length === 1
+                  ? root?.nodes.find((n) => n.id === focusPath[0] && isTsx(n))
+                  : undefined;
+            return owner ? (
+              <Section title="写回源码">
+                <JsxWriteBack
+                  owner={owner}
+                  sceneId={sceneId}
+                  selectedId={owner === node ? undefined : node.id}
+                  revision={snapshot?.revision}
+                  onError={(message) => setError(message)}
+                />
+              </Section>
+            ) : null;
+          })()}
           {['video', 'component', 'scene'].includes(node.type) && (
             <Section title="内容时间">
               <TimeInspector

@@ -24,7 +24,7 @@
     "dev:agent": "vite --config vite.agent.config.ts --host 127.0.0.1",
     "typecheck": "tsc --noEmit",
     "test": "node scripts/test-runner.mjs all",
-    "native:build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-native.ps1",
+    "native:build": "node scripts/build-native.mjs",
     "native:test": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-native.ps1",
     "package:dir": "npm run build && tsx scripts/package.ts",
     "format": "prettier --write src scripts tests *.ts *.json",

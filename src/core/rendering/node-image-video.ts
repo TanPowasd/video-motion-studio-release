@@ -18,7 +18,15 @@ export const renderers: NodeRenderer[] = ['image', 'video'].map((type) => ({
     if (!file) throw new VmotionError('MISSING_ASSET', `${n.id}: no source`);
     if (n.type === 'image') {
       const image = await services.image(file + ':' + (await fingerprint(file)), file);
-      ctx.drawImage(image, 0, 0, n.width, n.height);
+      const box = fitBox(n, image.width, image.height);
+      if (box.clip) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, n.width, n.height);
+        ctx.clip();
+      }
+      ctx.drawImage(image, box.x, box.y, box.width, box.height);
+      if (box.clip) ctx.restore();
     } else {
       const proxy =
           services.mediaQuality === 'auto' && asset
@@ -69,10 +77,42 @@ export const renderers: NodeRenderer[] = ['image', 'video'].map((type) => ({
       image
         .getContext('2d')
         .putImageData(new ImageData(new Uint8ClampedArray(pixels), width, height), 0, 0);
-      ctx.drawImage(image, 0, 0, n.width, n.height);
+      const meta = (asset?.metadata ?? {}) as { width?: unknown; height?: unknown },
+        box = fitBox(n, Number(meta.width), Number(meta.height));
+      if (box.clip) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, n.width, n.height);
+        ctx.clip();
+      }
+      ctx.drawImage(image, box.x, box.y, box.width, box.height);
+      if (box.clip) ctx.restore();
       image.width = 1;
       image.height = 1;
     }
     return { target: ctx };
   },
 }));
+
+/** object-fit for image/video content inside the node box (fill when the source size is unknown). */
+export function fitBox(
+  n: { width: number; height: number; fit?: 'fill' | 'contain' | 'cover' },
+  sourceWidth: number,
+  sourceHeight: number,
+) {
+  if (!n.fit || n.fit === 'fill' || !(sourceWidth > 0) || !(sourceHeight > 0))
+    return { x: 0, y: 0, width: n.width, height: n.height, clip: false };
+  const scale = (n.fit === 'cover' ? Math.max : Math.min)(
+      n.width / sourceWidth,
+      n.height / sourceHeight,
+    ),
+    width = sourceWidth * scale,
+    height = sourceHeight * scale;
+  return {
+    x: (n.width - width) / 2,
+    y: (n.height - height) / 2,
+    width,
+    height,
+    clip: n.fit === 'cover',
+  };
+}

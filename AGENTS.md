@@ -2,6 +2,7 @@
 
 This is a local programmable video workstation. The application never calls AI models; external agents author TypeScript/JSON and operate CLI/MCP.
 
+- To make videos *with* Vmotion (not develop it), use the Agent Skill in skills/vmotion/SKILL.md: edit project files first, CLI second, MCP last. Keep it in sync with CLI/SDK/diagnostic changes (tests/agent-skill.test.ts).
 - Keep source, tests, documentation and editable examples under Git. Commit verified feature stages locally; do not include dependencies, dist/release, caches, logs or exported media. The existing ignore rules cover these outputs.
 - Preserve user edits and production projects. Example authoring scripts need an explicit rebuild guard; use render-only mode to export an existing example.
 - Editor, CLI and MCP use the same project service, candidate checks, atomic transactions and shared undo. Generated edits belong to stable-ID overrides/structure; preserve component source.

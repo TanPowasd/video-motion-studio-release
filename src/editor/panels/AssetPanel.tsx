@@ -386,7 +386,7 @@ export const AssetPanel = React.memo(function AssetPanel({
           </div>
           {!stillMode && <div className="section-title">组件</div>}
           {Object.keys(snapshot!.files)
-            .filter((f) => !stillMode && f.endsWith('.ts'))
+            .filter((f) => !stillMode && /\.tsx?$/.test(f))
             .map((file) => (
               <button
                 className="component-row"

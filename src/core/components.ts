@@ -18,6 +18,7 @@ import {
 } from './parameters.js';
 import { evaluateNode } from './time.js';
 import { PluginRegistry } from './plugins.js';
+import { lintJsxSource } from './jsx-lint.js';
 const canonical = (value: any): string =>
   JSON.stringify(value, (_key, v) =>
     v && typeof v === 'object' && !Array.isArray(v)
@@ -220,12 +221,17 @@ export class ComponentHost {
           target: 'node22',
           sourcemap: 'inline',
           logLevel: 'silent',
+          // .tsx components use the Vmotion JSX runtime (no React, no DOM).
+          jsx: 'automatic',
+          jsxImportSource: '@vmotion/sdk',
           nodePaths: [path.resolve('node_modules')],
           plugins: [
             {
               name: 'project-snapshot',
               setup(b) {
-                b.onResolve({ filter: /^@vmotion\/sdk$/ }, () => ({ path: bundledSdk }));
+                b.onResolve({ filter: /^@vmotion\/sdk(\/jsx-(dev-)?runtime)?$/ }, () => ({
+                  path: bundledSdk,
+                }));
                 b.onResolve({ filter: /^@napi-rs\/canvas$/ }, () => ({
                   path: nativeCanvasModule,
                   external: true,
@@ -242,6 +248,7 @@ export class ComponentHost {
                     base + '.tsx',
                     base + '.json',
                     path.join(base, 'index.ts'),
+                    path.join(base, 'index.tsx'),
                   ]) {
                     const relative = path
                       .relative(projectRoot, candidate)
@@ -518,7 +525,13 @@ export class ComponentHost {
       resolveJsonModule: true,
       esModuleInterop: true,
       baseUrl: this.root,
-      paths: { '@vmotion/sdk': [sdk] },
+      paths: {
+        '@vmotion/sdk': [sdk],
+        '@vmotion/sdk/jsx-runtime': [sdk],
+        '@vmotion/sdk/jsx-dev-runtime': [sdk],
+      },
+      jsx: ts.JsxEmit.ReactJSX,
+      jsxImportSource: '@vmotion/sdk',
       types: ['node'],
       typeRoots: [
         path.join(installRoot, 'node_modules/@types'),
@@ -574,7 +587,7 @@ export class ComponentHost {
       options,
       host,
     );
-    const diagnostics = ts
+    const diagnostics: Diagnostic[] = ts
       .getPreEmitDiagnostics(program)
       .filter((d) => d.category === ts.DiagnosticCategory.Error)
       .map((d) => ({
@@ -591,6 +604,9 @@ export class ComponentHost {
             ? d.file.getLineAndCharacterOfPosition(d.start).character + 1
             : undefined,
       }));
+    // JSX-specific preflight: DOM/React/browser habits get actionable Vmotion alternatives.
+    for (const [name, text] of files)
+      if (name.endsWith('.tsx')) diagnostics.push(...lintJsxSource(name, text));
     this.typeDiagnostics.set(key, { diagnostics, probes });
     if (this.typeDiagnostics.size > 8)
       this.typeDiagnostics.delete(this.typeDiagnostics.keys().next().value!);

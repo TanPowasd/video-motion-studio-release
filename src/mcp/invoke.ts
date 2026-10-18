@@ -2,6 +2,9 @@ import { z } from 'zod';
 import type { CallToolResult, ContentBlock } from '@modelcontextprotocol/sdk/types.js';
 import type { ToolDefinition } from './catalog.js';
 import { VmotionError } from '../core/model.js';
+import { argumentError, parseArguments } from './argument-errors.js';
+import { planContract, writeContract } from './contract.js';
+import { deriveToolEffect } from './tool-definition.js';
 export const toolCallSchema = z
   .object({
     name: z.string().min(1),
@@ -190,13 +193,18 @@ const retry: Record<string, string> = {
   VALIDATION_FAILED: 'Fix reported diagnostics, preflight the corrected candidate, then apply.',
   TRACK_LOCKED: 'Inspect the affected track; unlock it explicitly before editing.',
   TOOL_NOT_FOUND: 'Use tools_search to select a real tool name.',
+  TOOL_NOT_LOADED:
+    'Call the capability through tool_call (works in every client), or tools_load it and refresh tools/list.',
   FILE_WRITE:
     'Inspect the reported file/systemCode, release a persistent file lock or fix storage access, then re-read context before retrying.',
   AGENT_PLAN_MISSING: 'Generate/import the candidate again and use its new planId.',
   AGENT_PLAN_CHANGED: 'Regenerate the candidate; never modify a stored plan file in place.',
   AGENT_PLAN_OVERRIDE:
     'Create a new candidate when operations, files, revision or asset checks must change. Only sampling/output options may override a stored plan.',
-  TOOL_ARGUMENTS: 'Read tool_schema for this tool and correct the reported argument paths.',
+  TOOL_ARGUMENTS:
+    'Correct the reported paths using allowed/minimum/maximum/example (tool_schema has the full interface).',
+  PLAN_MODE:
+    'This call made no single project transaction to capture. Call it with mode=apply, or use the matching *_plan capability.',
 };
 export function toolError(error: unknown): CallToolResult {
   const code =
@@ -205,16 +213,17 @@ export function toolError(error: unknown): CallToolResult {
         : error instanceof z.ZodError
           ? 'TOOL_ARGUMENTS'
           : 'INTERNAL_ERROR',
-    details =
-      error instanceof VmotionError
-        ? error.details
-        : error instanceof z.ZodError
-          ? error.issues.map((i) => ({ path: '/' + i.path.join('/'), message: i.message }))
-          : undefined,
+    zod =
+      error instanceof z.ZodError
+        ? argumentError('request', error, undefined, undefined)
+        : undefined,
+    details = error instanceof VmotionError ? error.details : zod?.details,
+    example = (error as { example?: unknown } | undefined)?.example,
     value = {
       code,
-      message: error instanceof Error ? error.message : String(error),
+      message: zod ? zod.message : error instanceof Error ? error.message : String(error),
       ...(details === undefined ? {} : { details }),
+      ...(example === undefined || code !== 'TOOL_ARGUMENTS' ? {} : { example }),
       ...(retry[code] ? { recovery: retry[code] } : {}),
     };
   return {
@@ -258,21 +267,26 @@ export async function invokeTool(
     inline?: boolean;
     fields?: string[];
     media?: boolean;
+    /** Project root used to store/read unified candidate plans. */
+    root?: string;
+    /** How the agent reached this capability; shapes the error example. */
+    via?: 'tool_call' | 'direct';
   } = {},
 ) {
-  if (options.fields) toolCallSchema.shape.fields.parse(options.fields);
-  let params: Record<string, unknown>;
-  try {
-    params = z.object(tool.schema).strict().parse(raw);
-  } catch (e) {
-    if (e instanceof z.ZodError)
-      throw new VmotionError(
-        'TOOL_ARGUMENTS',
-        `Invalid arguments for ${tool.name}`,
-        e.issues.map((i) => ({ path: '/' + i.path.join('/'), message: i.message })),
-      );
-    throw e;
-  }
+  if (options.fields) parseArguments('tool_call', toolCallSchema.shape.fields, options.fields);
+  let params: Record<string, unknown> = parseArguments(
+    tool.name,
+    z.object(tool.schema).strict(),
+    raw,
+    options.via === 'direct' ? undefined : 'tool_call',
+  );
+  const effect = tool.effect ?? deriveToolEffect(tool),
+    injected = new Set(tool.injected ?? []),
+    planning = effect === 'plan' || (!!tool.planMode && params.mode === 'plan'),
+    detail = params.detail === true || options.response === 'full',
+    captured = tool.planMode === 'captured' && params.mode === 'plan';
+  if (injected.size)
+    params = Object.fromEntries(Object.entries(params).filter(([key]) => !injected.has(key)));
   const inline = options.media === false ? false : (options.inline ?? true),
     payload =
       imageMethods.has(tool.method) ||
@@ -283,13 +297,22 @@ export async function invokeTool(
           : params;
   let rawResult: unknown;
   try {
-    rawResult = await call(tool.method, payload);
+    rawResult = captured
+      ? await call('agentPlanCapture', { method: tool.method, params: payload })
+      : await call(tool.method, payload);
   } catch (e) {
     if (e instanceof z.ZodError)
+      throw argumentError(
+        tool.name,
+        e,
+        z.object(tool.schema),
+        raw,
+        options.via === 'direct' ? undefined : 'tool_call',
+      );
+    if (captured && (e as { code?: string }).code === 'METHOD_NOT_FOUND')
       throw new VmotionError(
-        'TOOL_ARGUMENTS',
-        `Invalid arguments for ${tool.name}`,
-        e.issues.map((i) => ({ path: '/' + i.path.join('/'), message: i.message })),
+        'PLAN_MODE',
+        'The open editor predates mode=plan for direct writes; update it or use mode=apply',
       );
     throw e;
   }
@@ -300,7 +323,12 @@ export async function invokeTool(
     typeof rawResult === 'bigint'
   )
     throw new VmotionError('TOOL_RESULT', 'Backend returned an unsupported result');
-  const result = options.response === 'full' ? rawResult : compactResult(tool.method, rawResult);
+  const compacted = options.response === 'full' ? rawResult : compactResult(tool.method, rawResult);
+  const result = planning
+    ? await planContract(tool, compacted, { root: options.root, detail })
+    : effect === 'write'
+      ? writeContract(tool, rawResult, compacted)
+      : compacted;
   const media: ContentBlock[] = [];
   let value: unknown = result;
   if (
@@ -340,18 +368,35 @@ export async function invokeTool(
     );
   }
   // A few legacy mutations already exposed compact fields; full mode preserves their legacy shape.
-  if (options.response === 'full' && tool.method === 'animationEdit' && isRecord(result))
+  const contract = (record: JsonRecord) => ({
+    committed: record.committed,
+    effect: record.effect,
+    next: record.next,
+  });
+  if (
+    !planning &&
+    options.response === 'full' &&
+    tool.method === 'animationEdit' &&
+    isRecord(result)
+  )
     value = {
       revision: isRecord(result.snapshot) ? result.snapshot.revision : undefined,
       canUndo: result.canUndo,
       canRedo: result.canRedo,
+      ...contract(result),
     };
-  if (options.response === 'full' && tool.method === 'componentParametersEdit' && isRecord(result))
+  if (
+    !planning &&
+    options.response === 'full' &&
+    tool.method === 'componentParametersEdit' &&
+    isRecord(result)
+  )
     value = {
       revision: isRecord(result.snapshot) ? result.snapshot.revision : undefined,
       values: result.parameterValues,
       canUndo: result.canUndo,
       canRedo: result.canRedo,
+      ...contract(result),
     };
   const structuredContent: JsonRecord = isRecord(value) ? value : { result: value };
   const projected = options.fields
@@ -393,7 +438,15 @@ export function projectToolResult(value: Record<string, unknown>, fields: string
       }
     }
   }
-  for (const key of ['revision', 'baseRevision', 'candidateRevision', 'applied', 'valid'])
+  for (const key of [
+    'revision',
+    'baseRevision',
+    'candidateRevision',
+    'applied',
+    'valid',
+    'committed',
+    'plan',
+  ])
     if (Object.hasOwn(value, key)) result[key] = value[key];
   return { ...result, resultProjection: { fields: [...new Set(valid)], missing, partial: true } };
 }

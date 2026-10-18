@@ -11,6 +11,7 @@ export const publicRoots = [
   'tests/',
   'examples/',
   '.github/',
+  'skills/',
 ];
 export const publicRootFiles = new Set([
   'package.json',

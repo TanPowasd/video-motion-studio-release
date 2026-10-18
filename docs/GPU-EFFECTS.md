@@ -1,6 +1,6 @@
 # Direct3D12 逐像素特效
 
-Windows x64 的 `crates/vmotion-gpu` 使用 Rust/wgpu 和真实 Direct3D12 硬件设备，独立于动画/深度 CPU 进程。程序不接入模型。当前加速特效图中的 `colorMatrix`（sRGB/linear）、`keyer`（chroma/luma、spill/matte/invert）和同一输入的 `channels`。文字、矢量、深度 3D、模糊/光束/纹理/置换和混合等继续使用原 CPU 核心；没有实现全场景 Skia GPU、Electron 共享纹理或硬件视频编码。
+Windows x64 的 `crates/vmotion-gpu` 使用 Rust/wgpu 和真实 Direct3D12 硬件设备，独立于动画/深度 CPU 进程。程序不接入模型。当前加速特效图中的 `colorMatrix`（sRGB/linear）、`keyer`（chroma/luma、spill/matte/invert）和同一输入的 `channels`。文字、矢量、深度 3D、模糊/光束/纹理/置换和混合等继续使用原 CPU 核心；没有实现全场景 Skia GPU 或 Electron 共享纹理。MP4 硬件视频编码（NVENC/QSV/AMF/Media Foundation/VideoToolbox/VA-API）不经过本进程，由 FFmpeg 编码器提供并在导出时探测，详见 [硬件视频编码](HW-ENCODE.md)。
 
 | 模式 | 执行规则 |
 |---|---|

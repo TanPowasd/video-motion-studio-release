@@ -1,0 +1,17 @@
+{
+  "id": "main",
+  "name": "Main",
+  "duration": 90,
+  "tracks": [
+    {
+      "id": "visual",
+      "name": "Picture",
+      "type": "video",
+      "muted": false,
+      "clips": [
+        { "id": "intro-clip", "sceneId": "intro", "start": 0, "duration": 90, "sourceIn": 0, "speed": 1, "volume": 1, "fadeIn": 0, "fadeOut": 0 }
+      ]
+    }
+  ],
+  "markers": []
+}

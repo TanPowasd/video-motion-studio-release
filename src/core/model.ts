@@ -21,6 +21,7 @@ import { templateInstanceSchema } from './template-instance-schema.js';
 import { keyframeSchema, animationSchema, animationLayersSchema } from './animation-schema.js';
 import { renderProgramPathSchema } from './programs/render-program-schema.js';
 import { stillSchema, STILL_MAX_SIDE, VIDEO_MAX_WIDTH, VIDEO_MAX_HEIGHT } from './still-schema.js';
+import { videoExportSchema } from './video-export-schema.js';
 export { stillSchema, stillVariantSchema, type StillSettings, type StillVariant } from './still-schema.js';
 export { keyframeSchema, animationSchema } from './animation-schema.js';
 
@@ -239,6 +240,8 @@ export const nodeBaseSchema = z
       .optional(),
     assetId: id.optional(),
     source: z.string().optional(),
+    /** How image/video content fills the box: stretch (fill, default), letterbox (contain) or crop (cover). */
+    fit: z.enum(['fill', 'contain', 'cover']).optional(),
     sceneId: id.optional(),
     component: z.string().optional(),
     scene3d: scene3dSchema.optional(),
@@ -431,6 +434,8 @@ export const projectSchema = z
         shutterAngle: finite.min(0).max(360).default(180),
       })
       .optional(),
+    /** MP4 export defaults (encoder/codec/quality); render requests override them. */
+    videoExport: videoExportSchema.optional(),
   })
   .strict()
   .superRefine((p, ctx) => {

@@ -7,6 +7,7 @@ import { soundResource } from '../media/sound-source.js';
 import { VmotionError, type Snapshot } from '../core/model.js';
 import { hash } from './project.js';
 import { comparePixels } from '../core/pixel-evidence.js';
+import { encoderRequestSchema } from '../core/video-export-schema.js';
 const settings = z
   .object({
     graphOptimize: z.boolean().optional(),
@@ -15,6 +16,8 @@ const settings = z
     graphCache: z.boolean().optional(),
     nativeCache: z.boolean().optional(),
     gpu: z.enum(['cpu', 'auto', 'gpu']).optional(),
+    /** Opt-in video encode timing; when only one side sets it the other uses software. */
+    encoder: encoderRequestSchema.optional(),
   })
   .strict();
 type DetailedProfile = Extract<Awaited<ReturnType<typeof profileRendering>>, { samples: unknown }>;
@@ -26,6 +29,7 @@ export const renderCompareSchema = renderProfileSchema
     graphDetail: true,
     graphNodeLimit: true,
     gpu: true,
+    encoder: true,
   })
   .extend({
     baseline: settings.default({}),
@@ -61,12 +65,15 @@ export async function compareRendering(root: string, snapshot: Snapshot, raw: un
     checks.push(...batch);
   }
   const { baseline, optimized, order, nodeLimit, detail, pixelTolerance, ...common } = p,
+    encodes = baseline.encoder !== undefined || optimized.encoder !== undefined,
+    encoderDefault = encodes ? { encoder: 'software' } : {},
     configurations = {
       baseline: {
         graphOptimize: false,
         graphRegions: false,
         graphTileRows: 0,
         gpu: 'cpu' as const,
+        ...encoderDefault,
         ...baseline,
       },
       optimized: {
@@ -74,6 +81,7 @@ export async function compareRendering(root: string, snapshot: Snapshot, raw: un
         graphRegions: true,
         graphTileRows: 128,
         gpu: 'cpu' as const,
+        ...encoderDefault,
         ...optimized,
       },
     },
@@ -133,6 +141,7 @@ export async function compareRendering(root: string, snapshot: Snapshot, raw: un
       compilation: profile.cache.effectGraphs,
       nativeAnimation: profile.cache.nativeAnimation,
       gpu: profile.cache.gpu,
+      ...(profile.videoEncode ? { videoEncode: profile.videoEncode } : {}),
       surfaces: profile.cache.surfaces,
       graphScratchPeakBytes: profile.cache.graphScratchPeakBytes,
       graphNodes: profile.graphNodes,
@@ -190,6 +199,17 @@ export async function compareRendering(root: string, snapshot: Snapshot, raw: un
       afterMs: after,
       savedMs: before - after,
       savedRatio: before > 0 ? 1 - after / before : null,
+      ...(a.videoEncode && b.videoEncode
+        ? {
+            encode: {
+              baselineEncoder: a.videoEncode.used,
+              optimizedEncoder: b.videoEncode.used,
+              beforeMs: a.videoEncode.wallMs,
+              afterMs: b.videoEncode.wallMs,
+              speedup: b.videoEncode.wallMs > 0 ? a.videoEncode.wallMs / b.videoEncode.wallMs : null,
+            },
+          }
+        : {}),
     },
     coverage: {
       frames: p.frames.length,

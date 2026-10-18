@@ -13,6 +13,7 @@ import {
   animationEditSchema,
   animationInspectSchema,
   inspectAnimation,
+  inspectAnimationRequest,
 } from '../service/animation.js';
 import {
   editComponentParameters,
@@ -34,7 +35,9 @@ import {
   planDrivers,
 } from '../service/drivers.js';
 import { parameterQuerySchema, queryParameters } from '../service/parameter-query.js';
+import { jsxWriteBackSchema, planVerifiedJsxWriteBack } from '../service/jsx-writeback.js';
 import { builtinCandidate } from './candidate.js';
+import { applyOperations } from '../service/operations.js';
 import { defineRpcHandler, invokeRpcHandler } from './rpc-handler.js';
 import type { BuiltinPluginModule } from './types.js';
 
@@ -58,6 +61,7 @@ export const animationPlugin: BuiltinPluginModule = {
     'guide',
     'animationLayersInspect',
     'animationLayersPlan',
+    'jsxWriteBackPlan',
   ]),
   tools(): ToolDefinition[] {
     return [
@@ -175,7 +179,7 @@ export const animationPlugin: BuiltinPluginModule = {
       {
         name: 'animation_inspect',
         description:
-          'Read layer animation channels and sample evaluated values plus numerical velocity per second at chosen frames. Supports native and generated layers and structured component numeric paths.',
+          'Read layer animation channels and sample evaluated values plus numerical velocity per second at chosen frames. Without nodeId returns a paged scene/scope overview of animated layers (channels, key counts, frame ranges). Supports native and generated layers and structured component numeric paths.',
         method: 'animationInspect',
         schema: animationInspectSchema.shape,
 
@@ -275,6 +279,21 @@ export const animationPlugin: BuiltinPluginModule = {
         },
       },
       {
+        name: 'jsx_writeback_plan',
+        method: 'jsxWriteBackPlan',
+        schema: jsxWriteBackSchema.shape,
+        description:
+          'Promote visual-edit overrides of a .tsx component layer into its JSX source: literal attributes are rewritten/inserted; expression-driven attributes and flex/grid-positioned geometry stay overrides. The candidate is verified to regenerate identical nodes at sampled frames. Returns per-prop status (written/computed/layout/changed-output) and a planId for project_preflight/project_apply (one undo).',
+        categories: ['animation', 'composition'],
+        keywords: 'JSX TSX 写回 源码 覆盖 字面量 组件 writeback source override literal',
+        annotations: {
+          readOnlyHint: true,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false,
+        },
+      },
+      {
         name: 'component_describe',
         description: 'Read the editable parameter schema of a TypeScript component.',
         method: 'component',
@@ -339,6 +358,42 @@ export const animationRpcHandlers = {
       );
     },
   ),
+  jsxWriteBackPlan: defineRpcHandler(
+    z.object(jsxWriteBackSchema.shape).extend({ inline: z.boolean().optional() }).passthrough(),
+    async (host, params) => {
+      const { inline, ...request } = params as Record<string, unknown>;
+      const snapshot = structuredClone(host.snapshot),
+        planned = await planVerifiedJsxWriteBack(host.root, host.renderer, snapshot, request as never),
+        props = planned.props.slice(0, 200),
+        metadata = {
+          summary: planned.summary,
+          props,
+          ...(planned.props.length > props.length ? { propsOmitted: planned.props.length - props.length } : {}),
+          frames: planned.frames,
+        };
+      if (!planned.plan.files.length) return { unchanged: true, ...metadata };
+      const operations = [
+          ...planned.plan.operations,
+          { type: 'editFiles' as const, edits: planned.plan.files },
+        ],
+        candidate = applyOperations(host.root, snapshot, operations);
+      return builtinCandidate(
+        host.root,
+        {
+          revision: snapshot.revision,
+          operations: planned.plan.operations,
+          files: planned.plan.files,
+          samples: planned.frames.map((frame) => ({ sceneId: String(request.sceneId), frame })),
+          width: 320,
+          determinism: true,
+          visual: true,
+        },
+        candidate.revision,
+        inline === true || request.delivery === 'inline' ? 'inline' : 'stored',
+        metadata,
+      );
+    },
+  ),
   guide: defineRpcHandler(
     z.object({}).extend({ inline: z.boolean().optional() }).passthrough(),
     async (host, params) => {
@@ -400,7 +455,7 @@ export const animationRpcHandlers = {
     async (host, params) => {
       const method = 'animationInspect';
       const snapshot = host.snapshot;
-      return inspectAnimation(host.renderer, snapshot, params);
+      return inspectAnimationRequest(host.renderer, snapshot, params);
     },
   ),
   animationEdit: defineRpcHandler(

@@ -3,6 +3,9 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { VmotionError } from '../core/model.js';
 import type { ToolDefinition } from './catalog.js';
 import { createHash } from 'node:crypto';
+import { deriveToolEffect, type ToolEffect } from './tool-definition.js';
+import { parseArguments } from './argument-errors.js';
+import { toolCallSchema } from './invoke.js';
 
 export const categorySchema = z.enum([
   'core',
@@ -44,7 +47,8 @@ const categoryAliases: Record<ToolCategory, string> = {
   math: '数学 线性代数 优化 求解 least squares algebra solve',
   render: '导出 渲染 帧 图像序列 编码 render export frame',
   recovery: '撤销 重做 恢复 错误 冲突 修复 undo redo conflict repair recovery',
-  image: '图片 海报 封面 缩略图 静态 画板 印刷 出血 导出图片 PNG JPEG WebP still poster cover thumbnail artboard',
+  image:
+    '图片 海报 封面 缩略图 静态 画板 印刷 出血 导出图片 PNG JPEG WebP still poster cover thumbnail artboard',
   glyphs: '字形 字形库 偏旁 部件 拼字 造字 IDS 笔画 无字体 glyph radical component typeface stroke',
 };
 const defaultToolAnnotations = {
@@ -109,7 +113,7 @@ export function searchTools(
   raw: unknown = {},
   enabled?: Set<string>,
 ) {
-  const request = toolSearchSchema.parse(raw),
+  const request = parseArguments('tools_search', toolSearchSchema, raw),
     query = request.query.toLowerCase().trim(),
     terms = query.split(/\s+/).filter(Boolean),
     ranked = searchIndex(definitions)
@@ -139,6 +143,7 @@ export function searchTools(
           ? { summaryTruncated: true }
           : {}),
         categories,
+        effect: toolEffect(tool),
         annotations: toolAnnotations(tool.name, tool),
         ...(tool.plugin
           ? {
@@ -167,14 +172,43 @@ export function searchTools(
           })),
         }
       : {}),
-    next: 'tool_schema for inputs; tool_call to invoke. detail=true adds catalog metadata.',
+    next: 'tool_schema for inputs; tool_call invokes any capability. detail=true adds catalog metadata.',
   };
+}
+export function toolEffect(tool: ToolDefinition): ToolEffect {
+  return tool.effect ?? deriveToolEffect(tool);
 }
 export function findTool(definitions: ToolDefinition[], name: string) {
   const tool = definitions.find((t) => t.name === name);
-  if (!tool)
-    throw new VmotionError('TOOL_NOT_FOUND', `Unknown Vmotion tool ${name}; use tools_search`);
+  if (!tool) throw toolNotFound(definitions, name);
   return tool;
+}
+/** Entry/meta tools served by the MCP layer itself; tool_schema documents them too. */
+export const metaToolNames = ['tools_search', 'tool_schema', 'tool_call', 'tools_load'] as const;
+export function toolNotFound(definitions: ToolDefinition[], name: string) {
+  const lower = name.toLowerCase(),
+    stripped = lower.replace(/^mcp__[^_]+__/, ''),
+    candidates = [...definitions.map((t) => t.name), ...metaToolNames],
+    suggestions = candidates
+      .map((candidate) => {
+        const parts = stripped.split(/[_\s]+/).filter(Boolean),
+          score =
+            candidate === stripped
+              ? 100
+              : parts.filter((p) => candidate.includes(p)).length * 10 -
+                Math.abs(candidate.length - stripped.length) / 10;
+        return { candidate, score };
+      })
+      .filter((s) => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map((s) => s.candidate);
+  return new VmotionError(
+    'TOOL_NOT_FOUND',
+    `Unknown Vmotion tool "${name}" (neither a capability nor an entry tool). Entry tools: ${[...coreTools, ...metaToolNames].join(', ')}. ` +
+      `Find capability names with tools_search {"query":"..."} and invoke them with tool_call {"name":"<capability>","arguments":{...}}.`,
+    { name, ...(suggestions.length ? { suggestions } : {}) },
+  );
 }
 export const toolSchemaRequestSchema = z
   .object({
@@ -210,6 +244,9 @@ type ToolSchemaView = {
   format: 'compact' | 'expanded';
   description?: string;
   categories: ToolCategory[];
+  effect: ToolEffect;
+  modes?: readonly ['apply', 'plan'];
+  entry?: true;
   annotations: ReturnType<typeof toolAnnotations>;
   inputSchema: Record<string, unknown>;
   call?: { tool: string; arguments: { name: string; arguments: Record<string, unknown> } };
@@ -232,7 +269,10 @@ export function toolSchema(
     detail?: boolean;
   } = {},
 ): ToolSchemaView | ToolSchemaCached {
-  const tool = findTool(definitions, name);
+  const tool =
+    definitions.find((t) => t.name === name) ??
+    metaToolDefinitions.find((t) => t.name === name) ??
+    findTool(definitions, name);
   let entry = schemaCache.get(tool);
   if (!entry) {
     const object = z.object(tool.schema).strict(),
@@ -295,6 +335,9 @@ export function toolSchema(
     format: options.format ?? 'compact',
     ...(options.detail ? { description: tool.description } : {}),
     categories: toolCategories(name, tool),
+    effect: toolEffect(tool),
+    ...(tool.planMode ? { modes: ['apply', 'plan'] as const } : {}),
+    ...(tool.method.startsWith('mcp:') ? { entry: true as const } : {}),
     annotations: toolAnnotations(name, tool),
     ...((options.detail || tool.plugin?.origin === 'project') && tool.plugin
       ? { plugin: tool.plugin }
@@ -307,7 +350,7 @@ export function toolSchema(
       ? {
           call: { tool: 'tool_call', arguments: { name, arguments: {} } },
           response:
-            'response=full preserves complete results. fields selects result paths; media=false omits inline media.',
+            'response=full preserves complete results. fields selects result paths; media=false omits inline media. Planners/mode=plan return plan {planId,candidateRevision,summary}; project_preflight then project_apply with {planId}. Writes return committed/next.',
         }
       : {}),
   };
@@ -320,7 +363,7 @@ export const toolLoadSchema = z
   })
   .strict();
 export function selectTools(definitions: ToolDefinition[], raw: unknown, current: Set<string>) {
-  const request = toolLoadSchema.parse(raw);
+  const request = parseArguments('tools_load', toolLoadSchema, raw);
   request.names.forEach((name) => findTool(definitions, name));
   const selected = request.mode === 'add' ? new Set(current) : new Set(coreTools);
   for (const tool of definitions)
@@ -332,3 +375,57 @@ export function selectTools(definitions: ToolDefinition[], raw: unknown, current
   coreTools.forEach((name) => selected.add(name));
   return selected;
 }
+
+export const metaToolDescriptions: Record<(typeof metaToolNames)[number], string> = {
+  tools_search:
+    'Find capabilities by query/category/plugin with short summaries and effect hints. effect is read, plan (stored candidate, never commits) or write. detail=true includes argument names and full catalog metadata. Paginated Chinese/English search; no schemas/source. Then tool_schema/tool_call.',
+  tool_schema:
+    'Read one exact input schema, entry tools included, with local refs and ifHash. paths selects property branches; full invocation validation remains. detail=true adds description/plugin/call metadata, format=expanded inlines refs. Avoid loading the full catalog.',
+  tool_call:
+    'Invoke any capability by name, including ones absent from tools/list. Shared strict schemas/transactions; default compact JSON/native media, response=full opts into complete results. fields selects result paths while retaining revision/validity metadata, media=false omits inline media. Planners return plan.planId for project_preflight/project_apply; writes report committed/next. This gateway can mutate projects.',
+  tools_load:
+    'Enable named/category direct tools in this MCP connection. mode=add preserves currently loaded tools; replace returns to essential tools before adding. All capabilities remain callable through tool_call. Does not edit the project or other agent connections. Sends tools/list_changed; clients without dynamic reload should use tool_call.',
+};
+const metaReadOnly = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false,
+};
+export const metaToolAnnotations: Record<
+  (typeof metaToolNames)[number],
+  ToolDefinition['annotations']
+> = {
+  tools_search: metaReadOnly,
+  tool_schema: metaReadOnly,
+  tool_call: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
+  tools_load: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
+};
+export const metaToolSchemas = {
+  tools_search: toolSearchSchema,
+  tool_schema: toolSchemaRequestSchema,
+  tool_call: toolCallSchema,
+  tools_load: toolLoadSchema,
+} as const;
+/** Pseudo definitions so tool_schema can document the entry/meta tools with the same view. */
+export const metaToolDefinitions: ToolDefinition[] = metaToolNames.map((name) => ({
+  name,
+  description: metaToolDescriptions[name],
+  method: 'mcp:' + name,
+  schema: metaToolSchemas[name].shape,
+  categories: ['core'],
+  keywords: '',
+  annotations: metaToolAnnotations[name],
+  // tool_call inherits the effect of the capability it invokes; tools_load only changes this connection.
+  effect: name === 'tool_call' ? 'write' : 'read',
+}));

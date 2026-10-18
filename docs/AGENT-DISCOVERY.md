@@ -1,16 +1,41 @@
 # Agent 按需工具发现
 
-默认 `vmotion mcp --project ...` 使用 compact 模式，只暴露 10 个常用入口：agent_guide、project_context、project_file_read、project_preflight、project_apply、frame_capture，以及 tools_search、tool_schema、tool_call、tools_load。147 项内置创作能力全部仍可使用；启用的项目插件增加 namespaced 能力，不增加默认入口。完整模式 `--tools all` 返回 151 个内置直接工具/发现入口及启用的插件工具，兼容原有直接调用与结果形状。
+默认 `vmotion mcp --project ...` 使用 compact 模式，只暴露 10 个常用入口：agent_guide、project_context、project_file_read、project_preflight、project_apply、frame_capture，以及 tools_search、tool_schema、tool_call、tools_load。148 项内置创作能力全部仍可使用；启用的项目插件增加 namespaced 能力，不增加默认入口。完整模式 `--tools all` 返回 152 个内置直接工具/发现入口及启用的插件工具，兼容原有直接调用与结果形状。
+
+## 统一 Agent 契约
+
+外部 AI（如 Claude Code）通过 MCP 驱动时最常见的五类困惑已统一处理：
+
+- **只有 tools/list 中的工具能按名字直接调用。** compact 模式下其余能力（如 still_inspect）在客户端里不是函数；请用 `tool_call {"name":"still_inspect","arguments":{}}`，或先 `tools_load` 再刷新 tools/list。若客户端仍按名字发送未加载的能力，服务端返回 `TOOL_NOT_LOADED`（附 tool_call/tools_load 用法与当前 directTools），而不是 SDK 的 “Tool X disabled”。`project_context` 与 `agent_guide` 的结果附带 `mcp` 块：`directTools`（当前连接已加载的直接工具）与 `hidden` 说明。`tool_schema` 现在也能查询入口工具自身（tools_search、tool_schema、tool_call、tools_load，返回 `entry:true`）；未知名称返回 `TOOL_NOT_FOUND`，消息列出入口工具与 `tools_search {"query":...}` 用法，details.suggestions 给出相近名称。`mcp --tools auto` 为可选模式：与 compact 相同启动，经 tool_call/tool_schema 使用过的能力自动成为直接工具（最多 32 个，发送 tools/list_changed）。
+- **effect 声明。** 每项能力声明 `effect`：`read`（只读）、`plan`（返回存储候选，从不提交）、`write`（直接提交或产生文件/任务）。tools_search 条目、tool_schema 与 plan/write 结果都带 `effect`；read 结果不额外加字段。
+- **统一计划返回。** 所有 planner（27 个 effect=plan 能力：*_plan、mesh_generate/mesh_import、scene3d_materials、plugins_install）以及以 `mode:"plan"` 调用的直接写工具都返回：
+
+```json
+{"committed":false,"effect":"plan",
+ "plan":{"planId":"<sha256>","candidateRevision":"<rev>","baseRevision":"<rev>",
+         "summary":{"operations":3,"detail":"…"},"samples":[{"sceneId":"intro","frame":0}]},
+ "next":"project_preflight({planId}) then project_apply({planId}); …"}
+```
+
+  候选始终经 storeAgentPlan 存储（即使 `delivery:"inline"` 或 sequence_plan 这类原先只返回内联操作的工具），下一步一律 `project_preflight({planId})` → `project_apply({planId})`。`detail:true`（或 `response:"full"`）才内联 `plan.operations/files`。旧字段 `candidate`/`apply`（内联操作或 planId）本版本继续保留，并在 `deprecated:["candidate","apply"]` 中标注，下一版本移除。cache_plan 的 planId 由 `cache_apply` 消费（`next:"cache_apply({planId})"`）。
+- **直接写工具的 mode。** animation_edit、time_edit、component_parameters_edit、composition_edit_layer、composition_structure(_batch)、scene_place、scene_precompose、scene_reset_instance、asset_place、sequence_edit、captions_import、vector_bake、repeat_create、effect_import_lut、project_transact 新增 `mode:"apply"|"plan"`（默认 apply，行为不变）。plan 模式在服务内捕获该调用的唯一事务，不写工程/历史，返回上面的统一计划；composition_edit_layers 保留原生 mode。tool_schema 对这些工具给出 `modes:["apply","plan"]`。所有写结果包含 `committed`（是否产生一次工程提交；project_apply 等于 applied）与 `next`。
+- **参数错误可直接修正。** `TOOL_ARGUMENTS` 的 details 每项给出 `path`、完整 `allowed` 列表（枚举/判别字段，不截断）、`minimum`/`maximum`、`allowedKeys`（未知字段）与该字段 `example`；顶层 `example` 是最短可通过的调用（必填字段）。直接入口工具（含 tools_search）由 Vmotion 自己校验，不再返回 SDK 的 `-32602` 文本。
+
+`project_schema` 对对象 schema 先返回 `properties` 索引（字段名 → 简短类型/默认值，`animations` 说明 keys[].{frame,value,easing,bezier} 格式），再返回完整 schema，便于截断大结果的客户端仍能看到所有字段；`properties:["animations","start"]` 只返回所选字段。新增名称 `animation` 与 `keyframe`（与 animation_edit upsert 的 keys 相同）。`animation_inspect` 的 nodeId 变为可选：只给 sceneId（可加 path/properties/offset/limit）返回场景范围的分页总览，每个动画图层给出通道、键数与帧范围，默认 30 项、最多 200。
+
+预检证据：`project_preflight`/`project_apply` 上显式 `samples:false`，或 `visual:false` 且本次请求未给 samples，会覆盖存储计划里的 samples/visual，不渲染 320px 接触表；`.vmotion/preflight/` 默认输出只保留最新 48 张（≤64MB），其余在下一次写入时清理。
+
+真实 stdio 回归：`node scripts/check-mcp-contract.mjs [--packaged]` 逐项复现以上 7 个问题（main 上 0/7 通过，本分支 7/7）。
 
 本轮上下文优化：默认 tools/list 用简短描述，`tools_search` 返回最多160字摘要（截断有标志），省略重复参数名/分类统计和完整插件元数据；`detail:true` 恢复这些字段。查询索引按不可变目录复用，插件变化生成新目录。`tool_schema` 默认给接口/分类/注解，`detail:true` 补说明/调用示例/插件信息；项目插件的身份/版本/hash仍保留，便于拒绝旧接口。detail不改变输入接口hash，`format:expanded` 仍只控制引用展开。
 
 `tool_call` 新增 `fields:["summary.mean","samples.0.pixelHash"]`（最多32条、每条160字符）和 `media:false`。结果选择使用自身字段，禁止原型路径；非法选择在执行前拒绝，不会先写工程。返回 `resultProjection` 含 partial、实际请求路径和missing；缺失结果字段不把已经完成的写操作误报成失败。revision/baseRevision/candidateRevision/applied/valid若存在会保留。数组索引投影以索引对象返回，不重新编号。选字段只缩短传输，不减少底层渲染/检查工作；media=false关闭内联媒体，文件输出和诊断仍执行。完整结果用response=full并省略fields；原生媒体只传一次。
 
-CLI对应 `tools-search --detail`、`tool-schema --detail`、`tool-call --fields a,b --no-media`。窗口打开时仍通过同一工程服务。`composition_edit_layers mode=plan` 返回固定候选，直接apply默认保持；没有新增独立编辑系统或额外默认工具。
+CLI对应 `tools-search --detail`、`tool-schema --detail`、`tool-call --fields a,b --no-media`。CLI tool-call 走同一契约（planner 返回 plan.planId，写返回 committed/next；request 文件可含 `mode:"plan"`/`detail:true`），`tool-call --name tools_search|tool_schema` 与 `tool-schema --name tool_call` 也可用；`mcp --tools auto` 见上文。窗口打开时仍通过同一工程服务。`composition_edit_layers mode=plan` 返回固定候选，直接apply默认保持；没有新增独立编辑系统或额外默认工具。
 
 `plugins_inspect/plan` 管理项目本地插件和资源贡献；`plugins_package` 只返回分页内容指纹和文件大小。`tools_search pluginId` 查询一个插件的能力，Schema/call/load/list 按清单与源码内容条件hash刷新，支持升级/禁用/撤销和外部文件更新。插件参数接口与导出一致、上下文显式、编辑仍准确候选/一次撤销。CLI工具查询可选 --project，详见 PLUGINS.md。
 
-十八个内置模块147项能力使用统一注册表，唯一名称/处理器/版本/依赖在启动时校验；工程控制、历史恢复、缓存、画面检查及所有创作模块均通过同一注册表分发。assets_query默认24素材摘要、drawing_query默认24图层/16笔迹且点数组按需分页，component_query默认短参数/32通道，audio_timeline默认24片段、render_query默认20任务，project_diagnostics默认20条诊断/冲突定位/待修复文件。color_scopes默认省略分布数组，frame_compare/layer_impact返回短像素指标，原生图片不重复Base64。完整源码/metadata/错误/压感点显式读取，旧完整接口保持兼容。
+十八个内置模块148项能力使用统一注册表，唯一名称/处理器/版本/依赖在启动时校验；工程控制、历史恢复、缓存、画面检查及所有创作模块均通过同一注册表分发。assets_query默认24素材摘要、drawing_query默认24图层/16笔迹且点数组按需分页，component_query默认短参数/32通道，audio_timeline默认24片段、render_query默认20任务，project_diagnostics默认20条诊断/冲突定位/待修复文件。color_scopes默认省略分布数组，frame_compare/layer_impact返回短像素指标，原生图片不重复Base64。完整源码/metadata/错误/压感点显式读取，旧完整接口保持兼容。
 
 静态图片能力归入发现分类 `image`：`still_inspect`、`still_plan`（同时属 composition）与 `image_export`（同时属 render）。默认入口不变；`tools_search {"query":"海报","category":"image"}` 或 `tools_load {"categories":["image"]}` 按需取得，`agent_guide topic=image` 返回对应工作流。still_inspect 默认只给预设/模板 ID，presets/templates=true 才返回完整表；image_export 只返回路径/尺寸/字节/pixelHash，不含 Base64，preview 缩略图为显式选项。详见 [静态图片](STILL-IMAGES.md)。
 

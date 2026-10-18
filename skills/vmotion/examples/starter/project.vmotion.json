@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "id": "0c7d6a52-5f3e-4c1b-9a8e-2f4d1b7e9a10",
+  "name": "Starter",
+  "width": 1280,
+  "height": 720,
+  "fps": { "num": 30, "den": 1 },
+  "activeSequence": "main",
+  "scenes": ["scenes/intro.json"],
+  "sequences": ["sequences/main.json"],
+  "assets": []
+}

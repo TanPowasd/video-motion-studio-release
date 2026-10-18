@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "id": "6b1f4c1e-3a52-4d8e-9a3e-5f0b7f2a1c11",
+  "name": "JSX 组件实验室",
+  "width": 1280,
+  "height": 720,
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "colorSpace": "srgb",
+  "sampleRate": 48000,
+  "activeSequence": "main",
+  "scenes": [
+    "scenes/intro.json"
+  ],
+  "sequences": [
+    "sequences/main.json"
+  ],
+  "assets": [],
+  "drawings": [],
+  "sdkVersion": "0.1.0"
+}

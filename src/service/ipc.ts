@@ -39,7 +39,10 @@ export function rpc(root: string, method: string, params: unknown = {}): Promise
         socket.end();
         if (message.error)
           reject(
-            new VmotionError(message.error.code, message.error.message, message.error.details),
+            Object.assign(
+              new VmotionError(message.error.code, message.error.message, message.error.details),
+              message.error.example === undefined ? {} : { example: message.error.example },
+            ),
           );
         else resolve(message.result);
       } catch (e) {
@@ -99,6 +102,8 @@ export async function servePipe(app: Application) {
                   code: e instanceof VmotionError ? e.code : 'INTERNAL_ERROR',
                   message: (e as Error).message,
                   details: e instanceof VmotionError ? e.details : undefined,
+                  // Argument errors carry a short valid call; keep it across the editor bridge.
+                  example: (e as { example?: unknown }).example,
                 },
               }) + '\n',
             );

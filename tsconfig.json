@@ -13,7 +13,11 @@
     "noEmit": true,
     "types": ["node", "vite/client"],
     "baseUrl": ".",
-    "paths": { "@vmotion/sdk": ["src/sdk/index.ts"] }
+    "paths": {
+      "@vmotion/sdk": ["src/sdk/index.ts"],
+      "@vmotion/sdk/jsx-runtime": ["src/sdk/index.ts"],
+      "@vmotion/sdk/jsx-dev-runtime": ["src/sdk/index.ts"]
+    }
   },
-  "include": ["src", "scripts", "tests", "vite.config.ts", "examples/**/*.ts"]
+  "include": ["src", "scripts", "tests", "vite.config.ts", "examples/**/*.ts", "examples/**/*.tsx", "skills/**/*.ts", "skills/**/*.tsx"]
 }

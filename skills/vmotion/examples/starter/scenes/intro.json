@@ -1,0 +1,17 @@
+{
+  "id": "intro",
+  "name": "Intro",
+  "duration": 90,
+  "background": "#07090f",
+  "nodes": [
+    {
+      "id": "title-card",
+      "type": "component",
+      "name": "Title card",
+      "component": "components/title-card.tsx",
+      "width": 1280,
+      "height": 720,
+      "params": { "title": "你好，Vmotion" }
+    }
+  ]
+}

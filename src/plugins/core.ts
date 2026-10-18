@@ -39,7 +39,24 @@ export const candidateInput = {
     ]),
   ),
   operations: z.array(z.record(z.unknown())).max(1000).optional(),
+  samples: z.union([preflightSchema.shape.samples.removeDefault(), z.literal(false)]).optional(),
 };
+const candidateHandlerSchema = preflightSchema.partial().extend({
+  expectedCandidateRevision: z.string().optional(),
+  samples: z.union([preflightSchema.shape.samples.removeDefault(), z.literal(false)]).optional(),
+});
+/**
+ * Resolve a stored plan and let explicit evidence opt-outs win: samples:false always, and
+ * visual:false when this request does not name its own samples. Stored plans often carry
+ * sample frames/visual audits; agents that only want the structural check must not pay for PNGs.
+ */
+async function candidateRequest(root: string, params: z.infer<typeof candidateHandlerSchema>) {
+  const quiet =
+      params.samples === false || (params.visual === false && params.samples === undefined),
+    { samples, ...rest } = params,
+    request = await resolveAgentPlan(root, samples === false ? rest : params);
+  return quiet ? { ...request, samples: [], visual: false } : request;
+}
 
 export const corePlugin: BuiltinPluginModule = {
   id: 'vmotion.core',
@@ -164,11 +181,17 @@ export const corePlugin: BuiltinPluginModule = {
       {
         name: 'project_schema',
         description:
-          'Read one authoritative JSON schema only when needed. Query operationType to get the schema of a specific semantic operation rather than the full operation catalog.',
+          'Read one authoritative JSON schema only when needed. Object schemas start with a property index (name: type); properties selects only some fields, operationType one semantic operation. Names include node, animation and keyframe (animation_edit key format).',
         method: 'projectSchema',
         schema: {
           name: z.enum(projectSchemaNames),
           operationType: z.string().optional(),
+          properties: z
+            .array(z.string().min(1).max(100))
+            .min(1)
+            .max(64)
+            .optional()
+            .describe('Only these fields'),
         },
 
         categories: ['core'],
@@ -423,13 +446,14 @@ export const coreRpcHandlers = {
       .object({
         name: z.enum(projectSchemaNames),
         operationType: z.string().optional(),
+        properties: z.array(z.string().min(1).max(100)).min(1).max(64).optional(),
       })
       .extend({ inline: z.boolean().optional() })
       .passthrough(),
     async (host, params) => {
       const method = 'projectSchema';
       const service = host.coreService;
-      return projectSchemaInfo(params.name, params.operationType);
+      return projectSchemaInfo(params.name, params.operationType, params.properties);
     },
   ),
   projectContext: defineRpcHandler(
@@ -459,83 +483,74 @@ export const coreRpcHandlers = {
       return readProjectFile(service as Parameters<typeof readProjectFile>[0], params);
     },
   ),
-  projectPreflight: defineRpcHandler(
-    preflightSchema.partial().extend({ expectedCandidateRevision: z.string().optional() }),
-    async (host, params) => {
-      const method = 'projectPreflight';
-      const service = host.coreService;
-      const request = await resolveAgentPlan(host.root, params);
-      return (
-        await preflight(
-          host.root,
-          structuredClone({
-            ...service.snapshot,
-            files:
-              request.version === 'pending'
-                ? (service.pendingFiles ?? service.snapshot.files)
-                : service.snapshot.files,
-          }),
-          request,
-        )
-      ).result;
-    },
-  ),
-  projectApply: defineRpcHandler(
-    preflightSchema.partial().extend({ expectedCandidateRevision: z.string().optional() }),
-    async (host, params) => {
-      const method = 'projectApply';
-      const service = host.coreService;
-      const request = await resolveAgentPlan(host.root, params);
-      if (service.pendingFiles && request.version !== 'pending')
-        throw new VmotionError(
-          'INVALID_ON_DISK',
-          'Pending external files exist; read version=pending and preflight that version before applying repairs',
-          service.diagnostics,
-        );
-      const { expectedCandidateRevision, ...input } = request,
-        checked = await preflight(
-          host.root,
-          structuredClone({
-            ...service.snapshot,
-            files:
-              request.version === 'pending'
-                ? (service.pendingFiles ?? service.snapshot.files)
-                : service.snapshot.files,
-          }),
-          input,
-        );
-      if (!checked.result.valid)
-        throw new VmotionError(
-          'VALIDATION_FAILED',
-          'Preflight failed; no project changes saved',
-          checked.result.diagnostics,
-        );
-      if (
-        expectedCandidateRevision &&
-        expectedCandidateRevision !== checked.result.candidateRevision
+  projectPreflight: defineRpcHandler(candidateHandlerSchema, async (host, params) => {
+    const method = 'projectPreflight';
+    const service = host.coreService;
+    const request = await candidateRequest(host.root, params);
+    return (
+      await preflight(
+        host.root,
+        structuredClone({
+          ...service.snapshot,
+          files:
+            request.version === 'pending'
+              ? (service.pendingFiles ?? service.snapshot.files)
+              : service.snapshot.files,
+        }),
+        request,
       )
-        throw new VmotionError(
-          'CANDIDATE_REVISION',
-          'This candidate differs from the inspected preflight',
-          { expected: expectedCandidateRevision, actual: checked.result.candidateRevision },
-        );
-      if (!checked.operations.length)
-        return { ...checked.result, applied: false, revision: service.snapshot.revision };
-      const state = await service.transact(
-        checked.operations,
-        checked.result.baseRevision,
-        true,
-        (candidate) => checkAssets(host.root, candidate, checked.result.assetChecks),
+    ).result;
+  }),
+  projectApply: defineRpcHandler(candidateHandlerSchema, async (host, params) => {
+    const method = 'projectApply';
+    const service = host.coreService;
+    const request = await candidateRequest(host.root, params);
+    if (service.pendingFiles && request.version !== 'pending')
+      throw new VmotionError(
+        'INVALID_ON_DISK',
+        'Pending external files exist; read version=pending and preflight that version before applying repairs',
+        service.diagnostics,
       );
-      return {
-        ...checked.result,
-        applied: true,
-        revision: state.snapshot.revision,
-        canUndo: state.canUndo,
-        canRedo: state.canRedo,
-      };
-    },
-  ),
+    const { expectedCandidateRevision, ...input } = request,
+      checked = await preflight(
+        host.root,
+        structuredClone({
+          ...service.snapshot,
+          files:
+            request.version === 'pending'
+              ? (service.pendingFiles ?? service.snapshot.files)
+              : service.snapshot.files,
+        }),
+        input,
+      );
+    if (!checked.result.valid)
+      throw new VmotionError(
+        'VALIDATION_FAILED',
+        'Preflight failed; no project changes saved',
+        checked.result.diagnostics,
+      );
+    if (expectedCandidateRevision && expectedCandidateRevision !== checked.result.candidateRevision)
+      throw new VmotionError(
+        'CANDIDATE_REVISION',
+        'This candidate differs from the inspected preflight',
+        { expected: expectedCandidateRevision, actual: checked.result.candidateRevision },
+      );
+    if (!checked.operations.length)
+      return { ...checked.result, applied: false, revision: service.snapshot.revision };
+    const state = await service.transact(
+      checked.operations,
+      checked.result.baseRevision,
+      true,
+      (candidate) => checkAssets(host.root, candidate, checked.result.assetChecks),
+    );
+    return {
+      ...checked.result,
+      applied: true,
+      revision: state.snapshot.revision,
+      canUndo: state.canUndo,
+      canRedo: state.canRedo,
+    };
+  }),
   state: defineRpcHandler(
     z.object({}).extend({ inline: z.boolean().optional() }).passthrough(),
     async (host, params) => {

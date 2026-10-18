@@ -14,6 +14,10 @@ export type { DriverContext, DriverReport } from '../core/drivers.js';
 export type { Layout, LayoutInput, MotionPath, MotionPathInput } from '../core/driver-schema.js';
 export { axes, diagram, stack, cubicBezier, bubbleSortSteps } from './science.js';
 export * from './motion.js';
+export * from './jsx.js';
+export * from './jsx-time.js';
+export { lowerStyle, parseTransform, parseGradient, supportedStyleKeys } from './jsx-style.js';
+import { needsLowering, rootClock, toNodes, withClock, type VmChild } from './jsx.js';
 export { storyboardSchema, storyboardBoundary } from '../core/storyboard.js';
 export type { Storyboard, StoryboardInput } from '../core/storyboard.js';
 export {
@@ -184,13 +188,27 @@ export interface Component<P extends ParameterDefinitions = ParameterDefinitions
     params: ParameterValues<P>,
   ) => Array<Partial<Node> & Pick<Node, 'id' | 'type'>>;
 }
+/** A component definition; render may return node arrays (builders) or JSX (lowered per frame). */
+export interface ComponentDefinition<P extends ParameterDefinitions = ParameterDefinitions> {
+  name: string;
+  parameters: P;
+  render: (context: ComponentContext, params: ParameterValues<P>) => VmChild;
+}
 export function defineComponent<const P extends ParameterDefinitions>(
-  component: Component<P>,
+  component: ComponentDefinition<P>,
 ): Component<P> {
   validateParameterDefinitions(component.parameters);
   return {
     ...component,
-    render: (ctx, params) => component.render(ctx, resolveParameters(component.parameters, params)),
+    render: (ctx, params) => {
+      const clock = rootClock(ctx),
+        output = withClock(clock, () =>
+          component.render(ctx, resolveParameters(component.parameters, params)),
+        );
+      return needsLowering(output)
+        ? toNodes(output, clock)
+        : (output as Array<Partial<Node> & Pick<Node, 'id' | 'type'>>);
+    },
   };
 }
 export const rect = (id: string, props: NodeProps = {}) => newNode({ id, type: 'rect', ...props });

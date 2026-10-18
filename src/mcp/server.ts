@@ -1,7 +1,7 @@
 import { McpServer, type RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import { ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import { ListToolsRequestSchema, type CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { Application } from '../service/application.js';
 import { VmotionError } from '../core/model.js';
@@ -19,12 +19,23 @@ import {
   toolSchemaRequestSchema,
   toolLoadSchema,
   selectTools,
+  metaToolNames,
+  metaToolDescriptions,
+  metaToolSchemas,
+  metaToolAnnotations,
+  toolNotFound,
 } from './discovery.js';
+import { parseArguments } from './argument-errors.js';
 import { invokeTool, toolError, toolCallSchema } from './invoke.js';
 import { withChangeOrigin } from '../service/change-journal.js';
 import { projectPluginTools, type PluginCatalog } from './plugin-tools.js';
 
-export async function startMcp(root: string, options: { tools?: 'compact' | 'all' } = {}) {
+export type McpToolMode = 'compact' | 'all' | 'auto';
+/** SDK-side shape that accepts any value per key, so our own validator reports full fixes. */
+const lenient = (shape: z.ZodRawShape) =>
+  z.object(Object.fromEntries(Object.keys(shape).map((key) => [key, z.unknown()]))).passthrough();
+const AUTO_LOAD_LIMIT = 32;
+export async function startMcp(root: string, options: { tools?: McpToolMode } = {}) {
   const remote = await existingService(root),
     app = remote ? undefined : await new Application(root).open(),
     // Attribution for the Studio change feed: the MCP client name from the handshake.
@@ -37,7 +48,7 @@ export async function startMcp(root: string, options: { tools?: 'compact' | 'all
       { name: 'vmotion', version: '0.2.0' },
       {
         instructions:
-          'Use project_context and agent_guide. tools_search lists concise capabilities; tool_schema gives one exact interface; tool_call executes any capability without loading schemas; tools_load enables direct tools for this connection. Candidate edits still require the shared preflight/apply flow. The application never calls AI models.',
+          'Use project_context and agent_guide. Only the tools in tools/list can be called by direct name; call every other capability with tool_call {name,arguments} (or tools_load it first). tools_search lists capabilities with effect read|plan|write; tool_schema gives one exact interface (entry tools included). Planners return plan.planId: project_preflight({planId}) then project_apply({planId}). The application never calls AI models.',
       },
     ),
     builtinDefinitions = toolDefinitions(),
@@ -46,30 +57,69 @@ export async function startMcp(root: string, options: { tools?: 'compact' | 'all
   let definitionsByName = new Map(definitions.map((t) => [t.name, t]));
   const listCache = new Map<string, { schema: unknown; json: Record<string, unknown> }>();
   let enabled = mode === 'all' ? new Set(definitions.map((t) => t.name)) : new Set(coreTools);
+  const autoLoaded = new Set<string>();
+  /** --tools auto: a capability used through tool_call/tool_schema becomes a direct tool. */
+  const autoLoad = (name: string) => {
+    if (mode !== 'auto' || enabled.has(name) || autoLoaded.size >= AUTO_LOAD_LIMIT) return;
+    const entry = registered.get(name);
+    if (!entry || !definitionsByName.has(name)) return;
+    autoLoaded.add(name);
+    enabled.add(name);
+    entry.enable();
+  };
+  const routing = () => ({
+    mode,
+    directTools:
+      mode === 'all'
+        ? ('all' as const)
+        : [...registered].filter(([, entry]) => entry.enabled).map(([name]) => name).sort(),
+    hidden:
+      mode === 'all'
+        ? 'Every capability is a direct tool.'
+        : 'Only directTools can be called by name; call any other capability with tool_call {"name":"<capability>","arguments":{...}} or tools_load it and refresh tools/list.',
+    capabilities: definitions.length,
+  });
+  /** project_context/agent_guide tell the agent which names its client can call directly. */
+  const withRouting = (tool: ToolDefinition, result: CallToolResult, fields?: string[]): CallToolResult => {
+    if (fields || !['projectContext', 'agentGuide'].includes(tool.method)) return result;
+    const value = result.structuredContent;
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return result;
+    const next: Record<string, unknown> = { ...(value as Record<string, unknown>), mcp: routing() };
+    return {
+      ...result,
+      structuredContent: next,
+      content: result.content.map((block, index) =>
+        index === 0 && (block as { type?: string }).type === 'text'
+          ? { type: 'text' as const, text: JSON.stringify(next) }
+          : block,
+      ),
+    };
+  };
   const execute = async (
     tool: ToolDefinition,
     args: unknown,
     response: 'compact' | 'full',
-    delivery: { fields?: string[]; media?: boolean } = {},
+    delivery: { fields?: string[]; media?: boolean; via?: 'tool_call' | 'direct' } = {},
   ) => {
     if (app)
       return withChangeOrigin({ kind: 'mcp', client: agent.client, tool: tool.name }, () =>
-        invokeTool(tool, args, call, { response, ...delivery }),
+        invokeTool(tool, args, call, { response, ...delivery, root }),
       );
     try {
+      const { via: _via, ...bridged } = delivery;
       return await rpc(root, 'agentToolInvoke', {
         name: tool.name,
         arguments: args,
         response,
         inline: true,
-        ...delivery,
+        ...bridged,
         // Only editors that advertise origin support accept the extra field.
         ...(agent.origins ? { agent: { client: agent.client, pid: agent.pid } } : {}),
       });
     } catch (e) {
       // Older open editors can still serve their existing capabilities through the bridge.
       if ((e as { code?: string }).code === 'METHOD_NOT_FOUND')
-        return invokeTool(tool, args, call, { response, ...delivery });
+        return invokeTool(tool, args, call, { response, ...delivery, root });
       throw e;
     }
   };
@@ -78,8 +128,8 @@ export async function startMcp(root: string, options: { tools?: 'compact' | 'all
       tool.name,
       {
         description: tool.description,
-        // Preserve unknown fields for invokeTool's shared strict validation and structured errors.
-        inputSchema: z.object(tool.schema).passthrough(),
+        // Accept any values here; invokeTool's strict validation reports allowed values/examples.
+        inputSchema: lenient(tool.schema),
         annotations: toolAnnotations(tool.name, tool),
       },
       async (params) => {
@@ -91,9 +141,11 @@ export async function startMcp(root: string, options: { tools?: 'compact' | 'all
               'PLUGIN_CHANGED',
               'Plugin changed; refresh tools/list or use tool_schema before calling again',
             );
-          const result = await execute(tool, params, mode === 'all' ? 'full' : 'compact');
+          const result = await execute(tool, params, mode === 'all' ? 'full' : 'compact', {
+            via: 'direct',
+          });
           await refresh();
-          return result.result;
+          return withRouting(tool, result.result);
         } catch (e) {
           return toolError(e);
         }
@@ -149,81 +201,93 @@ export async function startMcp(root: string, options: { tools?: 'compact' | 'all
     }));
   for (const tool of definitions) register(tool);
   await refresh();
-  const discoveryNames = ['tools_search', 'tool_schema', 'tool_call', 'tools_load'];
-  registered.set(
-    'tools_search',
-    server.registerTool(
-      'tools_search',
-      {
-        description:
-          'Find capabilities by query/category/plugin with short summaries and read/write hints. detail=true includes argument names and full catalog metadata. Paginated Chinese/English search; no schemas/source. Then tool_schema/tool_call.',
-        inputSchema: toolSearchSchema,
-        annotations: { readOnlyHint: true, openWorldHint: false },
-      },
-      async (params) => {
-        try {
-          await refresh();
-          const value = searchTools(definitions, params, enabled);
-          return {
-            structuredContent: value,
-            content: [{ type: 'text', text: JSON.stringify(value) }],
-          };
-        } catch (e) {
-          return toolError(e);
-        }
-      },
-    ),
-  );
-  registered.set(
-    'tool_schema',
-    server.registerTool(
-      'tool_schema',
-      {
-        description:
-          'Read one exact input schema with local refs and conditional ifHash. paths selects property branches; full invocation validation remains. detail=true adds description/plugin/call metadata, format=expanded inlines refs. Avoid loading the full catalog.',
-        inputSchema: toolSchemaRequestSchema,
-        annotations: { readOnlyHint: true, openWorldHint: false },
-      },
-      async (params) => {
-        try {
-          await refresh();
-          const value = toolSchema(definitions, params.name, params);
-          return {
-            structuredContent: value,
-            content: [{ type: 'text', text: JSON.stringify(value) }],
-          };
-        } catch (e) {
-          return toolError(e);
-        }
-      },
-    ),
-  );
-  registered.set(
-    'tool_call',
-    server.registerTool(
-      'tool_call',
-      {
-        description:
-          'Invoke any capability through shared strict schemas/transactions. Default compact JSON/native media; response=full opts into complete results. fields selects result paths while retaining revision/validity metadata, media=false omits inline media. Unknown result paths are marked missing; edits use exact candidates/undo. This gateway can mutate projects.',
-        inputSchema: toolCallSchema,
-        annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
-      },
-      async (params) => {
-        try {
-          await refresh();
-          const tool = findTool(definitions, params.name);
-          const result = await execute(tool, params.arguments, params.response, {
-            fields: params.fields,
-            media: params.media,
-          });
-          await refresh();
-          return result.result;
-        } catch (e) {
-          return toolError(e);
-        }
-      },
-    ),
-  );
+  const discoveryNames: string[] = [...metaToolNames];
+  const reply = (value: unknown) => ({
+    structuredContent: value as Record<string, unknown>,
+    content: [{ type: 'text' as const, text: JSON.stringify(value) }],
+  });
+  const loadTools = (raw: unknown) => {
+    const selected = selectTools(definitions, raw, enabled);
+    let changed = false;
+    for (const [name, entry] of registered) {
+      if (discoveryNames.includes(name)) continue;
+      if (selected.has(name) !== enabled.has(name)) {
+        entry.enabled = selected.has(name);
+        changed = true;
+      }
+    }
+    enabled = selected;
+    for (const name of [...autoLoaded]) if (!enabled.has(name)) autoLoaded.delete(name);
+    if (changed) server.sendToolListChanged();
+    const names = [...enabled].sort();
+    return {
+      mode,
+      enabled: names,
+      permanent: discoveryNames,
+      totalAvailable: definitions.length,
+      categories: [
+        ...new Set(names.flatMap((name) => toolCategories(name, findTool(definitions, name)))),
+      ],
+      projectChanged: false,
+      next: 'Refresh tools/list for direct names, or call tool_call with a capability name.',
+    };
+  };
+  /** Meta handlers shared by the direct entry tools and tool_call {name:'tools_search'|...}. */
+  const meta: Record<string, (raw: unknown) => unknown> = {
+    tools_search: (raw) => searchTools(definitions, raw, enabled),
+    tool_schema: (raw) => {
+      const request = parseArguments('tool_schema', toolSchemaRequestSchema, raw);
+      const value = toolSchema(definitions, request.name, request);
+      if (!enabled.has(request.name) && definitionsByName.has(request.name)) {
+        const before = enabled.size;
+        autoLoad(request.name);
+        if (enabled.size !== before) server.sendToolListChanged();
+      }
+      return value;
+    },
+    tools_load: (raw) => loadTools(raw),
+  };
+  const registerMeta = (
+    name: (typeof metaToolNames)[number],
+    handler: (params: Record<string, unknown>) => Promise<unknown>,
+  ) =>
+    registered.set(
+      name,
+      server.registerTool(
+        name,
+        {
+          description: metaToolDescriptions[name],
+          inputSchema: lenient(metaToolSchemas[name].shape),
+          annotations: metaToolAnnotations[name],
+        },
+        async (params) => {
+          try {
+            await refresh();
+            return (await handler(params)) as never;
+          } catch (e) {
+            return toolError(e);
+          }
+        },
+      ),
+    );
+  registerMeta('tools_search', async (params) => reply(meta.tools_search(params)));
+  registerMeta('tool_schema', async (params) => reply(meta.tool_schema(params)));
+  registerMeta('tool_call', async (params) => {
+    const request = parseArguments('tool_call', toolCallSchema, params);
+    if (Object.hasOwn(meta, request.name)) return reply(meta[request.name](request.arguments));
+    if (request.name === 'tool_call')
+      throw new VmotionError('TOOL_ARGUMENTS', 'tool_call cannot invoke itself; pass the capability name');
+    const tool = findTool(definitions, request.name);
+    const result = await execute(tool, request.arguments, request.response, {
+      fields: request.fields,
+      media: request.media,
+    });
+    const before = enabled.size;
+    autoLoad(tool.name);
+    if (enabled.size !== before) server.sendToolListChanged();
+    await refresh();
+    return withRouting(tool, result.result, request.fields);
+  });
   server.server.setRequestHandler(ListToolsRequestSchema, async () => {
     await refresh();
     const tools = [...registered]
@@ -231,8 +295,10 @@ export async function startMcp(root: string, options: { tools?: 'compact' | 'all
       .map(([name, entry]) => {
         let cached = listCache.get(name);
         if (!cached || cached.schema !== entry.inputSchema) {
-          // SDK empty raw shapes normalize to Zod 4 Mini; keep the authoritative Zod 3 tool schema.
-          const shape = definitionsByName.get(name)?.schema,
+          // Registration shapes are lenient; list the authoritative strict Zod 3 schema.
+          const shape =
+              definitionsByName.get(name)?.schema ??
+              (metaToolSchemas as Record<string, z.AnyZodObject>)[name]?.shape,
             input = shape
               ? z.object(shape).strict()
               : (entry.inputSchema as z.ZodTypeAny | undefined);
@@ -248,71 +314,48 @@ export async function startMcp(root: string, options: { tools?: 'compact' | 'all
         }
         return {
           name,
-          description: mode==='all' ? entry.description : entry.description?.split(/\.\s/)[0].slice(0,200),
+          description:
+            mode === 'all'
+              ? entry.description
+              : entry.description?.split(/\.\s/)[0].slice(0, 200),
           inputSchema: cached.json as { type: 'object' },
           annotations: entry.annotations,
         };
       });
     return { tools };
   });
-  registered.set(
-    'tools_load',
-    server.registerTool(
-      'tools_load',
-      {
-        description:
-          'Enable named/category direct tools in this MCP connection. mode=add preserves currently loaded tools; replace returns to essential tools before adding. All capabilities remain callable through tool_call. Does not edit the project or other agent connections. Sends tools/list_changed; clients without dynamic reload should use tool_call.',
-        inputSchema: toolLoadSchema,
-        annotations: {
-          readOnlyHint: false,
-          idempotentHint: true,
-          destructiveHint: false,
-          openWorldHint: false,
-        },
-      },
-      async (params) => {
-        try {
-          await refresh();
-          const selected = selectTools(definitions, params, enabled);
-          let changed = false;
-          for (const [name, entry] of registered) {
-            if (discoveryNames.includes(name)) continue;
-            if (selected.has(name) !== enabled.has(name)) {
-              entry.enabled = selected.has(name);
-              changed = true;
-            }
-          }
-          enabled = selected;
-          if (changed) server.sendToolListChanged();
-          const names = [...enabled].sort(),
-            value = {
-              mode,
-              enabled: names,
-              permanent: discoveryNames,
-              totalAvailable: definitions.length,
-              categories: [
-                ...new Set(
-                  names.flatMap((name) => toolCategories(name, findTool(definitions, name))),
-                ),
-              ],
-              projectChanged: false,
-              next: 'Refresh tools/list for direct names, or call tool_call with a capability name.',
-            };
-          return {
-            structuredContent: value,
-            content: [{ type: 'text', text: JSON.stringify(value) }],
-          };
-        } catch (e) {
-          return toolError(e);
-        }
-      },
-    ),
-  );
+  registerMeta('tools_load', async (params) => reply(meta.tools_load(params)));
+  // A capability that exists but is not loaded in this connection (or an unknown name) gets a
+  // structured routing answer instead of the SDK's bare "Tool X disabled/not found".
+  const handlers = (
+    server.server as unknown as {
+      _requestHandlers: Map<string, (request: unknown, extra: unknown) => Promise<unknown>>;
+    }
+  )._requestHandlers;
+  const sdkCall = handlers.get('tools/call');
+  if (sdkCall)
+    handlers.set('tools/call', async (request, extra) => {
+      const name = (request as { params?: { name?: unknown } }).params?.name;
+      if (typeof name === 'string' && !registered.get(name)?.enabled) {
+        await refresh();
+        if (!registered.get(name)?.enabled)
+          return toolError(
+            definitionsByName.has(name)
+              ? new VmotionError(
+                  'TOOL_NOT_LOADED',
+                  `${name} is a Vmotion capability but not a direct tool in this connection; call tool_call {"name":"${name}","arguments":{...}} or tools_load {"names":["${name}"]} and refresh tools/list`,
+                  { name, directTools: routing().directTools },
+                )
+              : toolNotFound(definitions, name),
+          );
+      }
+      return sdkCall(request, extra);
+    });
   server.resource('project-guide', 'vmotion://guide', async (uri) => ({
     contents: [
       {
         uri: uri.href,
-        text: 'The default connection lists 10 compact entry tools. Use tools_search for capabilities, tool_schema for one exact interface, and tool_call {name,arguments} for any named capability; tools_load enables direct names for this connection. Start with project_context and agent_guide for workflow routing. Use matrix3d for geometry and scene3d_render for native color/depth/face-ID evidence. Inspect media_sample before sequence_plan; preflight its exact candidate and apply the unchanged payload with assetChecks. Read source ranges through project_file_read. Edits return compact revisions/IDs/diagnostics; response=full or mcp --tools all preserves legacy reads/results. The application contains no AI model integration.',
+        text: 'The default connection lists 10 compact entry tools. Use tools_search for capabilities, tool_schema for one exact interface, and tool_call {name,arguments} for any named capability; tools_load enables direct names for this connection. Start with project_context and agent_guide for workflow routing. Use matrix3d for geometry and scene3d_render for native color/depth/face-ID evidence. Only tools in tools/list are callable by direct name; use tool_call for the rest. Planners and mode=plan writes return plan.planId (committed:false): project_preflight({planId}) then project_apply({planId}). Inspect media_sample before sequence_plan. Read source ranges through project_file_read. Edits return compact revisions/IDs/diagnostics; response=full or mcp --tools all preserves legacy reads/results. The application contains no AI model integration.',
       },
     ],
   }));

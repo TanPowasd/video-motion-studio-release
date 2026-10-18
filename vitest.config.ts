@@ -8,6 +8,9 @@ export default defineConfig({
     environment: 'node',
     maxWorkers: 2,
     testTimeout: 30000,
+    // Integration beforeEach hooks open a full Application (component compile + first render),
+    // 5-9 s on a 2-core host; the 10 s default flakes under load, so match the test budget.
+    hookTimeout: 30000,
     coverage: {
       provider: 'v8',
       reportsDirectory: 'artifacts/coverage',

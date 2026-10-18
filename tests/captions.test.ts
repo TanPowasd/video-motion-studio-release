@@ -6,6 +6,15 @@ import { parseCaptions, captionsSchema } from '../src/core/captions.js';
 import { measureTextBlock } from '../src/core/text-layout.js';
 import { initProject } from '../src/service/template.js';
 import { Application } from '../src/service/application.js';
+import { createCanvas } from '@napi-rs/canvas';
+import { nativeTextFont } from '../src/core/bundled-fonts.js';
+// Wrapping a CJK subtitle is only measurable with a font that covers CJK ideographs. The bundled
+// runtime ships Noto Sans SC (scripts/prepare-runtime.ts) and Windows has system CJK fonts; a bare
+// Linux host without either measures tofu boxes (~0.3em), so the line never wraps. Every CJK font
+// advances ideographs by a full em, which is what this probe checks.
+const cjkProbe = createCanvas(1, 1).getContext('2d');
+cjkProbe.font = nativeTextFont(400, 100, 'sans-serif');
+const cjkFontAvailable = cjkProbe.measureText('中').width >= 80;
 it('parses SRT and WebVTT against a rational frame rate, strips styling and rejects overlapping cues', () => {
   const srt =
     '1\n00:00:01,000 --> 00:00:02,500\n第一行\n第二行\n\n2\n00:00:03,000 --> 00:00:04,000\n继续。';
@@ -29,7 +38,11 @@ it('parses SRT and WebVTT against a rational frame rate, strips styling and reje
   ).toThrow('overlap');
   expect(() => captionsSchema.parse({ ...doc, cues: [doc.cues[0], doc.cues[0]] })).toThrow();
 });
-it('native text measurement accounts for wrapping when computing subtitle height', () => {
+it('native text measurement accounts for wrapping when computing subtitle height', ({ skip }) => {
+  skip(
+    !cjkFontAvailable,
+    'no CJK-capable font: set VMOTION_RUNTIME to a runtime with fonts/NotoSansSC-*.otf or install a CJK system font',
+  );
   const block = measureTextBlock('这是一条比较长的中文字幕，需要自动换行后完整显示。', {
     fontSize: 28,
     width: 260,

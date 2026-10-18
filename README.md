@@ -4,6 +4,8 @@
 
 [下载便携版](https://github.com/TanPowasd/video-motion-studio-release/releases) · [创作指南](docs/STUDIO-GUIDE.md) · [外部 AI / MCP](docs/AGENT-WORKBENCH.md) · [能力与边界](docs/FEATURES.md)
 
+外部 AI agent（Claude Code / Codex / Cursor）请使用 [Agent Skill](skills/vmotion/README.md)：优先直接改工程文件，命令行校验与导出，MCP 最后才用。
+
 ## 共同编辑同一工程
 
 | 入口 | 面向 | 使用方式 |
@@ -11,11 +13,11 @@
 | Vmotion Studio | 可视化创作 | Vmotion.exe / 启动 Vmotion.cmd；动画、剪辑、音乐、绘画、素材、效果、导出 |
 | 外部 AI / Agent | 程序化创作 | 直接修改项目文件或连接 MCP；与 UI 共用工程服务和撤销 |
 
-人使用 Vmotion.exe 中的动画、剪辑、音乐、绘画和代码界面直接编辑；AI 在外部修改文件或连接 MCP，配置可从顶部“连接 MCP”复制。无需额外 Agent 工作台。HTTP/MCP 兼容入口继续可用；同一 ProjectService、预览/导出核心、事务、文件同步与撤销历史保证工程一致。MCP 保持 10 个默认入口，147 项能力按需发现；Agent 启动器和指南放在便携包 Agent 文件夹。
+人使用 Vmotion.exe 中的动画、剪辑、音乐、绘画和代码界面直接编辑；AI 在外部修改文件或连接 MCP，配置可从顶部“连接 MCP”复制。无需额外 Agent 工作台。HTTP/MCP 兼容入口继续可用；同一 ProjectService、预览/导出核心、事务、文件同步与撤销历史保证工程一致。MCP 保持 10 个默认入口，148 项能力按需发现；Agent 启动器和指南放在便携包 Agent 文件夹。
 
 ## 创作能力
 
-中文文字与公式、矢量、关键帧、动画层、路径/表达式/约束、遮罩/混合、特效节点、粒子/时间拖尾、矩阵 3D、网格/材质、分镜/转场、多轨音视频、代理与缓存、逐帧绘画/图层资源、PSD/OpenRaster 栅格导入，以及 MP4/PNG/WAV 导出。
+中文文字与公式、矢量、关键帧、动画层、路径/表达式/约束、遮罩/混合、特效节点、粒子/时间拖尾、矩阵 3D、网格/材质、分镜/转场、多轨音视频、代理与缓存、逐帧绘画/图层资源、PSD/OpenRaster 栅格导入，以及 MP4/PNG/WAV 导出。MP4 可用 NVENC/QSV/AMF/Media Foundation 等硬件编码 H.264/HEVC/AV1，探测失败自动回退软件。[硬件视频编码](docs/HW-ENCODE.md)。
 
 文字可以不依赖字体：用偏旁部件拼字（IDS 结构 ⿰⿱⿴…）组成自己的字形库，文字图层和字幕按字使用字形库、缺字回退字体。[偏旁部件拼字说明](docs/GLYPHS.md)。
 
@@ -35,6 +37,8 @@ npm test
 npm run build
 npx tsx scripts/package.ts
 ```
+
+Linux/macOS：`npm run native:build` 只构建 vmotion-core（动画求值/光栅化），输出到 dist/native 并写入同样的哈希清单；GPU 点渲染助手仅支持 DX12/Windows，非 Windows 平台走 CPU 路径。需要 Rust 工具链和可用的 C 链接器（cc）。中文字形测量需要 CJK 字体：设置 `VMOTION_RUNTIME` 指向含 fonts/NotoSansSC-*.otf 的运行时目录，或安装系统 CJK 字体，否则相关字幕换行测试会注明原因跳过。
 
 开发创作界面：npm run dev 和 npm run dev:ui；Agent 界面：npm run dev:agent。完整便携说明见 [PORTABLE](docs/PORTABLE.md)。
 

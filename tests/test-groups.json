@@ -19,6 +19,7 @@
       "tests/package-publish.test.ts",
       "tests/pixel-evidence.test.ts",
       "tests/post.test.ts",
+      "tests/hw-encode.test.ts",
       "tests/preview.test.ts",
       "tests/project-references.test.ts",
       "tests/sound.test.ts",
@@ -28,6 +29,8 @@
       "tests/workbench-store.test.ts",
       "tests/rpc-contract.test.ts",
       "tests/node-renderer-registry.test.ts",
+      "tests/jsx-runtime.test.ts",
+      "tests/jsx-layout.test.ts",
       "tests/mcp-result.test.ts",
       "tests/runtime-fonts.test.ts",
       "tests/test-runner.test.ts",
@@ -36,7 +39,8 @@
       "tests/midi-recording.test.ts",
       "tests/change-journal.test.ts",
       "tests/studio-shell.test.ts",
-      "tests/theme.test.ts"
+      "tests/theme.test.ts",
+      "tests/mcp-contract.test.ts"
     ]
   },
   "integration": {
@@ -44,6 +48,8 @@
     "files": [
       "tests/agent-media.test.ts",
       "tests/agent-preflight.test.ts",
+      "tests/jsx-components.test.ts",
+      "tests/jsx-writeback.test.ts",
       "tests/animation-layers-plan.test.ts",
       "tests/audio-mix-cache.test.ts",
       "tests/audio-mixing-service.test.ts",
@@ -91,6 +97,7 @@
       "tests/render-compare.test.ts",
       "tests/render-performance.test.ts",
       "tests/render.test.ts",
+      "tests/hw-encode-export.test.ts",
       "tests/repeater.test.ts",
       "tests/riemann.test.ts",
       "tests/service.test.ts",
@@ -114,7 +121,8 @@
       "tests/audio-plugins.test.ts",
       "tests/surfaces.test.ts",
       "tests/stills.test.ts",
-      "tests/glyphs.test.ts"
+      "tests/glyphs.test.ts",
+      "tests/agent-skill.test.ts"
     ]
   },
   "acceptance": {

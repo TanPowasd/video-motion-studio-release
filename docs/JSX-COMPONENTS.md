@@ -1,0 +1,161 @@
+# JSX / TSX 组件
+
+外部 agent 最熟悉 React/JSX 的写法。Vmotion 提供自己的 JSX 运行时：`components/*.tsx` 里的 JSX 在每一帧被“降低”（lower）为现有的扁平节点列表，再由同一个 Rust/Skia 原生核心渲染。没有浏览器、没有 React DOM、没有 reconciler，也没有组件状态——每一帧都是时钟的纯函数，任意跳帧结果一致。
+
+`.tsx` 与 `.ts` 组件可以混用、互相导入；预检、原子提交、共享撤销、变更记录和画面检查对两者完全相同。
+
+```tsx
+import { defineComponent, useClock, remap, springTo, Stage, LocalTime } from '@vmotion/sdk';
+
+function Title({ label }: { label: string }) {
+  const { frame } = useClock(); // 在 <LocalTime> 内是局部帧
+  return (
+    <text id="title" x={80} y={300} width={1100} height={90} fontSize={64} fontWeight={700}
+      fill="#f4f7ff" opacity={remap(frame, [0, 12], [0, 1])}>
+      {label}
+    </text>
+  );
+}
+
+export default defineComponent({
+  name: '标题卡',
+  parameters: { label: { type: 'string', default: '你好，JSX' } },
+  render(ctx, p) {
+    return (
+      <Stage id="stage" background="#07090f">
+        <rect id="bar" x={80} y={400} height={6} width={springTo(ctx, { from: 0, to: 600 })} fill="#7cf3ff" />
+        <LocalTime start={10}>
+          <Title label={p.label} />
+        </LocalTime>
+      </Stage>
+    );
+  },
+});
+```
+
+`render` 可以返回 JSX、SDK 构建函数生成的节点数组，或两者混合；`defineComponent` 只在需要时降低 JSX，原有 `.ts` 组件输出保持不变。组件编译器自动为 `.tsx` 使用 `jsxImportSource: "@vmotion/sdk"`，文件里不需要写 pragma（为了让编辑器/仓库 tsc 识别，示例保留了 `/** @jsxImportSource @vmotion/sdk */`）。
+
+## 元素
+
+小写元素对应现有节点类型，属性就是节点属性（`x`、`y`、`width`、`height`、`rotation`、`scaleX`、`opacity`、`fill`、`gradient`、`radius`、`stroke`、`strokeWidth`、`shadow`、`blur`、`blend`、`fontSize`、`effects`、`maskId`、`clip`……），与 `rect()`/`text()` 构建函数完全一致。
+
+| 元素 | 节点 | 说明 |
+|---|---|---|
+| `<group>` | group | 唯一能包含子元素的图形元素；子元素使用组的局部坐标 |
+| `<rect>` `<ellipse>` | rect / ellipse | |
+| `<path d="…">` | path | `d` 是 `path` 的别名 |
+| `<text>…</text>` | text | 子节点只能是字符串/数字，拼接为 `text` |
+| `<formula>` | formula | 子文本或 `tex` 为 TeX |
+| `<image src>` `<video src>` | image / video | `src` 为工程相对路径，`asset` 为素材 ID；视频支持 `trimStart`（帧）、`playbackRate` |
+| `<scene>` `<component src>` `<chart>` `<drawing>` `<scene3d>` `<program>` | 同名节点 | 嵌套场景/组件等 |
+| `<node type="…">` | 任意 | 原始节点类型的兜底写法 |
+
+便捷属性：`scale`（同时设置 scaleX/scaleY）、`origin`（`'center'`、`'top-left'`、`[x, y]`、`{x, y}`）、`skewX`/`skewY`（度，合成到 `matrix`）、`zIndex`（同级稳定排序）。`opacity` 会被限制在 0–1，避免弹簧过冲报错。
+
+数组、Fragment（`<>…</>`）、`null`/`false`/条件表达式都可以直接作为子节点；SDK 构建函数返回的节点（如 `particles()`、`group()`）也可以放进 `<group>`，ID 自动加上父组前缀。
+
+## 稳定 ID
+
+ID 决定视觉编辑、变更高亮和撤销能否持续附着在同一个图层上，规则是确定的：
+
+1. 本地名 = `id` 属性 › `key` › 自动名 `类型-序号`（如 `rect-0`，按同一作用域内同类型计数）。
+2. `<group id="card">`（以及 `<Stage>`）内的子元素 ID 为 `card/子名`，与 `group()` 构建函数相同。
+3. 带 `key` 的函数组件、`<LocalTime>`、`<Step>`、Fragment 会为内部 ID 加 `key/` 前缀，因此 `items.map(i => <Card key={i.id} />)` 中各卡片的 `title` 不会冲突。不带 key 的函数组件和时间容器不产生前缀。
+4. 重复 ID 直接报 `JSX_DUPLICATE_ID`，指出两个位置并建议加 `id`/`key`。
+
+自动名在增删同级元素时会移动，预检对没有 `id`/`key` 的元素给出 `JSX_AUTO_ID` 警告（不阻止提交）。需要被人手动调整的元素请写 `id`。
+
+## 时间
+
+| API | 作用 |
+|---|---|
+| `useClock()` | 当前组件的时钟 `{frame, seconds, fps, width, height, seed, audio, duration, start}`；在时间容器内为局部值。也可以直接使用 `render(ctx)` 的 `ctx` |
+| `<LocalTime start duration>` | 时间平移：子元素在 `start` 帧看到 frame=0；`start` 之前和 `duration` 之后不输出 |
+| `<Steps>` + `<Step duration offset>` | 顺序编排：每个 Step 在上一个结束时开始；`offset` 为负表示重叠；只有最后一个 Step 可以省略 duration |
+| `<Stage background>` | 全画面图层：位于 0,0、尺寸等于组件（或父组）的 group，可选背景矩形 `stage/background` |
+| `remap(value, [输入…], [输出…], {easing, clamp})` | 分段数值映射；默认两端钳制，`clamp: false` 线性外推，`'start'`/`'end'` 单侧钳制；`easing` 可用 `easings` 名称、函数或每段一个 |
+| `springTo(clock, {from, to, start, mass, stiffness, damping, velocity})` | 闭式阻尼弹簧（复用 `spring()`），可随机跳帧 |
+| `springSettle(fps, options)` | 弹簧收敛到阈值所需帧数，便于给 Step 定时长 |
+| `beatClock(clock, bpm, {offset, beatsPerBar, decay})` | 恒定 BPM 节拍：`beat`、`index`、`phase`、`bar`、`beatInBar`、`framesPerBeat`、`pulse`、`frameOfBeat(i)`；变速曲线请用声音模块的 `tempoClock()` |
+| `mixColor(a, b, t)`、`cycle(list, i)`、`toFrames(s, clock)` | 颜色插值、按节拍循环取样式、秒转帧 |
+
+已有的 `progress`、`tween`、`stagger`、`easings`、`cubicEasing`、`random(seed)` 照常可用。
+
+128 BPM、30 fps 时每拍 14.0625 帧，32 拍正好 450 帧（15 秒）。时间容器接受小数帧，所以按拍切分不会累积误差：
+
+```tsx
+const beats = (n: number, fps: number) => (n * fps * 60) / 128;
+<Steps>
+  <Step key="intro" duration={beats(8, ctx.fps)}><Intro /></Step>
+  <Step key="drop"><Drop /></Step>
+</Steps>
+```
+
+## 样式子集
+
+`style` 接受常用 CSS 写法并映射到节点属性；元素上直接写的属性优先于 `style`。
+
+| CSS | 节点属性 |
+|---|---|
+| `position: 'absolute'`、`left`/`top`/`right`/`bottom`、`width`/`height`（px 数字、`'12px'`、相对父框的 `'50%'`） | x / y / width / height |
+| `transform`（translate/scale/rotate/skew/matrix）、`transformOrigin` | 规范顺序 translate→rotate→scale 映射为可编辑的 x/y/rotation/scale（默认绕中心）；其他顺序精确合成到 `matrix` |
+| `opacity`、`visibility`、`display: 'none'`、`zIndex` | opacity / visible / 排序 |
+| `background`/`backgroundColor`/`color`/`fill`（颜色或 `linear-gradient()`/`radial-gradient()`） | fill / gradient |
+| `border`、`borderWidth`、`borderColor`、`stroke`、`strokeWidth`、`borderRadius` | stroke / strokeWidth / strokeDash / radius |
+| `boxShadow`、`textShadow`、`filter: blur() brightness() saturate() opacity() drop-shadow()` | shadow / blur / brightness / saturation |
+| `mixBlendMode` | blend（normal、multiply、screen、overlay、darken、lighten、difference、plus-lighter） |
+| `fontSize`、`fontFamily`、`fontWeight`、`textAlign`、`lineHeight` | 对应文字属性（`lineHeight: '48px'` 换算为倍数） |
+
+不支持的内容不会被静默忽略，而是给出带替代方案的诊断：
+
+| 写法 | 诊断 | 替代 |
+|---|---|---|
+| `<div>`、`<span>`、`<img>`、`<svg>` 等 HTML/SVG 标签 | `JSX_HTML_ELEMENT` | `<group>`/`<rect>`/`<text>`/`<image>`/`<path>` |
+| `<audio>` | `JSX_AUDIO` | 序列音频轨，或组件节点的 `audioAssetId` 驱动 `ctx.audio` |
+| `onClick` 等事件、`className`、`ref` | `JSX_EVENT_HANDLER` / `JSX_CLASSNAME` / `JSX_REF` | 用帧和参数驱动；用稳定 ID 引用图层 |
+| `useState`/`useEffect` 等 React hook、`import 'react'` | `JSX_REACT_HOOK` / `JSX_REACT_IMPORT` | `useClock()`、参数、模块级预计算 |
+| `async`/`await`、返回 Promise | `JSX_ASYNC` | 同步渲染；数据放在工程文件或参数中 |
+| `window`、`document`、`fetch`、`setTimeout`、`requestAnimationFrame` | `JSX_BROWSER_API` | 时钟与工程文件 |
+| `Math.random()`、`Date.now()`、`new Date()` | `JSX_NONDETERMINISTIC` | `random(seed)`、`useClock().seconds` |
+| `display: 'flex'`、margin/padding/grid/gap | `JSX_STYLE_UNSUPPORTED` | 第一批只有绝对定位：在代码中计算 x/y |
+| `transition`/`animation` | `JSX_STYLE_UNSUPPORTED` | `remap()`/`springTo()` |
+| `rotateX`/`rotateY`/`perspective` | `JSX_STYLE_UNSUPPORTED` | `project3D()`/矩阵 3D，或下面的伪 3D 写法 |
+| 未知属性（如 `rotate`、`color` 写在 rect 上） | `JSX_PROP`（带“did you mean”） | 对应节点属性 |
+| 文字直接放在 `<group>` 里、给 `<rect>` 加子元素 | `JSX_TEXT_CHILD` / `JSX_CHILDREN` | 用 `<text>` 包裹；用 `<group>` 组合 |
+
+静态检查在预检的 TypeScript 阶段对 `.tsx` 运行，给出文件、行、列；运行时检查覆盖动态写法（例如运行时拼出的标签名），在采样帧失败并返回同样的错误码。
+
+伪 3D：`scaleX` 取 `cos(角度)`、加一点 `skewY`、按深度设置 `zIndex` 与透明度，例子见 `examples/jsx-lab` 的卡片阵列：
+
+```tsx
+style={{ left, top, transform: `scale(${Math.abs(Math.cos(t)) * s}, ${s}) skewY(${-Math.sin(t) * 14}deg)` }}
+```
+
+## 可视编辑与写回源码
+
+JSX 生成的图层与 `.ts` 组件的生成图层相同：在界面中选中并拖动、改色等操作写入组件图层的稳定 ID `overrides`/`structure`，源码保持不变，撤销与变更高亮照常工作。因此请给可能被手动调整的元素写 `id`。
+
+可选的写回：`planJsxWriteBack(snapshot, sceneId, componentNodeId)`（`src/core/jsx-writeback.ts`）把字面量覆盖写回 `.tsx`——属性原本是字面量（`x={120}`、`fill="#fff"`）或缺省时改写/插入；属性是表达式（`x={remap(...)}`）时保留为 override 并在报告中标为 `computed`。它返回普通的 files + operations 候选，经 `project_preflight`/`project_apply` 提交，画面像素不变、一次撤销。界面按钮与 MCP 入口留到第二批。
+
+## 如果你熟悉 React 视频库
+
+| 通用概念 | Vmotion |
+|---|---|
+| 读取当前帧的 hook | `useClock().frame`（或 `render(ctx)` 的 `ctx.frame`） |
+| 视频配置（fps/尺寸） | `useClock()` 的 `fps`、`width`、`height` |
+| 带钳制的数值插值 | `remap(value, input, output, { clamp, easing })`（默认钳制） |
+| 物理弹簧 | `springTo(clock, { from, to, stiffness, damping, mass })` |
+| 铺满画面的容器 | `<Stage background>` |
+| 延迟/截取一段时间的容器 | `<LocalTime start duration>` |
+| 依次播放的序列 | `<Steps>` + `<Step duration offset>` |
+| 图片 / 视频元素 | `<image src>` / `<video src trimStart playbackRate>` |
+| 音频元素 | 序列音频轨（组件内不能发声） |
+| div + CSS 布局 | `<group>` + 绝对坐标（flex/grid 计划在第二批） |
+| 组合（Composition）注册 | `defineComponent({ name, parameters, render })` + 场景 JSON 中的 component 节点 |
+| 随机数 | `random(seed)`（不要用 `Math.random()`） |
+
+## 第二批计划
+
+- flex/grid 布局（例如基于 taffy 的原生布局）与更完整的 CSS 映射（letterSpacing、textTransform、overflow 等）。
+- 界面中的“写回源码”操作与 MCP 入口；表达式属性的参数化写回。
+- 编辑器对 `.tsx` 的语法高亮与 JSX 自动补全。
