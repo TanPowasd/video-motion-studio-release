@@ -7,13 +7,24 @@ if (!(Test-Path -LiteralPath (Join-Path $vmotionSdk '.git'))) {
  & git -c http.proxy= -c https.proxy= clone --no-checkout https://github.com/steinbergmedia/vst3sdk.git $vmotionSdk
  if ($LASTEXITCODE -ne 0) { throw 'Cannot acquire MIT VST3 SDK' }
 }
-if ((& git -C $vmotionSdk rev-parse HEAD) -ne $vmotionSdkCommit) {
+# A --no-checkout clone leaves an empty work tree even when HEAD already equals the pinned
+# commit (it is the default-branch tip), so always force-checkout the pin; fetch only if the
+# commit object is missing. Then verify HEAD and the required module sources before building.
+& git -C $vmotionSdk rev-parse --verify --quiet "$vmotionSdkCommit^{commit}" | Out-Null
+if ($LASTEXITCODE -ne 0) {
  & git -C $vmotionSdk -c http.proxy= -c https.proxy= fetch origin $vmotionSdkCommit
- & git -C $vmotionSdk checkout --detach $vmotionSdkCommit
- if ($LASTEXITCODE -ne 0) { throw 'Cannot pin VST3 SDK' }
+ if ($LASTEXITCODE -ne 0) { throw 'Cannot fetch pinned VST3 SDK commit' }
 }
-& git -C $vmotionSdk -c http.proxy= -c https.proxy= submodule update --init --depth 1 -- base cmake pluginterfaces public.sdk
+& git -C $vmotionSdk -c advice.detachedHead=false checkout --force --detach $vmotionSdkCommit
+if ($LASTEXITCODE -ne 0) { throw 'Cannot pin VST3 SDK' }
+if ((& git -C $vmotionSdk rev-parse HEAD) -ne $vmotionSdkCommit) { throw 'VST3 SDK is not at the pinned commit' }
+& git -C $vmotionSdk -c http.proxy= -c https.proxy= submodule update --init --recursive --force --depth 1 -- base cmake pluginterfaces public.sdk
 if ($LASTEXITCODE -ne 0) { throw 'Cannot acquire pinned VST3 SDK modules' }
+foreach ($vmotionModule in @('base','cmake','pluginterfaces','public.sdk')) {
+ $vmotionPinned = ((& git -C $vmotionSdk ls-tree HEAD $vmotionModule) -split '\s+')[2]
+ $vmotionActual = & git -C (Join-Path $vmotionSdk $vmotionModule) rev-parse HEAD
+ if (!$vmotionPinned -or $vmotionActual -ne $vmotionPinned) { throw "VST3 SDK module $vmotionModule is not at its pinned commit" }
+}
 $vmotionJson = Join-Path $vmotionAudioDeps 'json.hpp'
 if (!(Test-Path -LiteralPath $vmotionJson)) {
  & curl.exe --noproxy '*' --fail -L --max-time 120 -o $vmotionJson 'https://raw.githubusercontent.com/nlohmann/json/v3.12.0/single_include/nlohmann/json.hpp'

@@ -9,8 +9,9 @@ import { createHash } from 'node:crypto';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { repoRootFromModuleUrl } from './repo-root.mjs';
 
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const root = repoRootFromModuleUrl(import.meta.url);
 const run = (command, args) => {
   const result = spawnSync(command, args, { cwd: root, stdio: 'inherit' });
   if (result.error) throw result.error;

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "Vmotion",
-  "sourceCommit": "65dec7224c3d90aaead4bef5a7a4b46697f6ec5e",
+  "sourceCommit": "25f0be6e8bcecf2706e5a62554a8f98df950cd5b",
   "license": "Apache-2.0",
   "surfaces": {
     "studio": "src/editor",
@@ -35,8 +35,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 4317,
-      "sha256": "8b6abcd3f206639b23488958aca378038157661bf6997434b90aa9c3e44e4806"
+      "bytes": 5225,
+      "sha256": "180fd240470538fbb745aa25969298356a6a3ea847fbf06c89855a51087f8db6"
     },
     {
       "path": "crates/vmotion-core/Cargo.lock",
@@ -225,8 +225,8 @@
     },
     {
       "path": "docs/JSX-COMPONENTS.md",
-      "bytes": 11631,
-      "sha256": "0b0969f355022fefa9f63d6bc3f415f86203e8ee6d7672bd81760985ffefe6b0"
+      "bytes": 15412,
+      "sha256": "bbb397a3c8c81ef2e77a0bacbf658a0ed732311dfa797d534b180729bd4295c9"
     },
     {
       "path": "docs/KEYFRAMES.md",
@@ -940,8 +940,8 @@
     },
     {
       "path": "examples/jsx-lab/AGENTS.md",
-      "bytes": 1477,
-      "sha256": "6f5e8956c2bfdd6c7c212ad9db57b4d1127b0fb297892d9bd58aee32a507d0cd"
+      "bytes": 1663,
+      "sha256": "f99ab3de2fd13f3edfdeda9cf495977bd59fd0eea5d03dcec514f0fca96555c5"
     },
     {
       "path": "examples/jsx-lab/components/jsx-lab.tsx",
@@ -2145,23 +2145,23 @@
     },
     {
       "path": "scripts/build-audio.ps1",
-      "bytes": 3730,
-      "sha256": "066f6a012c6327f939579e9e8fe8f31f84464cfd13d20af87ee2a73953fae372"
+      "bytes": 4678,
+      "sha256": "a1fa7df33f75c12b4206c862ee78eeaf3229fc7c3e63e0f0da619ee530636716"
     },
     {
       "path": "scripts/build-audio.sh",
-      "bytes": 1965,
-      "sha256": "ed82f7e960502d20d1b8575b7815c7555edf3889781a8d1724349025194cdc49"
+      "bytes": 2702,
+      "sha256": "7d35d44a5f1c4ec33026dc8c3a496b08a5f5760cb529fe0337ab79e1bbb482f4"
     },
     {
       "path": "scripts/build-layout-wasm.mjs",
-      "bytes": 4320,
-      "sha256": "8dba3c072b943adcfcbe2c290445047f29ff08756460b27ef286da1a98bdd5db"
+      "bytes": 4348,
+      "sha256": "ed05386031b072019e2166eead4f05b2235f420933a9c7f273e7b48ad5a7e8b6"
     },
     {
       "path": "scripts/build-native.mjs",
-      "bytes": 2239,
-      "sha256": "03a7cc2ac2e8f97f1223cdaef08126f0532d70bb34ae2af09f6175bc384e33cd"
+      "bytes": 2267,
+      "sha256": "4cc3e42a4511e6966832038ed88ad686a3119bb31eadd6ac7e8319df40d26653"
     },
     {
       "path": "scripts/build-native.ps1",
@@ -2609,6 +2609,11 @@
       "sha256": "13a4a1fa771ce30a5439562f17b4ec9ac189a10d88082239a4827434cb64198d"
     },
     {
+      "path": "scripts/electron-binary.ts",
+      "bytes": 3111,
+      "sha256": "8e3b564987ed21b163da107554f353865785cd5ee9131326e6dc731af612c25f"
+    },
+    {
       "path": "scripts/export-public-release.ts",
       "bytes": 4185,
       "sha256": "25a0f37c7e35d6074e566bb2f8b4a9e4bbd55fcf377922d4496c3d3d40ef674a"
@@ -2685,8 +2690,8 @@
     },
     {
       "path": "scripts/package.ts",
-      "bytes": 11294,
-      "sha256": "1ad6349e972c37c955df81d8ae1de41a7a53de3792bce51b5abc46dd5c1efb6c"
+      "bytes": 11383,
+      "sha256": "e1f450ade39398f2c00356fe9aac3588b25578a7cfebfe3fc6e60ebfd52ad95e"
     },
     {
       "path": "scripts/parameter-lab-component.ts",
@@ -2727,6 +2732,16 @@
       "path": "scripts/repeater-lab-component.ts",
       "bytes": 5847,
       "sha256": "e18f989b51b0d7be5020a9e529e8dcd3d31a25c64fdd93eb566f00a493b002e6"
+    },
+    {
+      "path": "scripts/repo-root.d.mts",
+      "bytes": 114,
+      "sha256": "8596c92e05087270e309782cd0c2dad83a87fd1e00cd12510d92bbe7232a4e85"
+    },
+    {
+      "path": "scripts/repo-root.mjs",
+      "bytes": 851,
+      "sha256": "ecbf59d270d85ff076f7937554f2d7498b7429fdda72cf6d42e5ec27eca507df"
     },
     {
       "path": "scripts/riemann-component.ts",
@@ -2850,8 +2865,8 @@
     },
     {
       "path": "skills/vmotion/references/jsx.md",
-      "bytes": 14342,
-      "sha256": "c3d27de6b7ef38f3b77a295292598562a3a62677a2e5159abf6e0d2c4157146f"
+      "bytes": 14269,
+      "sha256": "c67c8b824fdfc57fc2d527f40af29b84d987f2295141096fdc7955ae41eb018a"
     },
     {
       "path": "skills/vmotion/references/mcp.md",
@@ -4945,8 +4960,8 @@
     },
     {
       "path": "tests/builtin-plugins.test.ts",
-      "bytes": 14793,
-      "sha256": "157c9ba3095f7227c7608d2b468f9b8136a02d8e7a4dfacc6b3bee5890f0e99e"
+      "bytes": 14956,
+      "sha256": "bd4bfc6d239abb4dd50043e93675492a8026fc94916eafec7b7aaf39d0843f6f"
     },
     {
       "path": "tests/bundled-runtime.test.ts",
@@ -5042,6 +5057,11 @@
       "path": "tests/effects2d.test.ts",
       "bytes": 9771,
       "sha256": "0ebd64ea23269c209967462dc287806de92e5c598e7292cdef8fc7327bf795bb"
+    },
+    {
+      "path": "tests/electron-binary.test.ts",
+      "bytes": 1944,
+      "sha256": "a93df87cf6d8ff62bb154e06d3a7303c9873b0a69fd56aa55faf62af74ef66d7"
     },
     {
       "path": "tests/fake-ffmpeg.ts",
@@ -5329,6 +5349,11 @@
       "sha256": "024c57a099770b05d4ad6a5aafeaedd1d9082f83810b9c2c286560b14ad2e590"
     },
     {
+      "path": "tests/script-paths.test.ts",
+      "bytes": 3062,
+      "sha256": "47c1b6161d7760ce0b50a28cd80cea3f39b39d434208a4ccef10c343fcbf0e4d"
+    },
+    {
       "path": "tests/service.test.ts",
       "bytes": 9974,
       "sha256": "38c55bc2e40efd9fd927fa7658869b6774d01360ed2fb9e804dd8ecbcf57eed4"
@@ -5385,8 +5410,8 @@
     },
     {
       "path": "tests/test-groups.json",
-      "bytes": 5524,
-      "sha256": "1ddac4ccee9ae4f263cf01d8253b4471814836b63412b9c5239fed749ae2e07a"
+      "bytes": 5599,
+      "sha256": "6c6e46419f9773894e1d114eba4b2a714611548363443f09eb33ba4c5ece45a8"
     },
     {
       "path": "tests/test-runner.test.ts",

@@ -2,13 +2,15 @@
 
 This is a local project, not an AI integration. External agents may edit these files or use CLI/MCP.
 
-A 15-second demo authored entirely in JSX/TSX (docs/JSX-COMPONENTS.md): 32 beats at 128 BPM
-(450 frames at 30 fps) split into five beat-locked `<Step>`s — typewriter opener, pseudo-3D card
-array that steps one card per beat, component explosion with a spectrum, per-beat style cuts, and
+A 22.5-second demo authored entirely in JSX/TSX (docs/JSX-COMPONENTS.md): 48 beats at 128 BPM
+(675 frames at 30 fps) split into seven beat-locked `<Step>`s (6/8/6/6/8/8/6 beats) shown as six HUD
+chapters — typewriter opener, pseudo-3D card array that steps one card per beat, component explosion
+with a spectrum, per-beat style cuts, a flex/grid layout chapter (grid reflow, then flex text), and
 fragments converging into the logo.
 
 - components/jsx-lab.tsx is the entry (defineComponent returning JSX); components/lab/scenes.tsx holds
-  the five scenes; components/lab/geometry.ts is a plain .ts helper (.ts and .tsx mix freely).
+  the beat scenes, components/lab/layout.tsx the flex/grid scenes (GridReflow, FlexText), and
+  components/lab/geometry.ts is a plain .ts helper (.ts and .tsx mix freely).
 - Elements use id/key so generated IDs are stable (e.g. `stage/s2/cards/card3/face`); visual edits are
   stable-ID overrides on the `lab` component layer and leave the source intact.
 - Frame math only: useClock(), beatClock(clock, 128), springTo(), remap(). No React hooks, DOM tags,

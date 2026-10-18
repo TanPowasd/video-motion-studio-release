@@ -104,7 +104,9 @@ const beats = (n: number, fps: number) => (n * fps * 60) / 128;
 | `border`、`borderWidth`、`borderColor`、`stroke`、`strokeWidth`、`borderRadius` | stroke / strokeWidth / strokeDash / radius |
 | `boxShadow`、`textShadow`、`filter: blur() brightness() saturate() opacity() drop-shadow()` | shadow / blur / brightness / saturation |
 | `mixBlendMode` | blend（normal、multiply、screen、overlay、darken、lighten、difference、plus-lighter） |
-| `fontSize`、`fontFamily`、`fontWeight`、`textAlign`、`lineHeight` | 对应文字属性（`lineHeight: '48px'` 换算为倍数） |
+| `fontSize`、`fontFamily`、`fontWeight`、`textAlign`、`lineHeight`、`letterSpacing`、`textTransform` | 对应文字属性（`lineHeight: '48px'` 换算为倍数） |
+| `overflow`/`overflowX`/`overflowY`（visible、hidden、clip）、`objectFit`（fill、contain、cover） | 裁剪框 / 图片·视频·组件适配 |
+| 布局键（`display: 'flex' \| 'grid'`、gap、margin、padding 等，见下节） | taffy 布局，结果写成普通 x/y/width/height |
 
 不支持的内容不会被静默忽略，而是给出带替代方案的诊断：
 
@@ -117,7 +119,9 @@ const beats = (n: number, fps: number) => (n * fps * 60) / 128;
 | `async`/`await`、返回 Promise | `JSX_ASYNC` | 同步渲染；数据放在工程文件或参数中 |
 | `window`、`document`、`fetch`、`setTimeout`、`requestAnimationFrame` | `JSX_BROWSER_API` | 时钟与工程文件 |
 | `Math.random()`、`Date.now()`、`new Date()` | `JSX_NONDETERMINISTIC` | `random(seed)`、`useClock().seconds` |
-| `display: 'flex'`、margin/padding/grid/gap | `JSX_STYLE_UNSUPPORTED` | 第一批只有绝对定位：在代码中计算 x/y |
+| `order`、`gridArea`/`gridTemplateAreas`、命名网格线、`inset`、`float` | `JSX_STYLE_UNSUPPORTED` | `row-reverse`、行列线编号/`span`、`left/top/right/bottom` |
+| `calc()` 等表达式长度 | `JSX_STYLE_VALUE` | 在代码中算出数值（px 数字、`'12px'`、`'50%'`、`'auto'`） |
+| 布局键用在无布局意义处、非 group 上 `display: 'flex'` | `JSX_LAYOUT_CONTEXT` | 见“Flex / Grid 布局” |
 | `transition`/`animation` | `JSX_STYLE_UNSUPPORTED` | `remap()`/`springTo()` |
 | `rotateX`/`rotateY`/`perspective` | `JSX_STYLE_UNSUPPORTED` | `project3D()`/矩阵 3D，或下面的伪 3D 写法 |
 | 未知属性（如 `rotate`、`color` 写在 rect 上） | `JSX_PROP`（带“did you mean”） | 对应节点属性 |
@@ -131,11 +135,40 @@ const beats = (n: number, fps: number) => (n * fps * 60) / 128;
 style={{ left, top, transform: `scale(${Math.abs(Math.cos(t)) * s}, ${s}) skewY(${-Math.sin(t) * 14}deg)` }}
 ```
 
+## Flex / Grid 布局
+
+在 `<group>`（或 `<Stage>`）的 `style` 上写 `display: 'flex'` 或 `'grid'`，该子树每一帧由 taffy（编译为 wasm 并内嵌，无需原生工具链）排版，结果写回为普通的 `x/y/width/height`，所以排版后的图层与手写坐标的图层一样可选中、可覆盖、可渲染。
+
+- 容器键（必须与 `display` 写在同一个 group 上）：`flexDirection`、`flexWrap`、`flexFlow`、`justifyContent`、`alignItems`、`alignContent`、`justifyItems`、`placeItems`、`placeContent`、`gap`、`rowGap`、`columnGap`、`gridTemplateColumns`、`gridTemplateRows`、`gridAutoColumns`、`gridAutoRows`、`gridAutoFlow`。
+- 子项键（只能写在布局容器的子元素上）：`flex`、`flexGrow`、`flexShrink`、`flexBasis`、`alignSelf`、`justifySelf`、`placeSelf`、`gridColumn`、`gridRow`、`gridColumnStart/End`、`gridRowStart/End`、`margin*`（含 `auto`）。
+- 盒模型键（布局内）：`padding*`、`minWidth`、`minHeight`、`maxWidth`、`maxHeight`、`aspectRatio`。
+- 网格轨道：`repeat(3, 1fr)`、`'200px 1fr auto'`、`minmax(80px, auto)`、`repeat(auto-fill, …)`/`auto-fit`、数组 `[120, '1fr']` 或列数；按行列线编号、`span N` 或 `auto` 放置。
+- 布局容器内的 `position: 'absolute'` 子元素相对容器用 `left/top/right/bottom` 和百分比尺寸定位（适合给 flex 内容垫背景矩形）。
+- 未写尺寸的文字用真实渲染字体测量（中文、字形库均可）。布局根节点自身用 `left/top/width/height` 定位。
+- 任何值都可以是帧的函数：列数、间距、宽度都能动画，每帧重新排版。
+
+```tsx
+<group id="chips" style={{ display: 'flex', gap: 18, justifyContent: 'center', left: 0, top: 420, width: 1280 }}>
+  {labels.map((label, i) => (
+    <group key={`chip${i}`} style={{ display: 'flex', alignItems: 'center', padding: '10px 22px' }}>
+      <rect id="bg" style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', borderRadius: 22 }} fill="#141b2e" />
+      <text id="label" fontSize={26} fill="#e8eeff">{label}</text>
+    </group>
+  ))}
+</group>
+```
+
+完整的按拍重排网格与 flex 文字示例见 `examples/jsx-lab/components/lab/layout.tsx`。
+
+已知不支持：`order`（改用 `row-reverse`/调整子元素顺序）、命名网格区域与命名线（`gridArea`、`gridTemplateAreas`，改用行列线编号或 `span`）、`calc()`（报 `JSX_STYLE_VALUE`，在代码里算出数值）、`inset`/`float`（改用 `left/top/right/bottom`）。布局键写在没有布局意义的位置（容器键所在 group 没有 `display: flex/grid`、子项键不在布局容器内、非 group 上写 `display: 'flex'`）会报 `JSX_LAYOUT_CONTEXT`。
+
 ## 可视编辑与写回源码
 
 JSX 生成的图层与 `.ts` 组件的生成图层相同：在界面中选中并拖动、改色等操作写入组件图层的稳定 ID `overrides`/`structure`，源码保持不变，撤销与变更高亮照常工作。因此请给可能被手动调整的元素写 `id`。
 
-可选的写回：`planJsxWriteBack(snapshot, sceneId, componentNodeId)`（`src/core/jsx-writeback.ts`）把字面量覆盖写回 `.tsx`——属性原本是字面量（`x={120}`、`fill="#fff"`）或缺省时改写/插入；属性是表达式（`x={remap(...)}`）时保留为 override 并在报告中标为 `computed`。它返回普通的 files + operations 候选，经 `project_preflight`/`project_apply` 提交，画面像素不变、一次撤销。界面按钮与 MCP 入口留到第二批。
+可选的写回：`planJsxWriteBack(snapshot, sceneId, componentNodeId)`（`src/core/jsx-writeback.ts`）把字面量覆盖写回 `.tsx`——属性原本是字面量（`x={120}`、`fill="#fff"`）或缺省时改写/插入；属性是表达式（`x={remap(...)}`）时保留为 override 并在报告中标为 `computed`。它返回普通的 files + operations 候选，经 `project_preflight`/`project_apply` 提交，画面像素不变、一次撤销。入口：检查器的“写回源码”区、MCP `jsx_writeback_plan`、CLI `vmotion jsx-writeback --project . --scene <场景> --node <组件图层> [--apply]`。
+
+写回范围：只改写组件图层引用的主 `.tsx` 文件中带字面量 `id` 的元素；从其他文件导入的子组件里的元素报告为 `no-target` 并保留为 override。表达式属性不做写回（保留 override，标为 `computed`），由 flex/grid 排版决定的几何保留 override，标为 `layout`。
 
 ## 如果你熟悉 React 视频库
 
@@ -150,12 +183,12 @@ JSX 生成的图层与 `.ts` 组件的生成图层相同：在界面中选中并
 | 依次播放的序列 | `<Steps>` + `<Step duration offset>` |
 | 图片 / 视频元素 | `<image src>` / `<video src trimStart playbackRate>` |
 | 音频元素 | 序列音频轨（组件内不能发声） |
-| div + CSS 布局 | `<group>` + 绝对坐标（flex/grid 计划在第二批） |
+| div + CSS 布局 | `<group style={{ display: 'flex' \| 'grid', … }}>`（taffy），或 `<group>` + 绝对坐标 |
 | 组合（Composition）注册 | `defineComponent({ name, parameters, render })` + 场景 JSON 中的 component 节点 |
 | 随机数 | `random(seed)`（不要用 `Math.random()`） |
 
-## 第二批计划
+## 后续计划
 
-- flex/grid 布局（例如基于 taffy 的原生布局）与更完整的 CSS 映射（letterSpacing、textTransform、overflow 等）。
-- 界面中的“写回源码”操作与 MCP 入口；表达式属性的参数化写回。
+- 更多 CSS 布局映射：`order`、命名网格区域/线、`calc()`。
+- 写回扩展：导入的子组件文件、表达式属性的参数化写回。
 - 编辑器对 `.tsx` 的语法高亮与 JSX 自动补全。

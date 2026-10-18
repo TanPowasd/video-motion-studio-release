@@ -5,6 +5,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { acquirePackageLock, publishPackage } from './package-publish.js';
 import { prepareRuntime } from './prepare-runtime.js';
+import { ensureElectronBinary } from './electron-binary.js';
 const root = path.resolve('.'),
   target = path.resolve(process.env.VMOTION_PACKAGE_ROOT ?? path.join(root, 'release/Vmotion')),
   release = path.dirname(target),
@@ -37,6 +38,7 @@ for (const name of nativeFiles) {
 const nativeFilter = (file: string) =>
   !file.endsWith('.exe') || nativeFiles.has(path.basename(file));
 await stat(path.join(root, 'dist/desktop/main.cjs'));
+ensureElectronBinary(root);
 const preparedRuntime = await prepareRuntime(root);
 const releaseLock = await acquirePackageLock(release);
 try {

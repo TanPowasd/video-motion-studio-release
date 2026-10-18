@@ -131,9 +131,11 @@ it('gives every public builtin tool one matching module handler, preserving cate
     moduleTools: 8,
     hostTools: 0,
   });
+  // 15 since jsx_writeback_plan joined the animation module (capability count 147 → 148).
+  expect(names('vmotion.animation')).toContain('jsx_writeback_plan');
   expect(builtinPlugins.status('vmotion.animation', names('vmotion.animation'))).toMatchObject({
     runtime: 'module',
-    moduleTools: 14,
+    moduleTools: 15,
   });
   expect(builtinPlugins.status('vmotion.drawing', names('vmotion.drawing'))).toMatchObject({
     runtime: 'module',

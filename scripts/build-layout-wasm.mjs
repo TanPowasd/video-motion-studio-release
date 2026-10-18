@@ -12,9 +12,10 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
+import { repoRootFromModuleUrl } from './repo-root.mjs';
 import { zlibSync } from 'fflate';
 
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const root = repoRootFromModuleUrl(import.meta.url);
 const crate = path.join(root, 'crates/vmotion-layout');
 const output = path.join(root, 'src/core/layout/taffy-wasm.generated.ts');
 export const sourceFiles = ['Cargo.toml', 'Cargo.lock', 'src/lib.rs', 'patches/taffy.mjs'];

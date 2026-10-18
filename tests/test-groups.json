@@ -31,6 +31,8 @@
       "tests/node-renderer-registry.test.ts",
       "tests/jsx-runtime.test.ts",
       "tests/jsx-layout.test.ts",
+      "tests/script-paths.test.ts",
+      "tests/electron-binary.test.ts",
       "tests/mcp-result.test.ts",
       "tests/runtime-fonts.test.ts",
       "tests/test-runner.test.ts",

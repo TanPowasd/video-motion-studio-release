@@ -2,9 +2,8 @@
 
 Source of truth in the Vmotion repo: `src/sdk/jsx.ts` (runtime, elements, ids), `src/sdk/jsx-time.ts` (time
 helpers), `src/sdk/jsx-style.ts` (CSS map), `src/sdk/jsx-layout.ts` (flex/grid), `src/core/jsx-lint.ts` (static
-checks), `src/core/jsx-writeback.ts`. Human doc: `docs/JSX-COMPONENTS.md` (Chinese). Note: that doc's
-"unsupported" table still lists flex/grid/margin/padding from batch 1; the layout engine (batch 2) now supports them as
-described below.
+checks), `src/core/jsx-writeback.ts`. Human doc: `docs/JSX-COMPONENTS.md` (Chinese), which documents the same
+flex/grid layout support and limits as section 6 below.
 
 ## Contents
 

@@ -40,11 +40,16 @@ npx tsx scripts/package.ts
 
 Linux/macOS：`npm run native:build` 只构建 vmotion-core（动画求值/光栅化），输出到 dist/native 并写入同样的哈希清单；GPU 点渲染助手仅支持 DX12/Windows，非 Windows 平台走 CPU 路径。需要 Rust 工具链和可用的 C 链接器（cc）。中文字形测量需要 CJK 字体：设置 `VMOTION_RUNTIME` 指向含 fonts/NotoSansSC-*.otf 的运行时目录，或安装系统 CJK 字体，否则相关字幕换行测试会注明原因跳过。
 
+常见问题：
+
+- Electron 44 没有 npm postinstall，`npm ci` 只安装 JS 外壳，不下载 Electron 二进制（`node_modules/electron/dist` 为空）。`npm run desktop` 首次运行会自动下载；`npx tsx scripts/package.ts` / `npm run package:dir` 会先检查并调用 Electron 自带安装器，失败时提示在仓库根目录手动运行 `node node_modules/electron/install.js`（需要代理或镜像时先设置 `ELECTRON_MIRROR`）。
+- 音频宿主的 VST3 SDK 固定在清单 commit，`scripts/build-audio.ps1` 会强制检出该 commit 并校验 base/cmake/pluginterfaces/public.sdk 子模块；若 `artifacts/audio-sdk` 来自中断的旧构建仍失败，删除该目录后重跑 `npm run native:build`。
+
 开发创作界面：npm run dev 和 npm run dev:ui；Agent 界面：npm run dev:agent。完整便携说明见 [PORTABLE](docs/PORTABLE.md)。
 
 ## 公开 Release
 
-此仓库提供可构建产品源码快照和测试，SOURCE-MANIFEST.json 记录来源版本与文件哈希。便携 ZIP/校验文件位于 Releases；个人生产工程、缓存、凭据、日志和私有 Git 历史不属于公开快照。
+此仓库提供可构建的产品源码和测试。公开源码快照由 `scripts/export-public-release.ts` 生成，并在快照根目录写入 SOURCE-MANIFEST.json（来源 commit 与文件哈希）；该文件只存在于导出的快照/Release 仓库中，开发仓库本身不含。便携 ZIP/校验文件位于 Releases；个人生产工程、缓存、凭据、日志和私有 Git 历史不属于公开快照。
 
 当前为早期预览版。全场景 GPU、专业长片/4K60 完整验收、HDR、ASIO/VST2、离线插件延迟补偿仍未完成。AU/macOS 后端源码尚未实机验收；第三方插件兼容性按实际测试报告区分。
 
