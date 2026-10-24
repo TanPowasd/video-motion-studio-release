@@ -3,6 +3,9 @@ import { open, stat, unlink, readFile } from 'node:fs/promises';
 import { setImmediate as yieldTask } from 'node:timers/promises';
 import { openSync, closeSync, readSync } from 'node:fs';
 import { compileSound, SoundRenderer, SOUND_RATE, type SoundSample } from '../core/sound.js';
+import { LoudnessMeter, TruePeakLimiter } from '../core/sound-loudness.js';
+import type { SoundLoudness } from '../core/sound-schema.js';
+import { dbGain } from '../core/sound-effects.js';
 import { VmotionError, type Snapshot, type Asset } from '../core/model.js';
 import { atomicWrite, hash, json, safePath } from '../platform/project-files.js';
 import { fingerprint, ffmpegBinary, runProcess, probe } from './ffmpeg.js';
@@ -85,7 +88,7 @@ export async function audioSourceFile(
   const { compiled, checks, pluginChecks } = await soundDependencies(root, snapshot, asset),
     key = hash(
       json({
-        engine: 'sound-3-external-plugins',
+        engine: 'sound-4-master-loudness',
         audioHost: pluginChecks.length ? audioHostBinary() : undefined,
         source: compiled.hash,
         checks,
@@ -260,6 +263,28 @@ export async function audioSourceFile(
         throw e;
       }
       await handle.close();
+      const loudness = compiled.document.master.loudness;
+      let loudnessReport: Awaited<ReturnType<typeof applySoundLoudness>> | undefined;
+      if (loudness) {
+        const processed = output + '.loudness.partial';
+        try {
+          loudnessReport = await applySoundLoudness(
+            temporary,
+            processed,
+            compiled.sampleCount,
+            loudness,
+            signal,
+          );
+        } catch (e) {
+          await unlink(processed).catch(() => {});
+          throw e;
+        } finally {
+          await unlink(temporary).catch(() => {});
+        }
+        ({ peak, sum, clipped } = loudnessReport.stats);
+        const { rename } = await import('node:fs/promises');
+        await rename(processed, temporary);
+      }
       await verify();
       // Content-addressed output permits concurrent readers; publication is atomic.
       const { rename } = await import('node:fs/promises');
@@ -277,6 +302,7 @@ export async function audioSourceFile(
           peak,
           rms: Math.sqrt(sum / compiled.sampleCount),
           clippedSampleRatio: clipped / compiled.sampleCount,
+          ...(loudnessReport ? { loudness: loudnessReport.loudness } : {}),
         }),
       );
       return output;
@@ -321,5 +347,118 @@ export async function soundRange(
     channels: 2,
     duration: count / SOUND_RATE,
     report: JSON.parse(await readFile(file + '.json', 'utf8')),
+  };
+}
+
+/** Read a float32 stereo WAV written by audioSourceFile in blocks. */
+async function* wavBlocks(file: string, sampleCount: number, block = 65536) {
+  const handle = await open(file, 'r');
+  try {
+    for (let at = 0; at < sampleCount; at += block) {
+      const count = Math.min(block, sampleCount - at),
+        bytes = Buffer.alloc(count * 8),
+        read = await handle.read(bytes, 0, bytes.length, 44 + at * 8);
+      if (read.bytesRead !== bytes.length)
+        throw new VmotionError('SOUND_CACHE', 'Incomplete sound render');
+      const left = new Float64Array(count),
+        right = new Float64Array(count);
+      for (let i = 0; i < count; i++) {
+        left[i] = bytes.readFloatLE(i * 8);
+        right[i] = bytes.readFloatLE(i * 8 + 4);
+      }
+      yield { left, right };
+    }
+  } finally {
+    await handle.close();
+  }
+}
+/**
+ * master.loudness: measure integrated loudness of the rendered master (pass 1), then apply
+ * the normalisation gain and a time-aligned 4x true-peak limiter (pass 2) while metering the
+ * result. Deterministic TypeScript, so cached sound renders match on every platform.
+ */
+export async function applySoundLoudness(
+  input: string,
+  output: string,
+  sampleCount: number,
+  settings: SoundLoudness,
+  signal?: AbortSignal,
+) {
+  const before = new LoudnessMeter();
+  if (settings.targetLufs !== null)
+    for await (const { left, right } of wavBlocks(input, sampleCount)) {
+      if (signal?.aborted) throw new VmotionError('CANCELLED', 'Sound rendering cancelled');
+      before.push(left, right);
+      await yieldTask();
+    }
+  const measured = settings.targetLufs !== null ? before.report() : undefined,
+    gainDb =
+      measured?.integratedLufs != null && settings.targetLufs !== null
+        ? Math.min(settings.maxGainDb, settings.targetLufs - measured.integratedLufs)
+        : 0,
+    gain = dbGain(gainDb),
+    limiter =
+      settings.truePeakDb !== null
+        ? new TruePeakLimiter(settings.truePeakDb, { releaseSeconds: settings.release })
+        : undefined,
+    after = new LoudnessMeter(),
+    stats = { peak: 0, sum: 0, clipped: 0 };
+  await atomicWrite(output, waveHeader(sampleCount));
+  const handle = await open(output, 'a');
+  let skip = limiter?.latency ?? 0,
+    written = 0;
+  const write = async (left: Float64Array, right: Float64Array) => {
+    const from = Math.min(skip, left.length);
+    skip -= from;
+    const count = Math.min(left.length - from, sampleCount - written);
+    if (count <= 0) return;
+    const bytes = Buffer.allocUnsafe(count * 8),
+      l = left.subarray(from, from + count),
+      r = right.subarray(from, from + count);
+    for (let i = 0; i < count; i++) {
+      const a = l[i],
+        b = r[i];
+      stats.peak = Math.max(stats.peak, Math.abs(a), Math.abs(b));
+      stats.sum += (a * a + b * b) / 2;
+      if (Math.max(Math.abs(a), Math.abs(b)) >= 1) stats.clipped++;
+      bytes.writeFloatLE(a, i * 8);
+      bytes.writeFloatLE(b, i * 8 + 4);
+    }
+    after.push(l, r);
+    written += count;
+    await handle.write(bytes);
+  };
+  try {
+    for await (const { left, right } of wavBlocks(input, sampleCount)) {
+      if (signal?.aborted) throw new VmotionError('CANCELLED', 'Sound rendering cancelled');
+      for (let i = 0; i < left.length; i++) {
+        left[i] *= gain;
+        right[i] *= gain;
+      }
+      const out = limiter ? limiter.process(left, right) : { left, right };
+      await write(out.left, out.right);
+      await yieldTask();
+    }
+    if (limiter) {
+      const tail = new Float64Array(limiter.latency),
+        out = limiter.process(tail, tail);
+      await write(out.left, out.right);
+    }
+  } finally {
+    await handle.close();
+  }
+  if (written !== sampleCount)
+    throw new VmotionError('SOUND_CACHE', 'Loudness pass returned the wrong length');
+  const result = after.report();
+  return {
+    stats,
+    loudness: {
+      engine: 'BS.1770-4 gated loudness + 4x oversampled true-peak limiter',
+      settings,
+      input: measured,
+      gainDb,
+      limiterReductionDb: limiter?.maxReductionDb ?? 0,
+      output: result,
+    },
   };
 }

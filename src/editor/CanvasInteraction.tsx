@@ -67,7 +67,12 @@ export function CanvasInteraction({
   stage: React.RefObject<HTMLDivElement | null>;
   onSelect: (ids: string[]) => void;
   onDraft: (draft: CompositionDraft[] | undefined) => void;
-  onCommit: (draft: CompositionDraft[], revision: string) => Promise<unknown>;
+  /** `layers`: the dragged layers as the gesture saw them (for a revision-conflict retry). */
+  onCommit: (
+    draft: CompositionDraft[],
+    revision: string,
+    layers: InteractionLayer[],
+  ) => Promise<unknown>;
   onEnter: (id: string) => void;
   /** When set, moves snap to these boxes' edges/centres and to the other layers (image mode). */
   snapBoxes?: Bounds[];
@@ -318,7 +323,7 @@ export function CanvasInteraction({
         }
         setCommitting(true);
         try {
-          await onCommit(edits, g.revision);
+          await onCommit(edits, g.revision, g.layers);
         } finally {
           setCommitting(false);
           setDelta(undefined);

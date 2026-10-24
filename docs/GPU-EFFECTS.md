@@ -20,6 +20,17 @@ Windows x64 的 `crates/vmotion-gpu` 使用 Rust/wgpu 和真实 Direct3D12 硬�
 
 对照默认使用完全相同的像素hash；显式 `pixelTolerance` 使用预乘SDR RGB与独立alpha的8位绝对差，同时报告hashMatch、最大值/MAE。容差对照最多保留32M首轮基准像素，超限报错；不降采样。`detail:true` 才返回每对完整指标。容差一致不等于字节相同，差异大小不衡量艺术质量。重复采样仍检查每个后端自身确定性。
 
+### CI：D3D12 WARP 正确性检查（不是性能）
+
+GitHub 托管 Windows runner 没有显卡。`VMOTION_GPU_ADAPTER=warp`（或 `fallback`）是显式开关：`vmotion-gpu` 以 `force_fallback_adapter` 请求 wgpu DX12 的回退适配器，即 WARP（Microsoft Basic Render Driver，`deviceType: Cpu`），身份报告 `hardware:false, software:true`；宿主只有在该变量存在时才接受软件适配器，默认仍拒绝软件/虚拟设备。`.github/workflows/windows.yml` 用它运行 `tests/gpu-effects.test.ts` 与 `tests/render-programs.test.ts` 的设备用例，验证真实 DX12 着色器、IPC、精度修正与 WGSL 自定义程序的**正确性**；WARP 计时与真实 GPU 性能无关，不能当作加速证据。未设置该变量且 `VMOTION_GPU=cpu` 时设备用例跳过；硬件性能/对照仍需参考机 `VMOTION_TEST_GPU=1`。
+
+```powershell
+$env:VMOTION_GPU='auto'; $env:VMOTION_GPU_ADAPTER='warp'
+npx vitest run --config vitest.config.ts tests/gpu-effects.test.ts tests/render-programs.test.ts
+```
+
+Linux/macOS 上可用 `node scripts/check-windows-cross.mjs [--install]` 对 `vmotion-core`、`vmotion-gpu` 做 `x86_64-pc-windows-msvc` 交叉 `cargo check`（只编译不链接，无需 MSVC CRT/SDK；构建脚本需要宿主 C 链接器），尽早发现 `cfg(windows)` 编译错误；它不证明能链接、启动或找到 D3D12 设备。
+
 可执行验证：
 
 ```powershell

@@ -720,8 +720,12 @@ export class SoundRenderer {
       route(block, bus);
     }
     let master = buffers.get('master')!;
+    const masterGain = dbGain(this.compiled.document.master.gainDb),
+      post = this.compiled.document.master.gainStage === 'post';
+    // Gain before the master chain keeps a master limiter/compressor as the final stage.
+    if (!post) panBlock(master, masterGain, 0);
     master = yield* applySoundChain(this.master, master, start);
-    panBlock(master, dbGain(this.compiled.document.master.gainDb), 0);
+    if (post) panBlock(master, masterGain, 0);
     for (const values of [master.left, master.right])
       for (const v of values)
         if (!Number.isFinite(v))

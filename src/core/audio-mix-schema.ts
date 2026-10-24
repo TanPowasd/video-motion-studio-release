@@ -68,7 +68,12 @@ export const audioMixSchema = z
     tracks: z.record(audioTrackMixSchema).default({}),
     buses: z.array(audioMixBusSchema).max(16).default([]),
     master: z
-      .object({ ...processor, normalization: audioNormalizationSchema.nullable().optional() })
+      .object({
+        ...processor,
+        /** 'pre' (default): gainDb before the master effects/limiter; 'post': legacy order. */
+        gainStage: z.enum(['pre', 'post']).default('pre'),
+        normalization: audioNormalizationSchema.nullable().optional(),
+      })
       .strict()
       .default({}),
     scratchBudgetMb: z.number().int().min(64).max(131072).default(20480),

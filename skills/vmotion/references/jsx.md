@@ -60,7 +60,7 @@ export default defineComponent({
 
 Props are node props, identical to the SDK `rect()`/`text()` builders: `x y width height rotation scaleX scaleY
 opacity fill gradient radius stroke strokeWidth strokeDash shadow blur blend brightness saturation effects maskId clip
-visible`; text: `fontSize fontWeight fontFamily align (left|center|right) lineHeight letterSpacing textTransform
+visible`; text: `fontSize fontWeight fontFamily align (left|center|right) lineHeight letterSpacing textTransform whiteSpace
 textAnimators glyphSet glyphFallback`. Convenience props: `scale` (both axes), `origin` (`'center'`, `'top-left'`,
 `[x, y]`, `{x, y}`), `skewX`/`skewY` (degrees), `zIndex` (stable sibling order). `opacity` is clamped to 0–1 so spring
 overshoot is safe.
@@ -124,6 +124,7 @@ Explicit props win over `style`.
 | `boxShadow`, `textShadow`, `filter: blur() brightness() saturate() opacity() drop-shadow()` | shadow / blur / brightness / saturation |
 | `mixBlendMode` (normal, multiply, screen, overlay, darken, lighten, difference, plus-lighter) | blend |
 | `fontSize`, `fontFamily`, `fontWeight` (100–900, normal, bold), `textAlign` (left/center/right), `lineHeight` (number or px), `letterSpacing` (px or em), `textTransform` | text props |
+| `whiteSpace` (`normal` default, `pre` keeps all spaces / breaks only at `\n`, `pre-wrap` keeps spaces and wraps; `<text>` only, not inherited) | text `whiteSpace` — use `pre` + `{'  indented\n    code'}` for code |
 | `overflow`/`overflowX`/`overflowY`: `visible`, `hidden`, `clip` | clip rect |
 | `objectFit`: `fill`, `contain`, `cover` | image/video/component fit |
 | Layout keys (next section) | taffy layout |
@@ -176,7 +177,7 @@ A full animated grid that reflows on the beat is `examples/jsx-lab/components/la
 | `perspective`, `rotateX/Y`, `translateZ`, `matrix3d`, `backfaceVisibility` | `JSX_STYLE_UNSUPPORTED` | `project3D()`/matrix helpers (`docs/MATRIX3D.md`) or pseudo-3D: `scaleX = cos(angle)`, a little `skewY`, depth-sorted `zIndex`/opacity |
 | `order`, `gridArea`, `gridTemplateAreas`, named grid lines, `inset`, `float` | `JSX_STYLE_UNSUPPORTED` | `row-reverse`, numeric lines/`span`, `left/top/right/bottom` |
 | `clipPath`, `mask` | `JSX_STYLE_UNSUPPORTED` | `overflow:'hidden'`, `clip` prop, `maskId` |
-| `textDecoration`, `whiteSpace`, `textOverflow`, `fontStyle`… | `JSX_STYLE_UNSUPPORTED` | `textAnimators`/`pathText`, pre-format the string |
+| `textDecoration`, `textOverflow`, `fontStyle`… | `JSX_STYLE_UNSUPPORTED` | `textAnimators`/`pathText`, pre-format the string |
 | Per-corner `borderRadius` | `JSX_STYLE_UNSUPPORTED` | One radius, or a `<path d>` |
 | `filter: hue-rotate()` etc. | `JSX_STYLE_UNSUPPORTED` | `effects={[…]}` raster effects (`docs/EFFECTS2D.md`) |
 | Layout keys outside a layout context, `display:flex` on non-group | `JSX_LAYOUT_CONTEXT` | See section 6 |

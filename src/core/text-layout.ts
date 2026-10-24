@@ -11,6 +11,10 @@ import {
 import type { GlyphSetDocument } from './glyphs/glyph-schema.js';
 import { glyphSetFile, glyphSetSchema } from './glyphs/glyph-schema.js';
 import { sharedGlyphSets } from './glyphs/glyph-resources.js';
+/** Spaces white-space:normal may drop at line edges (NBSP U+00A0/U+2007/U+202F are kept). */
+const collapsible = /[ \t\r\f\v\u1680\u2000-\u2006\u2008-\u200a\u205f\u3000]/gu,
+  leadingCollapsible = /^[ \t\r\f\v\u1680\u2000-\u2006\u2008-\u200a\u205f\u3000]+/u,
+  trailingCollapsible = /[ \t\r\f\v\u1680\u2000-\u2006\u2008-\u200a\u205f\u3000]+$/u;
 export function layoutTextLines(
   ctx: SKRSContext2D,
   n: Node,
@@ -29,17 +33,30 @@ export function layoutTextLines(
   const
     chars = Array.from(segmenter.segment(n.text), (s) => s.segment);
   const visible = chars.slice(0, Math.ceil(chars.length * n.reveal)).join('');
-  const lines: string[] = [];
+  const lines: string[] = [],
+    mode = n.whiteSpace ?? 'normal';
   for (const paragraph of visible.split('\n')) {
+    if (mode === 'pre') {
+      // No automatic wrapping; every space is kept.
+      lines.push(paragraph);
+      continue;
+    }
     let line = '';
     for (const { segment: word } of new Intl.Segmenter('zh', { granularity: 'word' }).segment(
       paragraph,
     )) {
-      if (line && width(line + word) > n.width) {
-        lines.push(line.trimEnd());
+      const blank = !word.replace(collapsible, '');
+      if (mode === 'pre-wrap') {
+        // Spaces never start a wrap (they hang at the end of the line) and are never dropped.
+        if (line && !blank && width(line + word) > n.width) {
+          lines.push(line);
+          line = '';
+        }
+      } else if (line && width(line + word) > n.width) {
+        lines.push(line.replace(trailingCollapsible, ''));
         line = '';
       }
-      if (width(word) > n.width) {
+      if (!blank && width(word) > n.width) {
         for (const { segment: char } of segmenter.segment(word)) {
           if (line && width(line + char) > n.width) {
             lines.push(line);
@@ -47,7 +64,12 @@ export function layoutTextLines(
           }
           line += char;
         }
-      } else line += !line ? word.trimStart() : word;
+      } else
+        line +=
+          !line && mode === 'normal'
+            ? // white-space: normal drops ordinary spaces at a line start; NBSP is kept.
+              word.replace(leadingCollapsible, '')
+            : word;
     }
     lines.push(line);
   }

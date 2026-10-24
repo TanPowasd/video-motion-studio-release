@@ -7,6 +7,23 @@ import {
 } from '../../core/sound-schema.js';
 
 export const musicUrl = (id = '') => `#/music${id ? '/' + encodeURIComponent(id) : ''}`;
+/** The explicit blank-song route. `#/music` alone opens the project's music instead. */
+export const NEW_MUSIC_ROUTE = 'new';
+/**
+ * Which score `#/music` (Ctrl+4 / the mode pill) opens: the first sound asset placed in the
+ * active sequence, else the first sound asset in the project. Undefined only when the project
+ * has no score yet, and then music mode starts a blank song.
+ */
+export function defaultMusicAsset(snapshot: {
+  project: { activeSequence?: string; assets: Array<{ id: string; soundSource?: string }> };
+  sequences?: Array<{ id: string; tracks?: Array<{ clips: Array<{ assetId?: string }> }> }>;
+}): string | undefined {
+  const sounds = snapshot.project.assets.filter((a) => a.soundSource);
+  if (!sounds.length) return undefined;
+  const active = snapshot.sequences?.find((s) => s.id === snapshot.project.activeSequence),
+    used = new Set(active?.tracks?.flatMap((t) => t.clips.map((c) => c.assetId)) ?? []);
+  return (sounds.find((a) => used.has(a.id)) ?? sounds[0]).id;
+}
 export const noteLabel = (value: string | number) => {
   const n = Math.round(noteNumber(value));
   return (

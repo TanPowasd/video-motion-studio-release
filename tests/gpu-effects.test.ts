@@ -142,7 +142,14 @@ it('keeps unavailable auto backends on CPU with explicit evidence and required G
     code: 'GPU_BUDGET',
   });
 });
-const available = process.platform === 'win32' && existsSync(gpu().binary);
+// Device cases need the Windows DX12 helper and a GPU-capable environment. VMOTION_GPU=cpu (hosted
+// CI without a GPU) skips them; VMOTION_GPU_ADAPTER=warp runs them on the D3D12 WARP software
+// adapter, which checks correctness of the DX12 path but not performance.
+const warp = ['warp', 'fallback'].includes((process.env.VMOTION_GPU_ADAPTER ?? '').trim());
+const available =
+  process.platform === 'win32' &&
+  existsSync(gpu().binary) &&
+  (process.env.VMOTION_GPU !== 'cpu' || warp);
 it.skipIf(!available)(
   'corrects more than one precision batch with bounded work buffers',
   async () => {
@@ -201,7 +208,7 @@ it.skipIf(!available)(
     }
     expect(backend.report()).toMatchObject({
       status: 'ready',
-      adapter: { hardware: true, backend: 'Dx12' },
+      adapter: warp ? { hardware: false, software: true, backend: 'Dx12' } : { hardware: true, backend: 'Dx12' },
       dispatches: variants.length,
       surfaceAllocations: 1,
       fullSceneGpu: false,

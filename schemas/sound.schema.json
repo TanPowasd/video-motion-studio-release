@@ -953,8 +953,67 @@
               "maximum": 24,
               "default": 0
             },
+            "gainStage": {
+              "type": "string",
+              "enum": [
+                "pre",
+                "post"
+              ],
+              "default": "pre"
+            },
             "effects": {
               "$ref": "#/definitions/sound/properties/tracks/items/properties/effects"
+            },
+            "loudness": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "targetLufs": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": -36,
+                          "maximum": -5
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": -14
+                    },
+                    "truePeakDb": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": -9,
+                          "maximum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": -1
+                    },
+                    "maxGainDb": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 36,
+                      "default": 24
+                    },
+                    "release": {
+                      "type": "number",
+                      "minimum": 0.001,
+                      "maximum": 1,
+                      "default": 0.05
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           },
           "additionalProperties": false,

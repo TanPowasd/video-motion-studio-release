@@ -45,6 +45,6 @@ Agent 使用 `transition_plan` 批量创建新的场景及组件，源场景保�
 
 `audio_mix_inspect/plan` 返回短配置及准确候选；`audio_preview planId` 试听混音候选；`audio_audit` 按 FFmpeg BS.1770/R128 测实际 LUFS、LRA、true peak，返回范围覆盖和 profile 差异。静音/过短范围显示不确定性；有损交付应再测编码文件。指标不证明听感，也没有录音、VST、完整 DAW。
 
-效果从起点处理并缓存，随机范围沿用历史状态；子序列先处理自身混音，再经过父级裁切、变速、音量/淡化。缓存仅根据声音子图和素材版本失效，修改画面不重做声音。处理使用固定分块与磁盘 stems，默认 scratch 20 GiB、最多 64 轨/16 总线/两小时/64 MiB 效果状态；预算可显式修改，不是整个项目缓存配额。未配置混音的原时间轴仍沿用 ±0.95 安全限制；配置新混音保留浮点超幅证据，需要明确 limiter/normalization。整段声音标准化不以采样摘要替代。
+效果从起点处理并缓存，随机范围沿用历史状态；子序列先处理自身混音，再经过父级裁切、变速、音量/淡化。缓存仅根据声音子图和素材版本失效，修改画面不重做声音。处理使用固定分块与磁盘 stems，默认 scratch 20 GiB、最多 64 轨/16 总线/两小时/64 MiB 效果状态；预算可显式修改，不是整个项目缓存配额。未配置混音的原时间轴仍沿用 ±0.95 安全限制；配置新混音保留浮点超幅证据，需要明确 limiter/normalization。整段声音标准化不以采样摘要替代。序列 `mix.master.gainDb` 默认在主效果之前（`gainStage:"pre"`），主 limiter 为最后一级；`gainStage:"post"` 恢复旧顺序。
 
 `examples/workstation-lab` 为 8 秒 1280×720/30fps、240 帧的数学二维/原生三维与八种转场例子，提供可编辑源码、contact 与性能 JSON。创建脚本拒绝默默覆盖；--render-only 保留修改，--rebuild 明确重建示例部分。`scripts/check-workstation.mjs --packaged` 验证真实 MCP 的批量转场、候选性能、池/基线像素、声音候选/响度及 120 帧带声音 MP4。相关测试覆盖 source/JSON/目录失效、状态代码、透明端点、池状态重置、随机声音范围、总线环路、锁与原子撤销。

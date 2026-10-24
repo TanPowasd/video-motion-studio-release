@@ -25,6 +25,9 @@ models by `scripts/schema.ts`, do not edit them by hand). From any project you c
 - Every scene/sequence/drawing file **listed in the manifest**. An unlisted `scenes/x.json` is ignored.
 - Every `*.ts`, `*.tsx`, `*.json`, `*.py`, `*.wgsl` under `components/` (recursive), whether referenced or not.
 - The watcher ignores `.vmotion/`, `node_modules/`, `exports/` and `*.tmp`.
+- On FUSE/network mounts (JuiceFS, NFS, SMB/CIFS, sshfs, 9p/virtiofs) native file events arrive late or never, so
+  the app also stat-polls the files above every 500 ms (`VMOTION_WATCH=auto|poll|native`,
+  `VMOTION_WATCH_POLL_MS=100…10000`). Mapped Windows network drives are not auto-detected: set `VMOTION_WATCH=poll`.
 
 ## 2. `project.vmotion.json`
 
@@ -179,7 +182,7 @@ own component that imports a cue JSON (see recipes).
 ## 11. Editing safely
 
 - Write whole files atomically (write then rename) when your tool allows; the watcher waits ~150 ms for writes to
-  settle, then reloads.
+  settle, then reloads (≤ ~0.6 s later on polled FUSE/network mounts).
 - Change the manifest in the same edit as adding/removing a scene or sequence file.
 - Keep ids stable: scene ids, node ids, sequence/track/clip ids, parameter names, generated JSX ids.
 - After a batch of edits run `vmotion validate`, then render frames. If the app is open, an invalid edit leaves the

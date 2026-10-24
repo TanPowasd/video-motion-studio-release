@@ -13,7 +13,7 @@ Vmotion 可以用可编辑 JSON 制作声音，而不只播放已有音频。软
 | 处理器 | 增益、低通/高通/峰值 EQ/高低架、失真、立体声 Delay、Chorus、算法 Reverb、软拐点 Compressor、立体声联动峰值 Limiter |
 | 工程与交付 | JSON 声音素材、主时间轴放置、候选试听、一次撤销、波形/音乐驱动画面、PCM WAV/视频导出、MIDI 导入/导出 |
 
-顶部“音乐”或素材库“新建声音”打开独立 `#/music` 工作区。参考 FL Studio 的 Pattern → Channel rack / Piano roll → Playlist → Mixer 工作流，采用 Vmotion 自有工程与界面。
+顶部“音乐”（Ctrl+4）或素材库“新建声音”打开独立 `#/music` 工作区。`#/music` 不再打开空白新曲：它会打开当前序列中使用的声音素材（没有则打开工程里第一首乐曲），只有工程里还没有乐曲时才是空白新曲。`#/music/new` 是明确的空白新曲路由；“＋ 新建乐曲”跳到该路由，已经在新曲上再点一次则开始新的空白草稿（有未保存修改时先确认）。参考 FL Studio 的 Pattern → Channel rack / Piano roll → Playlist → Mixer 工作流，采用 Vmotion 自有工程与界面。
 
 - Playlist：Pattern 拖入、点击放置、移动、重复；双击片段进入钢琴卷帘。实例保持关联，修改同一个 Pattern 会更新所有实例。
 - Piano roll：铅笔绘制、拖动、多选（Ctrl）、右边缘改长度、量化、复制、八度移调、力度和数值编辑；滚动/缩放，按可见范围绘制音符。
@@ -56,7 +56,17 @@ const score = compileSound({
 
 拍单位是四分音符拍；拍号不改变 BPM 的时间含义。`tempo` 必须从 beat=0 严格递增，映射拍↔秒后按 48 kHz 取采样位置。`event.duration` 是按键时长，release 是秒；音效尾音只能保留在显式 `document.tail` 与总时长内，不会自动延长整个视频。`endNote` 产生按秒连续扫频。采样变调会改变内容播放速度，不是保音高的时间拉伸；主时间轴已有独立 speed 处理。
 
-轨道声像为立体声 balance，合成单声部事件使用等功率声像。效果在轨道音量/声像之前，Send 在后推子位置；总线按无循环顺序处理，最后主输出。总线反馈应使用有界 Delay/Reverb 内部状态，不能把路由连接成环。
+轨道声像为立体声 balance，合成单声部事件使用等功率声像。效果在轨道音量/声像之前，Send 在后推子位置；总线按无循环顺序处理，最后主输出。
+
+主输出顺序：`master.gainDb` 默认在主效果链**之前**（`gainStage: "pre"`），所以主 limiter/compressor 始终是最后一级，主音量不会把信号推过 limiter。旧版本把 gainDb 放在效果链之后；需要旧行为时写 `master.gainStage: "post"`。只有线性主效果（gain/filter/delay/chorus/reverb）时两种顺序结果相同；gainDb≠0 且有 limiter/compressor/distortion 的旧乐曲会变响度/峰值更正确，缓存会自动重渲染。
+
+可选 `master.loudness` 在整曲渲染后离线处理：先按 BS.1770-4 / EBU R128 门限测积分响度，把增益调到 `targetLufs`（默认 −14 LUFS，`maxGainDb` 默认 24 限制安静素材的提升），再用 4× 过采样预读 true-peak limiter 压到 `truePeakDb`（默认 −1 dBTP，`release` 默认 0.05 s）。处理与输入逐样本对齐（limiter 延迟已补偿），纯 TypeScript 实现，跨平台结果一致。`targetLufs: null` 只做 true-peak 限幅，`truePeakDb: null` 只做响度标准化。缓存旁的报告 JSON 增加 `loudness`（输入/输出 LUFS、dBTP、所加增益和最大压缩量）。
+
+```json
+"master": { "gainDb": 0, "effects": [], "loudness": { "targetLufs": -14, "truePeakDb": -1 } }
+```
+
+总线反馈应使用有界 Delay/Reverb 内部状态，不能把路由连接成环。
 
 ## Agent 接口
 
@@ -73,7 +83,7 @@ MIDI 读取 format 0/1 PPQ、音符/力度、速度变化、running status 与�
 
 缓存采用资源内容和采样路径/fingerprint 标识，构建期间核对采样，原子发布浮点 WAV。长采样先解码到磁盘 PCM，再每轨最多保留 8 个 4096 帧页面（256 KiB）；一次声音资源最多 30 分钟、64 轨、16 总线、20000 事件、每轨 256 同时声音、2 GB 解码磁盘银行、64 MB 效果状态和 20 亿估计工作量。超预算返回诊断，不静默降低声音质量。多段声音资源可在视频工程中编排更长内容；此上限不是长视频性能验收。
 
-主合成及 sound_export 保留 float32 样本和超幅证据；范围试听 WAV 是 16 位 PCM，超过全幅时会报告削波，需明确降增益或加 limiter。Limiter 为无预读联动峰值保护，不是 true-peak/LUFS 认证；Reverb 为本地算法混响，没有脉冲响应卷积。音乐素材内不支持 sidechain、LUFS 标准化和空间音频；视频序列混音已有侧链与响度处理。
+主合成及 sound_export 保留 float32 样本和超幅证据；范围试听 WAV 是 16 位 PCM，超过全幅时会报告削波，需明确降增益或加 limiter。效果链里的 Limiter 仍是无预读联动采样峰值保护；需要 true-peak 与 LUFS 目标时使用 `master.loudness`（4× 过采样检测，BS.1770 门限测量，不是广播认证）。Reverb 为本地算法混响，没有脉冲响应卷积。音乐素材内不支持 sidechain 和空间音频；视频序列混音已有侧链与响度处理。
 
 `tests/sound*.test.ts` 验证频谱、拍↔采样、块分割一致性、带限采样、DSP 尾音、MIDI 延音、候选/接受/时间轴试听一致、随机范围、原子撤销、长采样及打包重渲染。`scripts/check-sound.mjs --packaged` 使用真实外部 MCP、封装运行时及 WAV/带音频 MP4 检查；`check-desktop-projects.mjs --packaged --sound` 实测新建、音符编辑、草稿试听、发布和时间轴放置。
 

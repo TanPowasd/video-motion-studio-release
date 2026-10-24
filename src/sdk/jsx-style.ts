@@ -50,6 +50,8 @@ export interface VmStyle {
   lineHeight?: number | string;
   letterSpacing?: number | string;
   textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+  /** normal (default) | pre | pre-wrap; also nowrap → pre, break-spaces → pre-wrap. */
+  whiteSpace?: 'normal' | 'pre' | 'pre-wrap' | 'nowrap' | 'break-spaces';
   overflow?: 'visible' | 'hidden' | 'clip';
   overflowX?: 'visible' | 'hidden' | 'clip';
   overflowY?: 'visible' | 'hidden' | 'clip';
@@ -130,7 +132,7 @@ const unsupportedStyle: Array<[RegExp, string]> = [
   ],
   [/^(clipPath|mask)/, 'Use overflow: "hidden", the clip prop ({x,y,width,height}) or maskId on the node.'],
   [
-    /^(textDecoration|whiteSpace|wordBreak|textOverflow|fontStyle|wordSpacing|textIndent)/,
+    /^(textDecoration|wordBreak|textOverflow|fontStyle|wordSpacing|textIndent)/,
     'Use textAnimators/pathText node props or pre-format the string; this text style is not mapped.',
   ],
 ];
@@ -614,6 +616,19 @@ export function lowerStyle(
               : length(value as never, 0, key, at);
         break;
       }
+      case 'whiteSpace': {
+        const map: Record<string, string> = {
+          normal: 'normal',
+          pre: 'pre',
+          'pre-wrap': 'pre-wrap',
+          'break-spaces': 'pre-wrap',
+          nowrap: 'pre',
+        };
+        if (!map[String(value)])
+          fail('JSX_STYLE_UNSUPPORTED', 'whiteSpace supports normal, pre, pre-wrap (nowrap → pre, break-spaces → pre-wrap)', { at, key });
+        out.whiteSpace = map[String(value)];
+        break;
+      }
       case 'textTransform':
         if (!['none', 'uppercase', 'lowercase', 'capitalize'].includes(String(value)))
           fail('JSX_STYLE_UNSUPPORTED', 'textTransform supports none, uppercase, lowercase, capitalize', { at, key });
@@ -798,6 +813,7 @@ export const supportedStyleKeys = [
   'lineHeight',
   'letterSpacing',
   'textTransform',
+  'whiteSpace',
   'overflow',
   'overflowX',
   'overflowY',

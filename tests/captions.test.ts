@@ -58,10 +58,12 @@ beforeEach(async (context) => {
   root = await mkdtemp(path.join(os.tmpdir(), 'vmotion-captions-'));
   await initProject(root);
   app = await new Application(root).open(false);
-});
+  // Cold Application.open measured 25-30 s on GitHub-hosted Windows runners while test:fast runs
+  // files in parallel (first open per worker); 30 s hookTimeout was too tight there.
+}, 120_000);
 afterEach(async (context) => {
   if (!context.task.name.startsWith('integration:')) return;
-  await app.close();
+  await app?.close();
   await rm(root, { recursive: true, force: true });
 });
 it('integration: imports editable subtitles, renders only active cues, preserves wrapped text and supports undo', async () => {

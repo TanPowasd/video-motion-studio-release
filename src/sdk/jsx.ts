@@ -722,6 +722,11 @@ function lowerIntrinsic(
         at,
         nodeId: id,
       });
+    if (lowered.whiteSpace !== undefined && type !== 'text')
+      throw err('JSX_STYLE_UNSUPPORTED', `whiteSpace applies to <text> only; set it on each <text> (at <${tag} id="${local}">)`, {
+        at,
+        nodeId: id,
+      });
     if (lowered.fit !== undefined && type !== 'image' && type !== 'video')
       throw err('JSX_STYLE_UNSUPPORTED', `objectFit applies to <image>/<video> only (at <${tag} id="${local}">)`, {
         at,

@@ -38,20 +38,41 @@ impl Gpu {
             backends,
             ..Default::default()
         });
+        // Opt-in software adapter for CI correctness checks: VMOTION_GPU_ADAPTER=warp|fallback asks
+        // wgpu for its fallback adapter (on DX12 this is WARP, "Microsoft Basic Render Driver",
+        // reported as DeviceType::Cpu). Never selected implicitly; the identity reports
+        // hardware:false so callers and evidence can tell it apart. Measures correctness only.
+        let software = matches!(
+            std::env::var("VMOTION_GPU_ADAPTER").ok().as_deref().map(str::trim),
+            Some("warp") | Some("fallback")
+        );
         let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::HighPerformance,
-            force_fallback_adapter: false,
+            force_fallback_adapter: software,
             compatible_surface: None,
         }))
-        .ok_or("GPU_UNAVAILABLE: no hardware adapter")?;
+        .ok_or(if software {
+            "GPU_UNAVAILABLE: no software (WARP/fallback) adapter"
+        } else {
+            "GPU_UNAVAILABLE: no hardware adapter"
+        })?;
         let info = adapter.get_info();
-        if !matches!(
-            info.device_type,
-            wgpu::DeviceType::DiscreteGpu | wgpu::DeviceType::IntegratedGpu
-        ) {
-            return Err("GPU_UNAVAILABLE: software/virtual adapter rejected".into());
+        let accepted = if software {
+            matches!(info.device_type, wgpu::DeviceType::Cpu)
+        } else {
+            matches!(
+                info.device_type,
+                wgpu::DeviceType::DiscreteGpu | wgpu::DeviceType::IntegratedGpu
+            )
+        };
+        if !accepted {
+            return Err(if software {
+                format!("GPU_UNAVAILABLE: fallback adapter is not a software device ({:?})", info.device_type)
+            } else {
+                "GPU_UNAVAILABLE: software/virtual adapter rejected".into()
+            });
         }
-        let identity = json!({"name":info.name,"vendor":info.vendor,"device":info.device,"driver":info.driver,"driverInfo":info.driver_info,"backend":format!("{:?}",info.backend),"deviceType":format!("{:?}",info.device_type),"hardware":true});
+        let identity = json!({"name":info.name,"vendor":info.vendor,"device":info.device,"driver":info.driver,"driverInfo":info.driver_info,"backend":format!("{:?}",info.backend),"deviceType":format!("{:?}",info.device_type),"hardware":!software,"software":software});
         let mut limits = wgpu::Limits::downlevel_defaults().using_resolution(adapter.limits());
         limits.max_storage_buffers_per_shader_stage = 5;
         let (device, queue) = pollster::block_on(adapter.request_device(

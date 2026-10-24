@@ -105,6 +105,7 @@ const beats = (n: number, fps: number) => (n * fps * 60) / 128;
 | `boxShadow`、`textShadow`、`filter: blur() brightness() saturate() opacity() drop-shadow()` | shadow / blur / brightness / saturation |
 | `mixBlendMode` | blend（normal、multiply、screen、overlay、darken、lighten、difference、plus-lighter） |
 | `fontSize`、`fontFamily`、`fontWeight`、`textAlign`、`lineHeight`、`letterSpacing`、`textTransform` | 对应文字属性（`lineHeight: '48px'` 换算为倍数） |
+| `whiteSpace`（normal、pre、pre-wrap；nowrap→pre，break-spaces→pre-wrap），也可直接写 `<text whiteSpace="pre">` | 文字节点 `whiteSpace`：`pre` 保留所有空格且只在 `\n` 换行（代码块），`pre-wrap` 保留空格并自动换行，`normal`（默认）与旧版一致：行首普通空格被去掉，NBSP 保留 |
 | `overflow`/`overflowX`/`overflowY`（visible、hidden、clip）、`objectFit`（fill、contain、cover） | 裁剪框 / 图片·视频·组件适配 |
 | 布局键（`display: 'flex' \| 'grid'`、gap、margin、padding 等，见下节） | taffy 布局，结果写成普通 x/y/width/height |
 
@@ -123,6 +124,8 @@ const beats = (n: number, fps: number) => (n * fps * 60) / 128;
 | `calc()` 等表达式长度 | `JSX_STYLE_VALUE` | 在代码中算出数值（px 数字、`'12px'`、`'50%'`、`'auto'`） |
 | 布局键用在无布局意义处、非 group 上 `display: 'flex'` | `JSX_LAYOUT_CONTEXT` | 见“Flex / Grid 布局” |
 | `transition`/`animation` | `JSX_STYLE_UNSUPPORTED` | `remap()`/`springTo()` |
+
+空格说明：JSX 编译本身会去掉跨行文本两端的空白并把换行合并为一个空格，所以代码缩进请写成字符串表达式，例如 `<text whiteSpace="pre">{'  if (x) {\n    run()\n  }'}</text>`。默认 `normal` 为兼容旧工程（同样的源码渲染不变），不会自动对 JSX 文字改成 pre；`whiteSpace` 只作用于 `<text>`，不从父组继承。
 | `rotateX`/`rotateY`/`perspective` | `JSX_STYLE_UNSUPPORTED` | `project3D()`/矩阵 3D，或下面的伪 3D 写法 |
 | 未知属性（如 `rotate`、`color` 写在 rect 上） | `JSX_PROP`（带“did you mean”） | 对应节点属性 |
 | 文字直接放在 `<group>` 里、给 `<rect>` 加子元素 | `JSX_TEXT_CHILD` / `JSX_CHILDREN` | 用 `<text>` 包裹；用 `<group>` 组合 |
@@ -167,6 +170,8 @@ style={{ left, top, transform: `scale(${Math.abs(Math.cos(t)) * s}, ${s}) skewY(
 JSX 生成的图层与 `.ts` 组件的生成图层相同：在界面中选中并拖动、改色等操作写入组件图层的稳定 ID `overrides`/`structure`，源码保持不变，撤销与变更高亮照常工作。因此请给可能被手动调整的元素写 `id`。
 
 可选的写回：`planJsxWriteBack(snapshot, sceneId, componentNodeId)`（`src/core/jsx-writeback.ts`）把字面量覆盖写回 `.tsx`——属性原本是字面量（`x={120}`、`fill="#fff"`）或缺省时改写/插入；属性是表达式（`x={remap(...)}`）时保留为 override 并在报告中标为 `computed`。它返回普通的 files + operations 候选，经 `project_preflight`/`project_apply` 提交，画面像素不变、一次撤销。入口：检查器的“写回源码”区、MCP `jsx_writeback_plan`、CLI `vmotion jsx-writeback --project . --scene <场景> --node <组件图层> [--apply]`。
+
+检查器里的“写回源码”区：选中组件图层本身、进入组件后的任意子图层，或在根画布上直接选中组件生成的子图层（深选）时都会出现；选中子图层时标题为“写回源码 · <组件名>”，列表只含该子图层及其后代的覆盖（子图层自己没有覆盖时列出整个组件）。点击后先重新生成写回计划，再直接 `project_apply`——apply 本身会执行与 preflight 相同的类型检查、组件校验、确定性和视觉采样，不再额外跑一次 `project_preflight`；按钮显示当前阶段（“检查覆盖…”/“写入并验证…”）和已用秒数，完成后保留“已写入 N 项到 <文件>”。同一进程内类型检查结果按工程根目录、SDK 声明和源码全文共享（仍逐文件核对），预检后的 apply 不再重复构建 TypeScript 程序。
 
 写回范围：只改写组件图层引用的主 `.tsx` 文件中带字面量 `id` 的元素；从其他文件导入的子组件里的元素报告为 `no-target` 并保留为 override。表达式属性不做写回（保留 override，标为 `computed`），由 flex/grid 排版决定的几何保留 override，标为 `layout`。
 

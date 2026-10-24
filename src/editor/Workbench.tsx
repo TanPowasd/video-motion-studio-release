@@ -146,6 +146,7 @@ export function Workbench() {
     stateRef,
     setClipSelected,
     transact,
+    commitCanvasDraft,
     setSceneId,
     setSelected,
     sceneId,
@@ -214,6 +215,7 @@ export function Workbench() {
     scopeKey,
     selectMany,
     setCanvasDraft,
+    canvasDraft,
     setSaving,
     stroke,
     visualCheck,
@@ -1770,7 +1772,10 @@ export function Workbench() {
                     {workspace === 'animation' &&
                       !playing &&
                       interactions &&
-                      interactions.revision === snapshot!.revision &&
+                      // Stay mounted through an external save that lands mid-drag (the
+                      // gesture would be lost silently); the commit retries on the new
+                      // revision when the dragged layers are unchanged.
+                      (interactions.revision === snapshot!.revision || !!canvasDraft) &&
                       interactions.frame === frame &&
                       interactions.sceneId === sceneId &&
                       JSON.stringify(interactions.path) === JSON.stringify(focusPath) && (
@@ -1793,19 +1798,7 @@ export function Workbench() {
                                 })()
                               : undefined
                           }
-                          onCommit={async (draft, revision) => {
-                            setSaving(true);
-                            try {
-                              return await run('compositionTransactBatch', {
-                                sceneId,
-                                frame,
-                                edits: draft,
-                                revision,
-                              });
-                            } finally {
-                              setSaving(false);
-                            }
-                          }}
+                          onCommit={commitCanvasDraft}
                         />
                       )}
                     {workspace === 'drawing' && (

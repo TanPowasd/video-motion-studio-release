@@ -2,7 +2,14 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { soundDocumentSchema, type SoundDocument } from '../../core/sound-schema.js';
 import type { ApplicationState, RpcInput } from '../../service/rpc-contract.js';
 import { rpcTyped } from '../state/rpc-client.js';
-import { emptyMusicDraft, musicReducer, newMusic, musicUrl } from './music-model.js';
+import {
+  defaultMusicAsset,
+  emptyMusicDraft,
+  musicReducer,
+  newMusic,
+  musicUrl,
+  NEW_MUSIC_ROUTE,
+} from './music-model.js';
 
 export function useMusic() {
   const [application, setApplication] = useState<ApplicationState>(),
@@ -64,8 +71,18 @@ export function useMusic() {
     };
   }, []);
   const loaded = useRef('');
+  // `#/music` (Ctrl+4, the mode pill) opens the project's score rather than a blank song:
+  // the one used in the active sequence, else the first. `#/music/new` stays the explicit blank.
+  useEffect(() => {
+    if (!application || routeId) return;
+    const id = defaultMusicAsset(application.snapshot);
+    if (!id) return;
+    window.history.replaceState(null, '', musicUrl(id));
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  }, [application, routeId]);
   useEffect(() => {
     if (!application) return;
+    if (!routeId && defaultMusicAsset(application.snapshot)) return;
     const key = application.root + ':' + routeId;
     if (loaded.current === key) return;
     loaded.current = key;
@@ -314,7 +331,24 @@ export function useMusic() {
       setAudio(undefined);
     }
   };
+  /** "新建乐曲": go to the blank-song route; pressed again there, start a fresh blank. */
+  const newSong = useCallback(() => {
+    const target = musicUrl(NEW_MUSIC_ROUTE);
+    if (location.hash !== target) {
+      location.hash = target;
+      return;
+    }
+    if (draftRef.current.document && JSON.stringify(draftRef.current.document) !== JSON.stringify(draftRef.current.saved) && !window.confirm('放弃未保存的新乐曲草稿？'))
+      return;
+    const root = appRef.current?.root;
+    try {
+      if (root) sessionStorage.removeItem('vmotion-music:' + root + ':' + NEW_MUSIC_ROUTE);
+    } catch {}
+    setBaseSource(undefined);
+    dispatch({ type: 'load', document: newMusic(crypto.randomUUID()), saved: undefined });
+  }, []);
   return {
+    newSong,
     application,
     doc,
     draft,

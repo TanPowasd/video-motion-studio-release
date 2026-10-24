@@ -513,6 +513,14 @@
             "ducking": {
               "$ref": "#/definitions/audioMix/properties/tracks/additionalProperties/properties/ducking"
             },
+            "gainStage": {
+              "type": "string",
+              "enum": [
+                "pre",
+                "post"
+              ],
+              "default": "pre"
+            },
             "normalization": {
               "anyOf": [
                 {

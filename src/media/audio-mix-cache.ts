@@ -126,7 +126,7 @@ export async function prepareSequenceMix(
     legacyProtection = !rawChild && !hasAudioMix(snapshot, sequenceId),
     key = hash(
       json({
-        engine: 'sequence-mix-1',
+        engine: 'sequence-mix-2-master-gain-stage',
         legacyProtection,
         audio: audioVersion(snapshot, sequenceId),
         sequenceId,

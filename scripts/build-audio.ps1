@@ -31,7 +31,19 @@ if (!(Test-Path -LiteralPath $vmotionJson)) {
  if ($LASTEXITCODE -ne 0) { throw 'Cannot acquire JSON header' }
 }
 if ((Get-FileHash -LiteralPath $vmotionJson -Algorithm SHA256).Hash.ToLower() -ne 'aaf127c04cb31c406e5b04a63f1ae89369fccde6d8fa7cdda1ed4f32dfc5de63') { throw 'JSON header hash mismatch' }
-& cmake -S native-audio -B artifacts/audio-build -G 'Visual Studio 17 2022' -A x64 "-DVMOTION_VST3_SDK=$vmotionSdk" "-DVMOTION_JSON_INCLUDE=$vmotionAudioDeps"
+# Pick the installed Visual Studio generator (hosted windows-latest may ship VS 2026 instead of 2022).
+# VMOTION_CMAKE_GENERATOR overrides; otherwise vswhere decides, falling back to VS 2022.
+$vmotionGenerator = $env:VMOTION_CMAKE_GENERATOR
+if (!$vmotionGenerator) {
+ $vmotionGenerator = 'Visual Studio 17 2022'
+ $vmotionVswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+ if (Test-Path -LiteralPath $vmotionVswhere) {
+  $vmotionVsVersion = & $vmotionVswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationVersion
+  switch -Regex ("$vmotionVsVersion") { '^18\.' { $vmotionGenerator = 'Visual Studio 18 2026' } '^17\.' { $vmotionGenerator = 'Visual Studio 17 2022' } '^16\.' { $vmotionGenerator = 'Visual Studio 16 2019' } }
+ }
+}
+Write-Output "[audio] CMake generator: $vmotionGenerator"
+& cmake -S native-audio -B artifacts/audio-build -G $vmotionGenerator -A x64 "-DVMOTION_VST3_SDK=$vmotionSdk" "-DVMOTION_JSON_INCLUDE=$vmotionAudioDeps"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & cmake --build artifacts/audio-build --config Release --target vmotion-audio vmotion-audio-fixture --parallel 4
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

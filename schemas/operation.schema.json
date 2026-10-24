@@ -4158,6 +4158,14 @@
                   "exclusiveMinimum": 0,
                   "default": 1.3
                 },
+                "whiteSpace": {
+                  "type": "string",
+                  "enum": [
+                    "normal",
+                    "pre",
+                    "pre-wrap"
+                  ]
+                },
                 "pathText": {
                   "anyOf": [
                     {
@@ -4961,6 +4969,9 @@
                         "type": "number",
                         "exclusiveMinimum": 0
                       },
+                      "whiteSpace": {
+                        "$ref": "#/definitions/operation/anyOf/3/properties/patch/properties/whiteSpace"
+                      },
                       "pathText": {
                         "anyOf": [
                           {
@@ -5713,6 +5724,9 @@
                           "lineHeight": {
                             "$ref": "#/definitions/operation/anyOf/3/properties/patch/properties/lineHeight"
                           },
+                          "whiteSpace": {
+                            "$ref": "#/definitions/operation/anyOf/3/properties/patch/properties/whiteSpace"
+                          },
                           "pathText": {
                             "$ref": "#/definitions/operation/anyOf/3/properties/patch/properties/pathText"
                           },
@@ -6030,6 +6044,9 @@
                 },
                 "lineHeight": {
                   "$ref": "#/definitions/operation/anyOf/3/properties/patch/properties/lineHeight"
+                },
+                "whiteSpace": {
+                  "$ref": "#/definitions/operation/anyOf/3/properties/patch/properties/whiteSpace"
                 },
                 "pathText": {
                   "$ref": "#/definitions/operation/anyOf/3/properties/patch/properties/pathText"
@@ -7096,6 +7113,14 @@
                             },
                             "ducking": {
                               "$ref": "#/definitions/operation/anyOf/9/properties/patch/properties/mix/anyOf/0/properties/tracks/additionalProperties/properties/ducking"
+                            },
+                            "gainStage": {
+                              "type": "string",
+                              "enum": [
+                                "pre",
+                                "post"
+                              ],
+                              "default": "pre"
                             },
                             "normalization": {
                               "anyOf": [

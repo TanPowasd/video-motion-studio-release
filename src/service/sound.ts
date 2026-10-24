@@ -201,6 +201,8 @@ export function soundLibrary(raw: unknown) {
         'sourceIn/sourceDuration in seconds, up to 30 minutes per sample window; disk-paged PCM and band-limited pitch within four octaves of rootNote',
       routing: 'track/bus outputs and post-fader sends form an acyclic graph',
       automation: 'gainDb/pan linear keys in document time',
+      master:
+        'gainDb feeds the master effects (gainStage pre; post = legacy); master.loudness {targetLufs,truePeakDb} = BS.1770 normalisation + 4x true-peak limiter',
       review:
         'sound_plan → sound_preview planId → project_preflight → project_apply unchanged → audio_preview/render_start',
       schemas: request.schemas ? ['sound', 'soundInstrument', 'soundEffect'] : undefined,

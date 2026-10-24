@@ -3854,6 +3854,14 @@
                 "exclusiveMinimum": 0,
                 "default": 1.3
               },
+              "whiteSpace": {
+                "type": "string",
+                "enum": [
+                  "normal",
+                  "pre",
+                  "pre-wrap"
+                ]
+              },
               "pathText": {
                 "anyOf": [
                   {
@@ -4657,6 +4665,9 @@
                       "type": "number",
                       "exclusiveMinimum": 0
                     },
+                    "whiteSpace": {
+                      "$ref": "#/definitions/scene/properties/nodes/items/properties/whiteSpace"
+                    },
                     "pathText": {
                       "anyOf": [
                         {
@@ -5408,6 +5419,9 @@
                         },
                         "lineHeight": {
                           "$ref": "#/definitions/scene/properties/nodes/items/properties/lineHeight"
+                        },
+                        "whiteSpace": {
+                          "$ref": "#/definitions/scene/properties/nodes/items/properties/whiteSpace"
                         },
                         "pathText": {
                           "$ref": "#/definitions/scene/properties/nodes/items/properties/pathText"

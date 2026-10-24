@@ -83,6 +83,7 @@ export class TypographyLayout {
         n.fontSize,
         n.reveal,
         glyphSourceKey(glyphs),
+        n.whiteSpace ?? 'normal',
       ]),
       hit = this.lineCache.get(key);
     if (hit) return [...hit];
@@ -128,6 +129,7 @@ export class TypographyLayout {
         !!path,
         granularity,
         glyphSourceKey(glyphs),
+        n.whiteSpace ?? 'normal',
       ]);
     ctx.font = nativeTextFont(n.fontWeight, n.fontSize, n.fontFamily);
     ctx.textAlign = 'left';

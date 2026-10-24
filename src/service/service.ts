@@ -22,7 +22,9 @@ import {
   validateSnapshot,
   safePath,
   readProjectFiles,
+  sourceFiles,
 } from './project.js';
+import { planWatch, ProjectFilePoller, type WatchPlan } from './file-watch.js';
 import { HISTORY_FILE, HistoryStore, boundedHistory } from './history.js';
 import { applyOperations } from './operations.js';
 import {
@@ -43,6 +45,9 @@ export class ProjectService extends EventEmitter {
   private undoStack: Snapshot[] = [];
   private redoStack: Snapshot[] = [];
   private watcher?: FSWatcher;
+  private poller?: ProjectFilePoller;
+  /** How external edits are detected (native events, plus stat polling on FUSE/network mounts). */
+  watchPlan?: WatchPlan;
   private queue: Promise<unknown> = Promise.resolve();
   private timer?: NodeJS.Timeout;
   private historyStore: HistoryStore;
@@ -116,19 +121,33 @@ export class ProjectService extends EventEmitter {
         ignoreInitial: true,
         awaitWriteFinish: { stabilityThreshold: 150, pollInterval: 50 },
       });
-      this.watcher.on('all', () => {
-        clearTimeout(this.timer);
-        if (this.agentHold) {
-          this.heldReload = true;
-          return;
-        }
-        this.timer = setTimeout(
-          () => void this.exclusive(() => this.reload()).catch((e) => this.report(e)),
-          120,
-        );
-      });
+      this.watcher.on('all', () => this.externalChange());
+      this.watchPlan = await planWatch(this.root);
+      if (this.watchPlan.poll)
+        this.poller = await new ProjectFilePoller(
+          this.root,
+          async () => [
+            'project.vmotion.json',
+            ...Object.keys(this.snapshot.files),
+            ...(await sourceFiles(this.root)),
+          ],
+          () => this.externalChange(),
+          this.watchPlan.intervalMs,
+        ).start();
     }
     return this;
+  }
+  /** Debounced reload after a native watcher event or a stat-poll change. */
+  private externalChange() {
+    clearTimeout(this.timer);
+    if (this.agentHold) {
+      this.heldReload = true;
+      return;
+    }
+    this.timer = setTimeout(
+      () => void this.exclusive(() => this.reload()).catch((e) => this.report(e)),
+      120,
+    );
   }
   private report(e: unknown) {
     this.diagnostics = [
@@ -479,6 +498,7 @@ export class ProjectService extends EventEmitter {
   }
   async close() {
     clearTimeout(this.timer);
+    this.poller?.stop();
     await this.watcher?.close();
     await this.queue;
     await this.journal.flush();

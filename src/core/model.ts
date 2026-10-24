@@ -29,6 +29,7 @@ export const FORMAT_VERSION = 1;
 const finite = z.number().finite();
 const id = z.string().min(1).max(200);
 const color = z.string().min(1);
+export const whiteSpaceSchema = z.enum(['normal', 'pre', 'pre-wrap']);
 const pointSchema = z.object({ x: finite, y: finite });
 export const gradientSchema = z.discriminatedUnion('type', [
   z.object({
@@ -148,6 +149,7 @@ export const overrideSchema = z
     glyphFallback: glyphFallbackSchema.optional(),
     align: z.enum(['left', 'center', 'right']).optional(),
     lineHeight: finite.positive().optional(),
+    whiteSpace: whiteSpaceSchema.optional(),
     pathText: pathTextSchema.nullable().optional(),
     textAnimators: textAnimatorsSchema.optional(),
     reveal: finite.min(0).max(1).optional(),
@@ -223,6 +225,11 @@ export const nodeBaseSchema = z
     glyphFallback: glyphFallbackSchema.optional(),
     align: z.enum(['left', 'center', 'right']).default('left'),
     lineHeight: finite.positive().default(1.3),
+    /**
+     * Text spaces: 'normal' (default, legacy) drops ordinary spaces at line starts (NBSP kept);
+     * 'pre-wrap' keeps every space and wraps; 'pre' keeps every space and only breaks at \n.
+     */
+    whiteSpace: whiteSpaceSchema.optional(),
     pathText: pathTextSchema.nullable().optional(),
     textAnimators: textAnimatorsSchema.default([]),
     reveal: finite.min(0).max(1).default(1),

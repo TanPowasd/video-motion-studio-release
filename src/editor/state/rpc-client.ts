@@ -11,6 +11,19 @@ const envelope = z.object({
     .object({ message: z.string(), code: z.string().optional(), details: z.unknown().optional() })
     .optional(),
 });
+/** An RPC failure that keeps the service error code (e.g. REVISION_CONFLICT) for callers. */
+export class RpcError extends Error {
+  constructor(
+    message: string,
+    readonly code?: string,
+    readonly details?: unknown,
+  ) {
+    super(message);
+    this.name = 'RpcError';
+  }
+}
+export const isRevisionConflict = (error: unknown) =>
+  error instanceof Error && (error as { code?: unknown }).code === 'REVISION_CONFLICT';
 export const rpc: RpcClient = async (method: string, params: unknown = {}) => {
   const response = await fetch(agentOnlyMethods.has(method)?'/api/agent/rpc':'/api/studio/rpc', {
     method: 'POST',
@@ -25,7 +38,11 @@ export const rpc: RpcClient = async (method: string, params: unknown = {}) => {
           return parsed.success && parsed.data.severity === 'error' ? [parsed.data.message] : [];
         })
       : [];
-    throw new Error(details.length ? details.join('\n') : value.error.message);
+    throw new RpcError(
+      details.length ? details.join('\n') : value.error.message,
+      value.error.code,
+      value.error.details,
+    );
   }
   return value.result;
 };

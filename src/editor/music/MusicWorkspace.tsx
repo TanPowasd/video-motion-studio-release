@@ -327,12 +327,8 @@ export default function MusicWorkspace({ embedded = false }: { embedded?: boolea
           <button
             className="music-new"
             disabled={busy}
-            onClick={() => {
-              if (location.hash !== musicUrl('new')) location.hash = musicUrl('new');
-              else {
-                location.hash = musicUrl();
-              }
-            }}
+            title="新建空白乐曲（#/music/new）；再次点击重新开始空白草稿"
+            onClick={m.newSong}
           >
             ＋ 新建乐曲
           </button>

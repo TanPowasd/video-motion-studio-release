@@ -1,5 +1,6 @@
 import { Field, Section } from './WorkbenchFields.js';
 import { JsxWriteBack } from '../JsxWriteBack.js';
+import { writeBackScope } from '../jsx-writeback-scope.js';
 type ControllerValues = ReturnType<typeof useWorkbenchController>;
 type PanelProps<K extends keyof ControllerValues> = Pick<ControllerValues, K> & {
   [P in Extract<K, 'project' | 'scene' | 'sequence' | 'state'>]: NonNullable<ControllerValues[P]>;
@@ -349,22 +350,19 @@ export const InspectorPanel = React.memo(function InspectorPanel({
             </Section>
           )}
           {(() => {
-            const root = snapshot?.scenes.find((s) => s.id === sceneId),
-              isTsx = (n?: { type: string; component?: string }) =>
-                n?.type === 'component' && !!n.component?.endsWith('.tsx'),
-              owner = !focusPath.length
-                ? isTsx(node)
-                  ? node
-                  : undefined
-                : focusPath.length === 1
-                  ? root?.nodes.find((n) => n.id === focusPath[0] && isTsx(n))
-                  : undefined;
-            return owner ? (
-              <Section title="写回源码">
+            const scope = writeBackScope(
+              snapshot?.scenes.find((s) => s.id === sceneId)?.nodes,
+              focusPath,
+              node,
+              interactions?.layers.find((l) => l.node.id === node.id)?.path,
+            );
+            return scope ? (
+              <Section title={scope.owner === node ? '写回源码' : `写回源码 · ${scope.owner.name}`}>
                 <JsxWriteBack
-                  owner={owner}
+                  owner={scope.owner}
                   sceneId={sceneId}
-                  selectedId={owner === node ? undefined : node.id}
+                  selectedId={scope.localId}
+                  ids={scope.ids}
                   revision={snapshot?.revision}
                   onError={(message) => setError(message)}
                 />

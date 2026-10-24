@@ -81,4 +81,6 @@ npx vitest run --config vitest.config.ts tests/hw-encode.test.ts tests/hw-encode
 
 脚本打印探测表（8-bit 与 10-bit），对软件与每个探测成功的硬件编码器做 `render_profile` 编码计时（fps 及相对 libx264/软件 H.264 的倍数），再经真实 `vmotion render --encoder <mode> --codec <codec>` 导出并用 ffprobe 检查编码格式、profile、pix_fmt、逐帧计数和完整解码无错误，最后确认 `--encoder auto` 选中了优先级中第一个通过探测的后端。报告写入 `artifacts/hw-encode/report-*.json`；任何导出或校验失败退出码为 1，`--strict` 时没有任何硬件编码器通过探测也算失败。Windows 下假 FFmpeg 测试会跳过（脚本形式的假可执行文件需要 POSIX），真实性以本脚本为准。
 
+CI（`.github/workflows/windows.yml`）在托管 Windows runner 上以 `--width 1280 --height 720 --frames 60 --export-frames 30` 非严格运行本脚本并上传报告：runner 无显卡，硬件行预期不可用，只验证软件导出（及可能存在的 `h264_mf` 软件 MFT）与 auto 回退；不代表硬件编码结论。
+
 尚待真机确认：各厂商驱动下 10-bit HEVC/AV1 支持、AMF/Media Foundation 质量映射的主观效果、长片中驱动重置时的错误文本、Intel 核显 QSV 在无显示器会话下的可用性。

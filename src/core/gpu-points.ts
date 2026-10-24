@@ -179,7 +179,16 @@ export class GpuPoints {
         if (!existsSync(this.binary))
           throw new VmotionError('GPU_UNAVAILABLE', 'Native GPU runtime is missing');
         const result = await this.request('initialize', {}, gpuCanvasTable());
-        if (result.header.version !== 1 || !result.header.adapter?.hardware)
+        // A software adapter (D3D12 WARP) is only accepted when explicitly requested through
+        // VMOTION_GPU_ADAPTER=warp|fallback, which CI uses to exercise the DX12 code path for
+        // correctness on GPU-less runners. Its timings say nothing about real GPU performance.
+        const softwareRequested = ['warp', 'fallback'].includes(
+          (process.env.VMOTION_GPU_ADAPTER ?? '').trim(),
+        );
+        if (
+          result.header.version !== 1 ||
+          !(result.header.adapter?.hardware || (softwareRequested && result.header.adapter?.software))
+        )
           throw new VmotionError('GPU_PROTOCOL', 'GPU runtime did not report a hardware adapter');
         this.adapter = result.header.adapter;
         this.status = 'ready';

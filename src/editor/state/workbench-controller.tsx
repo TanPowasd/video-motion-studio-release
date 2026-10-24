@@ -11,7 +11,13 @@ import { canPresentPreview, paintPreview, readPreviewBitmap } from '../preview.j
 import { usePlayback } from '../usePlayback.js';
 import { rpc } from './rpc-client.js';
 import { useStableControllerValues } from './stable-controller.js';
-import { createWorkbenchCommands, subscribeWorkbench } from './workbench-effects.js';
+import {
+  commitWithRevisionRetry,
+  createWorkbenchCommands,
+  sameLayers,
+  stableJson,
+  subscribeWorkbench,
+} from './workbench-effects.js';
 import { useWorkbenchField } from './workbench-selectors.js';
 import { useWorkbenchStore } from './workbench-store.js';
 const StudioWorkspace = lazy(() =>
@@ -585,31 +591,100 @@ export function useWorkbenchController() {
   };
   const transact = async (operations: Operation[]) => {
     setSaving(true);
+    // Retry once after REVISION_CONFLICT (an external file save landed between the drag and
+    // its commit) when the edited layers are exactly as the edit saw them.
+    const updates = operations.filter(
+        (op): op is Extract<Operation, { type: 'updateNode' }> => op.type === 'updateNode',
+      ),
+      ids = updates.map((op) => op.nodeId),
+      beforeLayers = interactions?.layers ?? [],
+      beforeSnapshot = stateRef.current?.snapshot,
+      view = { sceneId, frame, path: focusPath, contextFrames: focusContextFrames };
+    const unchanged = async (fresh: NonNullable<typeof state>) => {
+      if (updates.length !== operations.length) return false;
+      if (ids.every((id) => beforeLayers.some((l) => l.node.id === id))) {
+        const after = await rpc('compositionInteractions', { ...view, nodeIds: ids });
+        return sameLayers(beforeLayers, after.layers, ids);
+      }
+      const find = (snap: typeof beforeSnapshot, op: (typeof updates)[number]) =>
+        snap?.scenes.find((s) => s.id === op.sceneId)?.nodes.find((n) => n.id === op.nodeId);
+      return updates.every((op) => {
+        const a = find(beforeSnapshot, op),
+          b = find(fresh.snapshot, op);
+        return !!a && !!b && stableJson(a) === stableJson(b);
+      });
+    };
     try {
       if (
         operations.every((op) => op.type === 'updateNode') &&
         (focusPath.length ||
           operations.some((op) => !rootScene?.nodes.some((n) => n.id === (op as any).nodeId)))
       ) {
-        return await run('compositionTransactBatch', {
-          sceneId,
-          frame,
-          revision: stateRef.current?.snapshot.revision,
-          edits: operations.map((operation) => {
-            const op = operation as Extract<Operation, { type: 'updateNode' }>;
-            return {
-              path: interactions?.layers.find((l) => l.node.id === op.nodeId)?.path ?? focusPath,
-              contextFrames:
-                interactions?.layers.find((l) => l.node.id === op.nodeId)?.contextFrames ??
-                focusContextFrames,
-              frame: interactions?.layers.find((l) => l.node.id === op.nodeId)?.frame ?? frame,
-              nodeId: op.nodeId,
-              patch: op.patch,
-            };
-          }),
+        const edits = operations.map((operation) => {
+          const op = operation as Extract<Operation, { type: 'updateNode' }>;
+          return {
+            path: interactions?.layers.find((l) => l.node.id === op.nodeId)?.path ?? focusPath,
+            contextFrames:
+              interactions?.layers.find((l) => l.node.id === op.nodeId)?.contextFrames ??
+              focusContextFrames,
+            frame: interactions?.layers.find((l) => l.node.id === op.nodeId)?.frame ?? frame,
+            nodeId: op.nodeId,
+            patch: op.patch,
+          };
         });
+        return (
+          await commitWithRevisionRetry(
+            store,
+            'compositionTransactBatch',
+            (revision) => ({ sceneId, frame, revision, edits }),
+            beforeSnapshot?.revision,
+            unchanged,
+          )
+        ).result as Awaited<ReturnType<typeof run>>;
       }
-      return await run('transact', { operations, revision: stateRef.current?.snapshot.revision });
+      return (
+        await commitWithRevisionRetry(
+          store,
+          'transact',
+          (revision) => ({ operations, revision }),
+          beforeSnapshot?.revision,
+          unchanged,
+        )
+      ).result as Awaited<ReturnType<typeof run>>;
+    } finally {
+      setSaving(false);
+    }
+  };
+  /**
+   * Commit a canvas drag/resize draft computed against `revision` (the interaction graph it was
+   * drawn on). An external save right before the commit used to fail it with
+   * "Project changed before composition editing"; now it is re-sent once on the new revision
+   * when the dragged layers' node data and matrix are unchanged, else dropped with a notice.
+   */
+  const commitCanvasDraft = async (
+    draft: CompositionDraft[],
+    revision: string,
+    layers?: ReadonlyArray<{ node: { id: string }; matrix?: readonly number[] }>,
+  ) => {
+    setSaving(true);
+    const ids = draft.map((d) => d.nodeId),
+      beforeLayers = layers ?? interactions?.layers ?? [],
+      view = { sceneId, frame, path: focusPath, contextFrames: focusContextFrames };
+    try {
+      return (
+        await commitWithRevisionRetry(
+          store,
+          'compositionTransactBatch',
+          (next) => ({ sceneId, frame, edits: draft, revision: next }),
+          revision,
+          async () =>
+            sameLayers(
+              beforeLayers,
+              (await rpc('compositionInteractions', { ...view, nodeIds: ids })).layers,
+              ids,
+            ),
+        )
+      ).result;
     } finally {
       setSaving(false);
     }
@@ -1204,6 +1279,7 @@ export function useWorkbenchController() {
     stateRef,
     setClipSelected,
     transact,
+    commitCanvasDraft,
     setSceneId,
     setSelected,
     sceneId,
@@ -1271,6 +1347,7 @@ export function useWorkbenchController() {
     interactions,
     scopeKey,
     selectMany,
+    canvasDraft,
     setCanvasDraft,
     setSaving,
     stroke,

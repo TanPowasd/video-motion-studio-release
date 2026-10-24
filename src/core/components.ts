@@ -91,12 +91,20 @@ interface Loaded {
   >;
   counter: number;
 }
+/**
+ * Typecheck results shared by every ComponentHost in the process. Preflight/apply build a
+ * fresh Renderer per candidate, so an instance cache never hit when the same candidate was
+ * preflighted and then applied (two full TypeScript programs). Entries are keyed by project
+ * root, SDK declaration identity and source text, and still verified against the probed
+ * files, so sharing them is exact.
+ */
+const sharedTypeDiagnostics = new Map<
+  string,
+  { diagnostics: Diagnostic[]; probes: Map<string, string | null> }
+>();
 export class ComponentHost {
   private modules = new Map<string, Promise<Loaded>>();
-  private typeDiagnostics = new Map<
-    string,
-    { diagnostics: Diagnostic[]; probes: Map<string, string | null> }
-  >();
+  private typeDiagnostics = sharedTypeDiagnostics;
   private moduleDependencies = new Map<
     string,
     Array<{ key: string; sdk: string; kind: string; probes: Map<string, string | null> }>
@@ -500,7 +508,13 @@ export class ComponentHost {
       .filter(([name]) => /\.(ts|tsx)$/.test(name))
       .sort(([a], [b]) => a.localeCompare(b, 'en'));
     if (!files.length) return [];
-    const key = hash(files.map(([name, text]) => name + text).join(''));
+    const declaration = path.resolve(moduleDirectory, '../types/sdk/index.d.ts'),
+      sdk = existsSync(declaration) ? declaration : sdkFile;
+    const key = hash(
+      [this.root, sdk, this.sdkIdentity(sdk), ...files.map(([name, text]) => name + '\0' + text)].join(
+        '\0',
+      ),
+    );
     const cached = this.typeDiagnostics.get(key);
     if (cached && this.matches(snapshot, cached.probes)) {
       this.stats.typecheckHits++;
@@ -512,8 +526,6 @@ export class ComponentHost {
         if (!name.startsWith('../') && !path.isAbsolute(name))
           probes.set(name, snapshot.files[name] ?? null);
       };
-    const declaration = path.resolve(moduleDirectory, '../types/sdk/index.d.ts'),
-      sdk = existsSync(declaration) ? declaration : sdkFile;
     const installRoot = path.resolve(moduleDirectory, '../..');
     const options: ts.CompilerOptions = {
       target: ts.ScriptTarget.ES2022,
@@ -608,7 +620,7 @@ export class ComponentHost {
     for (const [name, text] of files)
       if (name.endsWith('.tsx')) diagnostics.push(...lintJsxSource(name, text));
     this.typeDiagnostics.set(key, { diagnostics, probes });
-    if (this.typeDiagnostics.size > 8)
+    if (this.typeDiagnostics.size > 16)
       this.typeDiagnostics.delete(this.typeDiagnostics.keys().next().value!);
     return diagnostics;
   }
@@ -619,7 +631,7 @@ export class ComponentHost {
       } catch {}
     this.modules.clear();
     this.moduleDependencies.clear();
-    this.typeDiagnostics.clear();
+    // typeDiagnostics is process-wide (exact, probe-verified); closing one host keeps it.
     this.sdkSignatures.clear();
   }
 }

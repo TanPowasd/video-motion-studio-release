@@ -88,6 +88,21 @@ export const builtinSoundEffectSchema = z.discriminatedUnion('type', [
     })
     .strict(),
 ]);
+export const masterGainStageSchema = z.enum(['pre', 'post']);
+/**
+ * Integrated-loudness normalisation (BS.1770 / EBU R128 gating) followed by a 4x
+ * oversampled true-peak limiter, applied to the whole rendered sound after the master
+ * chain. targetLufs null = limit only; truePeakDb null = normalise only.
+ */
+export const soundLoudnessSchema = z
+  .object({
+    targetLufs: n.min(-36).max(-5).nullable().default(-14),
+    truePeakDb: n.min(-9).max(0).nullable().default(-1),
+    /** Upper bound for the normalisation gain on quiet material. */
+    maxGainDb: n.min(0).max(36).default(24),
+    release: n.min(0.001).max(1).default(0.05),
+  })
+  .strict();
 export const soundEffectSchema = z.discriminatedUnion('type', [
   ...builtinSoundEffectSchema.options,
   audioPluginSchema.extend({ type: z.literal('plugin') }),
@@ -242,7 +257,17 @@ export const soundDocumentSchema = z
       .optional(),
     buses: z.array(soundBusSchema).max(16).default([]),
     master: z
-      .object({ gainDb: n.min(-80).max(24).default(0), effects })
+      .object({
+        gainDb: n.min(-80).max(24).default(0),
+        /**
+         * 'pre' (default): master gain feeds the master effects, so a master limiter is the
+         * last stage. 'post': legacy order (gain after effects, can push past a limiter).
+         */
+        gainStage: masterGainStageSchema.default('pre'),
+        effects,
+        /** Offline loudness normalisation + true-peak limiting of the rendered sound. */
+        loudness: soundLoudnessSchema.nullable().optional(),
+      })
       .strict()
       .default({}),
   })
@@ -251,6 +276,7 @@ export type SoundDocument = z.output<typeof soundDocumentSchema>;
 export type SoundInput = z.input<typeof soundDocumentSchema>;
 export type SoundInstrument = z.output<typeof soundInstrumentSchema>;
 export type SoundEffect = z.output<typeof soundEffectSchema>;
+export type SoundLoudness = z.output<typeof soundLoudnessSchema>;
 export type AudioPluginConfig = z.output<typeof audioPluginSchema>;
 export type SoundTrack = z.output<typeof soundTrackSchema>;
 export type SoundEvent = z.output<typeof soundEventSchema>;

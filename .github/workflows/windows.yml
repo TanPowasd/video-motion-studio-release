@@ -17,7 +17,7 @@ concurrency:
 jobs:
   verify:
     runs-on: windows-latest
-    timeout-minutes: 75
+    timeout-minutes: 90
     env:
       VMOTION_GPU: cpu
     steps:
@@ -39,16 +39,62 @@ jobs:
           node --import tsx --input-type=module -e "import {prepareRuntime} from './scripts/prepare-runtime.ts'; await prepareRuntime(process.cwd());"
           $runtime = Join-Path $PWD 'dist/runtime'
           "VMOTION_RUNTIME=$runtime" >> $env:GITHUB_ENV
+      # D3D12 WARP (Microsoft Basic Render Driver) runs the real DX12 wgpu path on a GPU-less runner.
+      # VMOTION_GPU_ADAPTER=warp is an explicit opt-in; the adapter reports hardware:false.
+      # This measures CORRECTNESS of the DX12 kernels and IPC only, never performance.
+      - name: GPU effects on D3D12 WARP (correctness only, not performance)
+        timeout-minutes: 15
+        env:
+          VMOTION_GPU: auto
+          VMOTION_GPU_ADAPTER: warp
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts/gpu-warp | Out-Null
+          npx vitest run --config vitest.config.ts --reporter=verbose --reporter=json --outputFile.json=artifacts/gpu-warp/vitest.json tests/gpu-effects.test.ts tests/render-programs.test.ts 2>&1 | Tee-Object -FilePath artifacts/gpu-warp/vitest.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - run: npm run typecheck
+      - run: npm run build
       - run: npm run test:fast
       - run: npm run test:integration
-      - run: npm test
-      - run: npm run build
+      # Hosted runners have no GPU: hardware rows are expected to be unavailable; software exports
+      # (and possibly the h264_mf software MFT) must still validate. Non-strict, report only.
+      - name: Hardware encode probe (expected unavailable on hosted CI)
+        if: success() || failure()
+        continue-on-error: true
+        timeout-minutes: 15
+        run: node scripts/check-hw-encode.mjs --width 1280 --height 720 --frames 60 --export-frames 30
       - name: Portable release candidate
         if: github.event_name == 'workflow_dispatch' && inputs.portable
         run: npx tsx scripts/package.ts
+      - name: Portable ZIP
+        if: github.event_name == 'workflow_dispatch' && inputs.portable
+        run: pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/portable-zip.ps1
+      - name: Upload portable release candidate
+        if: always() && github.event_name == 'workflow_dispatch' && inputs.portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: vmotion-portable-${{ github.sha }}
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 0
+          path: |
+            release/Vmotion-Windows-x64-Portable.zip
+            release/Vmotion-Windows-x64-Portable.zip.sha256
+            release/Vmotion/portable-manifest.json
       - name: Actual stdio, portable and desktop acceptance
         if: github.event_name == 'workflow_dispatch' && inputs.portable
         run: npm run test:acceptance
+      - name: Upload test logs and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vmotion-windows-reports-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            artifacts/tests/**
+            artifacts/gpu-warp/**
+            artifacts/hw-encode/report-*.json
+            artifacts/gpu-effects-*/report.json
       - name: Explicit GPU scope
-        run: Write-Output 'Hosted CI verifies CPU fallback. Hardware GPU parity is verified separately with VMOTION_TEST_GPU=1 on the reference workstation.'
+        if: always()
+        run: Write-Output 'Hosted CI verifies CPU fallback plus DX12 correctness on the WARP software adapter. Hardware GPU parity/performance and hardware video encoders are verified separately with VMOTION_TEST_GPU=1 on the reference workstation.'

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "project": "Vmotion",
-  "sourceCommit": "25f0be6e8bcecf2706e5a62554a8f98df950cd5b",
+  "sourceCommit": "28b208c52f82f991e24720e278d883b74a5ce3ff",
   "license": "Apache-2.0",
   "surfaces": {
     "studio": "src/editor",
@@ -15,8 +15,8 @@
     },
     {
       "path": ".github/workflows/windows.yml",
-      "bytes": 1837,
-      "sha256": "d3f8f3cc21d4514db993517fd798d73959151bc6a1475c42d838f57da0b904d8"
+      "bytes": 4379,
+      "sha256": "7bfb43d974d4eb66ec30103ee3ba2092120e97c187d62ba231d459a63b3e400f"
     },
     {
       "path": ".gitignore",
@@ -80,8 +80,8 @@
     },
     {
       "path": "crates/vmotion-gpu/src/main.rs",
-      "bytes": 21533,
-      "sha256": "457bd1440d7fe7ed0ec89b03def460f79542d59c6a8870c89ac3d863e7877c36"
+      "bytes": 22569,
+      "sha256": "f8d8b6536b6587b05eae58c00849d934a79d6ca6825c1a341f38355b0685e7c7"
     },
     {
       "path": "crates/vmotion-gpu/src/point.wgsl",
@@ -215,18 +215,18 @@
     },
     {
       "path": "docs/GPU-EFFECTS.md",
-      "bytes": 5069,
-      "sha256": "0767e76354cdf58af4819a966fe6748bee35168a58b23a1a44cbd6461ad164fc"
+      "bytes": 6450,
+      "sha256": "5014719a1a7e6f64a235b003bff7e5f2bd7f3be9e7b9b6cdbefc37342375a84d"
     },
     {
       "path": "docs/HW-ENCODE.md",
-      "bytes": 9923,
-      "sha256": "0f9ba944b6d856b7f06e836becd89f5124492bc218c0baab25a51fd945f99952"
+      "bytes": 10257,
+      "sha256": "6d914ee47939698396af0ab8ee66b463e69e3500a84e461eadbee80d20a2e2c7"
     },
     {
       "path": "docs/JSX-COMPONENTS.md",
-      "bytes": 15412,
-      "sha256": "bbb397a3c8c81ef2e77a0bacbf658a0ed732311dfa797d534b180729bd4295c9"
+      "bytes": 17032,
+      "sha256": "9f7acf11c936f767c626059a22e46c28389c463d657b7390a51d9ae1fd4394a8"
     },
     {
       "path": "docs/KEYFRAMES.md",
@@ -265,8 +265,8 @@
     },
     {
       "path": "docs/PERFORMANCE-TRANSITIONS.md",
-      "bytes": 6177,
-      "sha256": "79febf502dbb14d14de74f0e603ec9d0d5d0facbdd76353a2ef371f0c91301ce"
+      "bytes": 6321,
+      "sha256": "781a4824426bb6e3f36902c335a2a1b312952dc3866ad8e68893ade2dc855902"
     },
     {
       "path": "docs/PIXEL-REVIEW.md",
@@ -325,8 +325,8 @@
     },
     {
       "path": "docs/SOUND-MUSIC.md",
-      "bytes": 9770,
-      "sha256": "8316854da3ed946359f64b94a006deb14cf215298419413d0385efdfbb7dab8c"
+      "bytes": 11498,
+      "sha256": "e30c56aa90e4e70745590c605abbbb32f3e368ad1a7f978988d48f58387e7460"
     },
     {
       "path": "docs/STILL-IMAGES.md",
@@ -340,8 +340,8 @@
     },
     {
       "path": "docs/STUDIO-GUIDE.md",
-      "bytes": 1447,
-      "sha256": "e5427694c2850c148421c22b762ffb8df9de2df2f2d6e9416ddedcb471c43cc6"
+      "bytes": 1821,
+      "sha256": "c514fa6b420217196fec3ea4678fd4dcd67c0dd33a551654116c5888b1ab3b62"
     },
     {
       "path": "docs/TEMPORAL-PARTICLES.md",
@@ -365,8 +365,8 @@
     },
     {
       "path": "docs/UI.md",
-      "bytes": 5852,
-      "sha256": "86d05244ffe78c8aec0488b35aadb3c8549d088e12f8669e9914ed1a005d53ad"
+      "bytes": 6470,
+      "sha256": "199a191fdf5df202fef2d894be00ca8829070404d6c0152e93086ff7b2b950fa"
     },
     {
       "path": "docs/VECTOR-ANIMATION.md",
@@ -1935,8 +1935,8 @@
     },
     {
       "path": "schemas/audioMix.schema.json",
-      "bytes": 19903,
-      "sha256": "609b40dff3fd965dbf3560c7671beb521ee72f3f633fa2337aefe466235b7586"
+      "bytes": 20095,
+      "sha256": "6abc1132e3ba46f3d5fee79d3af7b7ac14c5cee329e3acb735e84824b03c8378"
     },
     {
       "path": "schemas/audioNormalization.schema.json",
@@ -2005,13 +2005,13 @@
     },
     {
       "path": "schemas/node.schema.json",
-      "bytes": 221999,
-      "sha256": "4a2a081e9adf398ed43e2530acd09104a219a70c6c25d6744e916208ca9f33fd"
+      "bytes": 222398,
+      "sha256": "2478220dc1023c1fc2e8b6bd005dac0e6b25d5add2be69c869df8dfd4f7834c7"
     },
     {
       "path": "schemas/operation.schema.json",
-      "bytes": 368183,
-      "sha256": "ee9da16dc48f6a1bd1d402f5c184e3dfac8f0f0c6e324f2100318a1dc9fdcc3f"
+      "bytes": 369224,
+      "sha256": "08825c9e9a86c6c7f99b18f25cb993c9fc3d1dbe7bec4c7c31be4d38f65f04ee"
     },
     {
       "path": "schemas/pathText.schema.json",
@@ -2045,8 +2045,8 @@
     },
     {
       "path": "schemas/scene.schema.json",
-      "bytes": 270406,
-      "sha256": "03d0ee9387e689c464e93853085c40dea628225e9095a8a6980fd9278dac3475"
+      "bytes": 270937,
+      "sha256": "4cc61fa14c69c20d2be0d8aec89f93e19941c6431ff6feb4685f792e3c5b45a1"
     },
     {
       "path": "schemas/scene3d.schema.json",
@@ -2060,8 +2060,8 @@
     },
     {
       "path": "schemas/sequence.schema.json",
-      "bytes": 31455,
-      "sha256": "b65eab0154ec4f23845e53e85835065f317b510ceaf6caf14ce349f06d5f9d36"
+      "bytes": 31711,
+      "sha256": "b5fcb1aef05ef2c6cab51715a0bc9c1fc0216863a287710b1dbd463ccb488465"
     },
     {
       "path": "schemas/shapeOperator.schema.json",
@@ -2070,8 +2070,8 @@
     },
     {
       "path": "schemas/sound.schema.json",
-      "bytes": 32217,
-      "sha256": "2b2b978b833e4e01cb589a489c3ff9d258c5a6bd9947238feab60810ae47cbcb"
+      "bytes": 34001,
+      "sha256": "85301678743e4502b27bde53631584b120555512984f3acd31182769dfb616ff"
     },
     {
       "path": "schemas/soundEffect.schema.json",
@@ -2095,8 +2095,8 @@
     },
     {
       "path": "schemas/templateAuthor.schema.json",
-      "bytes": 272549,
-      "sha256": "5d7976aacdaa3eebdf112ce981516ae369acf01cab786d1995d2862c7dc62469"
+      "bytes": 273098,
+      "sha256": "6feb40cb4e6fdc7caa706bf1eafa13f11b47a328e7e1d1f3505a79b3319a098c"
     },
     {
       "path": "schemas/textAnimator.schema.json",
@@ -2145,8 +2145,8 @@
     },
     {
       "path": "scripts/build-audio.ps1",
-      "bytes": 4678,
-      "sha256": "a1fa7df33f75c12b4206c862ee78eeaf3229fc7c3e63e0f0da619ee530636716"
+      "bytes": 5556,
+      "sha256": "ec32c73fb701d8b2f7d95944b041ebb22b5d58b445b46921d5a1e5477b55a38e"
     },
     {
       "path": "scripts/build-audio.sh",
@@ -2387,6 +2387,11 @@
       "path": "scripts/check-visual-fields.mjs",
       "bytes": 10396,
       "sha256": "26c18be68d875cf2048ff89e55097b213299498ac0a0e2b014603529d22d70b7"
+    },
+    {
+      "path": "scripts/check-windows-cross.mjs",
+      "bytes": 2921,
+      "sha256": "67dbd911a93d6d327c5376c0313221aaf2939e8770fd3bd06ba73e465b1acc9f"
     },
     {
       "path": "scripts/check-workbench-selectors.mjs",
@@ -2865,8 +2870,8 @@
     },
     {
       "path": "skills/vmotion/references/jsx.md",
-      "bytes": 14269,
-      "sha256": "c67c8b824fdfc57fc2d527f40af29b84d987f2295141096fdc7955ae41eb018a"
+      "bytes": 14485,
+      "sha256": "e25d21cff4d23df4ba4a300c846c97967439b825f6b7a4d1a1ec3286489b7526"
     },
     {
       "path": "skills/vmotion/references/mcp.md",
@@ -2875,8 +2880,8 @@
     },
     {
       "path": "skills/vmotion/references/project-files.md",
-      "bytes": 9131,
-      "sha256": "4fe693106314319f9c1fa36ffb4f01ed35c581752a885f90fa9dce05f5979e8c"
+      "bytes": 9503,
+      "sha256": "22a135ca853454086bae6a690033bdf0b059be12a625dde87d6fe6a762c2c1db"
     },
     {
       "path": "skills/vmotion/references/recipes.md",
@@ -2935,13 +2940,13 @@
     },
     {
       "path": "src/core/audio-mix-schema.ts",
-      "bytes": 2662,
-      "sha256": "cfc26d27f95395d62c858bb5f95b380e7524e7b095b63e6904803b11ef4d6f51"
+      "bytes": 2840,
+      "sha256": "94652a869faeb19a0b78e517b50ed941b3ae3b8cbc39a13fbc818518de098745"
     },
     {
       "path": "src/core/audio-mix.ts",
-      "bytes": 10305,
-      "sha256": "dd1053433673ce5ca9b8e987a185bbcfa859543b664cab2736a536843fc80fe6"
+      "bytes": 10609,
+      "sha256": "fc6b3f8b98ccbff513b7ed5837d6aa29e5c1921531f3b752b99c919a7d5e39bc"
     },
     {
       "path": "src/core/bundled-fonts.ts",
@@ -2970,8 +2975,8 @@
     },
     {
       "path": "src/core/components.ts",
-      "bytes": 23888,
-      "sha256": "a034ed2f88e31a5253bffc200e34a3a4bd7d9ecc80c84b6268895d3838e630a6"
+      "bytes": 24485,
+      "sha256": "770df2bfc5362461e6c3bc59e43df2e7527ccc97656c8b32d80fbdc67021ddca"
     },
     {
       "path": "src/core/composition.ts",
@@ -3115,8 +3120,8 @@
     },
     {
       "path": "src/core/gpu-points.ts",
-      "bytes": 16821,
-      "sha256": "0fb1cfc7ba42ded021a4905c401e338eff4568d54e69ad0ab16e3cb374c2ce73"
+      "bytes": 17330,
+      "sha256": "64b9b9df6a60d771510133dec1d9187bc7fa452ac7d0be334a24a0ea5c459bd1"
     },
     {
       "path": "src/core/gpu-transport.ts",
@@ -3220,8 +3225,8 @@
     },
     {
       "path": "src/core/model.ts",
-      "bytes": 23018,
-      "sha256": "ac269e07c0f2f7b8d2c9adf616b6b647f19760764a9f47abe60bb7f6d7eeff9e"
+      "bytes": 23386,
+      "sha256": "7cf514a0a35283ac1c6b3079a32048e2849bf80d3b73baafa7c0de5977c4b36f"
     },
     {
       "path": "src/core/motion-template.ts",
@@ -3449,6 +3454,11 @@
       "sha256": "8d5451fa4add33881f001da95ef1c3f5de7a41655db5af56c4c8d4bffe482c82"
     },
     {
+      "path": "src/core/sound-loudness.ts",
+      "bytes": 10731,
+      "sha256": "fac1b787467e88f1125fa0564c6b54f85e8d1f08b8c524c3a5ce6ed3b33b77fc"
+    },
+    {
       "path": "src/core/sound-midi.ts",
       "bytes": 14829,
       "sha256": "4061ada9ee9ba85b3fb04d7aab918e5cf41325cc2b03ae0ff0bf2b5b725b7459"
@@ -3465,13 +3475,13 @@
     },
     {
       "path": "src/core/sound-schema.ts",
-      "bytes": 7909,
-      "sha256": "b7b5565b7d1fe8da734cb3a92e573328e1015ba7874c0963cdf644825916af9b"
+      "bytes": 9073,
+      "sha256": "bd1f20387977516b9a6b3b5883f710a3910288e0e7799a909778f3cf827f4469"
     },
     {
       "path": "src/core/sound.ts",
-      "bytes": 26687,
-      "sha256": "187229c6837cb771e3028534351688667b80980c3a1331807e66c63cd3ac8cd7"
+      "bytes": 26935,
+      "sha256": "314331a2443b44f6461d3d70be398d07859a18c27c04e36164a45287bc8c9686"
     },
     {
       "path": "src/core/spatial-effect-schema.ts",
@@ -3530,8 +3540,8 @@
     },
     {
       "path": "src/core/text-layout.ts",
-      "bytes": 6563,
-      "sha256": "e880366870edacfbeb12456bc8555c2e2d1fe99fdc75eef5382a45d456ce6ed3"
+      "bytes": 7590,
+      "sha256": "481694c9072a5d4fe921ff781d0e85feff4dfb5fe3f4286467a06f82e678c57b"
     },
     {
       "path": "src/core/texture-schema.ts",
@@ -3575,8 +3585,8 @@
     },
     {
       "path": "src/core/typography.ts",
-      "bytes": 12781,
-      "sha256": "0b22be3f2d4fbc429a95f0d340634bb3b7b7fbdacc245cfd36f2fd2c1de63fe7"
+      "bytes": 12849,
+      "sha256": "46b70e0379a4d0e43a791580cd8ff35ccf87a972e70cfcb4ac164a59cb0c6408"
     },
     {
       "path": "src/core/vector-schema.ts",
@@ -3660,8 +3670,8 @@
     },
     {
       "path": "src/editor/CanvasInteraction.tsx",
-      "bytes": 14640,
-      "sha256": "77b037811ab824e25f717462337c9819676f5209940224a8a36fc756de615804"
+      "bytes": 14790,
+      "sha256": "21dfc080eda0d76099c6772a5fb76c949529b70f89b15cca0ea605d3bb5975fc"
     },
     {
       "path": "src/editor/CanvasViewport.tsx",
@@ -3725,8 +3735,8 @@
     },
     {
       "path": "src/editor/JsxWriteBack.tsx",
-      "bytes": 5569,
-      "sha256": "4dd275213119d16a7b239f3e521544e9e3744c29aa4af6f65c7280213e027cac"
+      "bytes": 7307,
+      "sha256": "8629a25528b190a09b5771992696c357dd322fd353adbbdc34e362ff9142285c"
     },
     {
       "path": "src/editor/LICENSE",
@@ -3815,8 +3825,8 @@
     },
     {
       "path": "src/editor/Workbench.tsx",
-      "bytes": 92434,
-      "sha256": "4a1367bcf307e08ac869b939924e6f324d44f5704fea880ff58398b991b27ad3"
+      "bytes": 92227,
+      "sha256": "450a5165a881cc265f4832f5f91d06a28d3bfe19a4c2bffb5be9fce357689250"
     },
     {
       "path": "src/editor/WorkbenchHeader.tsx",
@@ -3859,6 +3869,16 @@
       "sha256": "11d411907578f225bcb68aa23e097a666259344865eac15fd5d8802615a7c963"
     },
     {
+      "path": "src/editor/jsx-writeback-run.ts",
+      "bytes": 1636,
+      "sha256": "e29bde0d3009c89ad91f5be47afaa7a770505a72290db40e6bffd7b3fa414230"
+    },
+    {
+      "path": "src/editor/jsx-writeback-scope.ts",
+      "bytes": 1717,
+      "sha256": "a4523bfa95bbeea90fb7dec052f2a990fd6713376e954f7ca8a7b0dc176ffbaa"
+    },
+    {
       "path": "src/editor/main.tsx",
       "bytes": 1664,
       "sha256": "67411d0681f940fa53530637c73404dac8858b0d5093601b82b5c1a99c5ab444"
@@ -3895,8 +3915,8 @@
     },
     {
       "path": "src/editor/music/MusicWorkspace.tsx",
-      "bytes": 30317,
-      "sha256": "b4971f019cd41ddb7e29ec65a1a37398b9497d8055bcad54d79c05941a463802"
+      "bytes": 30233,
+      "sha256": "a011f78f2d9204c4319685b00dc6be9f58c64700ce6421858248eef39609a7fc"
     },
     {
       "path": "src/editor/music/PianoRoll.tsx",
@@ -3925,8 +3945,8 @@
     },
     {
       "path": "src/editor/music/music-model.ts",
-      "bytes": 6064,
-      "sha256": "fb39e505c5963491dfb4d0c0c242075ef4de16ac052767e65f1d886487d1e9ce"
+      "bytes": 7063,
+      "sha256": "0bce44e742bd0a7c7e75a4bb1ca0af4ca17b7a98b20e63b065cebf906c5f920c"
     },
     {
       "path": "src/editor/music/music-panel-types.ts",
@@ -3940,8 +3960,8 @@
     },
     {
       "path": "src/editor/music/use-music.ts",
-      "bytes": 11723,
-      "sha256": "973b84e996afae177564aac2383c888d0075b1cb8425b7991e2b4ac52613064c"
+      "bytes": 13077,
+      "sha256": "a0f644d38eb2f9c7746f9a144a723b3c5ffa8acd09ebef9bfb1a65897d7d8bb4"
     },
     {
       "path": "src/editor/navigation.ts",
@@ -3960,8 +3980,8 @@
     },
     {
       "path": "src/editor/panels/InspectorPanel.tsx",
-      "bytes": 24829,
-      "sha256": "ad7faceee38aefc40c3623c25672ee440dc09187aa616f72ced69a40aabe922e"
+      "bytes": 24726,
+      "sha256": "a9aa2814c02547b21af8d8ad33acff80120a7d36984ccb0c1e3b643f61f3242b"
     },
     {
       "path": "src/editor/panels/WorkbenchFields.tsx",
@@ -3990,8 +4010,8 @@
     },
     {
       "path": "src/editor/state/rpc-client.ts",
-      "bytes": 1501,
-      "sha256": "81f59a1c3a387b674d6b9df0d39d3b17573dc757236b8813e58a0e6a6c1733b8"
+      "bytes": 1998,
+      "sha256": "fef59098deebc86241ed08097eab9b7c05213ab9c1d7f2ddaee2a73761f2521f"
     },
     {
       "path": "src/editor/state/stable-controller.ts",
@@ -4005,13 +4025,13 @@
     },
     {
       "path": "src/editor/state/workbench-controller.tsx",
-      "bytes": 45304,
-      "sha256": "2efcfa62a7e1d0fb8acb51e2bca5f27c344711cf6212b0fa0996babbff2ad4b6"
+      "bytes": 48221,
+      "sha256": "f84e27cf3462b4e3a2351e994fa6436b91e45d72ef5e12c863d4d36fe1f8f9f1"
     },
     {
       "path": "src/editor/state/workbench-effects.ts",
-      "bytes": 3044,
-      "sha256": "594baa185aad81c830265706e694d5bf7a047d88916e846f0ceb42f6565caa42"
+      "bytes": 6234,
+      "sha256": "d795fa0fd90d03eed68a1f1a3e5231569e31c4ae4cfd838dd3b2a64aac06f4d1"
     },
     {
       "path": "src/editor/state/workbench-reducer.ts",
@@ -4230,8 +4250,8 @@
     },
     {
       "path": "src/media/audio-mix-cache.ts",
-      "bytes": 14570,
-      "sha256": "c08da73e5bd2b40ed8ad8cb7cf9b7b5e0360af2816b99bb54a1015a707e720af"
+      "bytes": 14588,
+      "sha256": "4bf935675752ffce6d564d02c806ff53e649bb6679688b6fcc9217b68cf8de24"
     },
     {
       "path": "src/media/audio-plugin-host.ts",
@@ -4270,8 +4290,8 @@
     },
     {
       "path": "src/media/sound-source.ts",
-      "bytes": 12320,
-      "sha256": "05b3c1a82d4edd6ef56e00c1af9d2a2e1ef7202b5723af1bb827dad90aeb4c4d"
+      "bytes": 17436,
+      "sha256": "3a56ddf0de0cbbd9d6697fd1313ca0b955fbd7b41d63266db69083b420dd5569"
     },
     {
       "path": "src/media/video-encoder.ts",
@@ -4425,8 +4445,8 @@
     },
     {
       "path": "src/sdk/jsx-style.ts",
-      "bytes": 28765,
-      "sha256": "930703fdac62ab14929c007060a57a3105a1c5be765fe2f01a851ae9527a7cfe"
+      "bytes": 29411,
+      "sha256": "977d1d8aeeebe9bcc5a208e1bdf6589142dbde56101cb98b50b0750b3ea3c417"
     },
     {
       "path": "src/sdk/jsx-time.ts",
@@ -4435,8 +4455,8 @@
     },
     {
       "path": "src/sdk/jsx.ts",
-      "bytes": 34953,
-      "sha256": "068cbaf88218df1fe9f8c6f1700eedc9bd4d331797ed45d76e14c21fd6037e4e"
+      "bytes": 35187,
+      "sha256": "729d0b1f4767f4463cd76b5b88bda17bdcf35e7ca4cf971aeae303875e28552b"
     },
     {
       "path": "src/sdk/linear-algebra.ts",
@@ -4612,6 +4632,11 @@
       "path": "src/service/effects2d.ts",
       "bytes": 9298,
       "sha256": "85a2d064ed58609290bfe4b488cfcfcaf846ef03e3f0b328d8b80729a6b14da2"
+    },
+    {
+      "path": "src/service/file-watch.ts",
+      "bytes": 6768,
+      "sha256": "c1627f3ffcf27ca96cbeec14f27c88bdae44204c9bec75ae9b57bd86164aac5a"
     },
     {
       "path": "src/service/frame-compare.ts",
@@ -4805,8 +4830,8 @@
     },
     {
       "path": "src/service/service.ts",
-      "bytes": 18024,
-      "sha256": "8d99c8c2ca3180fd227c4fe71183b988039412beb1c41e22b72d483fe9f27402"
+      "bytes": 18812,
+      "sha256": "b285759d4c8b032e897be74dac057ef237d49d0ddc15578db01385c01c87e58a"
     },
     {
       "path": "src/service/shared-scenes.ts",
@@ -4815,8 +4840,8 @@
     },
     {
       "path": "src/service/sound.ts",
-      "bytes": 24562,
-      "sha256": "a13cb6d8538309795ef10a3eacff185ce3a2f8444312dbf9b4b822faf5aeef26"
+      "bytes": 24738,
+      "sha256": "ef55c1ee10d20f011bd4ab425756c8446368260d7bfb22ec6acfc4c136965c09"
     },
     {
       "path": "src/service/stills.ts",
@@ -4980,8 +5005,8 @@
     },
     {
       "path": "tests/captions.test.ts",
-      "bytes": 4846,
-      "sha256": "663471a16ae07e779063a3918b31cf42d71af7d7405d754de987baacb36baae4"
+      "bytes": 5040,
+      "sha256": "4f527f759fdf33cbe4558a8ab0f145194884203f4ed8963a1782670084cc18c5"
     },
     {
       "path": "tests/change-journal.test.ts",
@@ -5012,6 +5037,11 @@
       "path": "tests/core.test.ts",
       "bytes": 2857,
       "sha256": "da551cbbc5bd3a9c993f90ac395f6e5eac1d03d107369dbd399777a3da11b915"
+    },
+    {
+      "path": "tests/drag-revision-retry.test.ts",
+      "bytes": 5154,
+      "sha256": "281d2874befb1019da35c5629e5e3eabce3cfc1220a6118aa830f3261494702a"
     },
     {
       "path": "tests/drawings.test.ts",
@@ -5069,14 +5099,19 @@
       "sha256": "76716959c81dc4a335537c1666b279ac41dbb2393e05fb75aa4f0c0fcc89f573"
     },
     {
+      "path": "tests/file-watch.test.ts",
+      "bytes": 5007,
+      "sha256": "ecf689e2ab8ee8db79af1b3862501958461712a02fef94747cb01d89e351f5bd"
+    },
+    {
       "path": "tests/glyphs.test.ts",
       "bytes": 15988,
       "sha256": "2eefc15e5940ae172c13dd00f9f24c4b9ca494a1418651848216f2028d8ac056"
     },
     {
       "path": "tests/gpu-effects.test.ts",
-      "bytes": 12947,
-      "sha256": "7abfff636fe95d13f0f8b4d1eb842bb7a4fbfea2627e001ad5ad0d762daf768d"
+      "bytes": 13424,
+      "sha256": "15bf476957f2ca4c7c679585add7e8df6be398391d0096f0a1a45b34c646e5b5"
     },
     {
       "path": "tests/graph-outputs-channels.test.ts",
@@ -5122,6 +5157,16 @@
       "path": "tests/jsx-runtime.test.ts",
       "bytes": 17109,
       "sha256": "cb85b247565b4afb16027e9ff8c4d8d034b200c3eeadb6acbaf44d47c9da6558"
+    },
+    {
+      "path": "tests/jsx-writeback-scope.test.ts",
+      "bytes": 2063,
+      "sha256": "067e7cb4fc6353c0bc5b3812ff65f446dc2ea6fd03cdbfebf47efc59ec691c3d"
+    },
+    {
+      "path": "tests/jsx-writeback-ui.test.ts",
+      "bytes": 1778,
+      "sha256": "41010b416bd02f4cfaaf818bf3679a6ddaa920cd021223ff9d5db690d09bef45"
     },
     {
       "path": "tests/jsx-writeback.test.ts",
@@ -5207,6 +5252,11 @@
       "path": "tests/motion-plan.test.ts",
       "bytes": 10217,
       "sha256": "49945921ced1beab3261d496887505ac8a4361c14705425303607427a168eedb"
+    },
+    {
+      "path": "tests/music-default-route.test.ts",
+      "bytes": 1484,
+      "sha256": "7049ec8e0b5610374e2ab7d143caad730be842c2089b90d060b1f91a485c0b33"
     },
     {
       "path": "tests/music-export.test.ts",
@@ -5364,6 +5414,11 @@
       "sha256": "a2c2a8566e63caf4b8da9996aaffafcf83b17b10704f1cd29bc829958c19f710"
     },
     {
+      "path": "tests/sound-loudness.test.ts",
+      "bytes": 8507,
+      "sha256": "2b8c1e6ef6a47d97dcfa20c755d16ba7970cd0b604fc169f5104bcdc19907d0a"
+    },
+    {
       "path": "tests/sound-plan.test.ts",
       "bytes": 8846,
       "sha256": "a032e1a39be2b3005a97713c8f4a25fdfa06cd63045ebdf8401e2240a6a59442"
@@ -5410,13 +5465,18 @@
     },
     {
       "path": "tests/test-groups.json",
-      "bytes": 5599,
-      "sha256": "6c6e46419f9773894e1d114eba4b2a714611548363443f09eb33ba4c5ece45a8"
+      "bytes": 5918,
+      "sha256": "f247f0da9939bc079162d6c5d64e2f17dc316488fd8591b7cdea19f3e73df625"
     },
     {
       "path": "tests/test-runner.test.ts",
       "bytes": 710,
       "sha256": "a61d638a4fb3a9a948ef0c708cf19660902206a878755211ae42a05d0aee2b95"
+    },
+    {
+      "path": "tests/text-whitespace.test.ts",
+      "bytes": 3250,
+      "sha256": "9f313785dd2f61031ac2950e70a5d85968e79bed15890ed00cd861dafc67b7f4"
     },
     {
       "path": "tests/theme.test.ts",
@@ -5442,6 +5502,11 @@
       "path": "tests/transitions-profile.test.ts",
       "bytes": 6565,
       "sha256": "29d07b34046e5fdb6a92d26393f4f5c30b9c22589f1c45b7f8515fcb24e9aa7d"
+    },
+    {
+      "path": "tests/typecheck-cache.test.ts",
+      "bytes": 1901,
+      "sha256": "223d7ad91a101ece59f2350b2b05f4a732623e6a130e27704d72d32e0939a462"
     },
     {
       "path": "tests/typography-shapes.test.ts",

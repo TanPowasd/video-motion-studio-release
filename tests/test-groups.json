@@ -42,11 +42,18 @@
       "tests/change-journal.test.ts",
       "tests/studio-shell.test.ts",
       "tests/theme.test.ts",
-      "tests/mcp-contract.test.ts"
+      "tests/mcp-contract.test.ts",
+      "tests/file-watch.test.ts",
+      "tests/sound-loudness.test.ts",
+      "tests/text-whitespace.test.ts",
+      "tests/jsx-writeback-ui.test.ts",
+      "tests/drag-revision-retry.test.ts",
+      "tests/music-default-route.test.ts",
+      "tests/jsx-writeback-scope.test.ts"
     ]
   },
   "integration": {
-    "timeoutMs": 1500000,
+    "timeoutMs": 2400000,
     "files": [
       "tests/agent-media.test.ts",
       "tests/agent-preflight.test.ts",
@@ -124,7 +131,8 @@
       "tests/surfaces.test.ts",
       "tests/stills.test.ts",
       "tests/glyphs.test.ts",
-      "tests/agent-skill.test.ts"
+      "tests/agent-skill.test.ts",
+      "tests/typecheck-cache.test.ts"
     ]
   },
   "acceptance": {

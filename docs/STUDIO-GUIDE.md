@@ -12,3 +12,5 @@
 人通过画布、属性、时间轴、音乐/绘画及代码工作区直接编辑。顶部“连接 MCP”仅用于复制外部 AI 的接入配置；AI 使用文件或 MCP，不需要专用工作台。属性面板“打开组件代码”在同一程序中打开代码工作区。JSON、TypeScript、Python 和 WGSL 源文件由同一工程服务维护。
 
 工程修改、撤销/重做、文件同步、预览/导出和 Agent 操作共用底层，两个入口不会生成两份不同的工程。
+
+文件同步：本地磁盘用系统文件事件；工程位于 FUSE/网络挂载（JuiceFS、NFS、SMB、sshfs、9p/virtiofs）时自动再加 500 ms 轮询，外部修改约 0.6 秒内载入。`VMOTION_WATCH=poll` 强制轮询（Windows 映射网络盘需要手动设置），`VMOTION_WATCH=native` 关闭轮询，`VMOTION_WATCH_POLL_MS` 调整间隔（100–10000）。
